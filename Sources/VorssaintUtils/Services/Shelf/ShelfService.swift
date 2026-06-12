@@ -28,7 +28,12 @@ final class ShelfService: ObservableObject {
         static func == (lhs: Item, rhs: Item) -> Bool { lhs.id == rhs.id }
     }
 
-    @Published private(set) var items: [Item] = []
+    @Published private(set) var items: [Item] = [] {
+        didSet { scheduleRefit() }
+    }
+    /// Ids of tiles the user has selected; a drag of any selected tile drags
+    /// the whole selection out together.
+    @Published private(set) var selection: Set<UUID> = []
 
     private var panel: NSPanel?
     private var hotKeyRef: EventHotKeyRef?
@@ -188,18 +193,36 @@ final class ShelfService: ObservableObject {
 
     func removeItem(_ id: UUID) {
         items.removeAll { $0.id == id }
+        selection.remove(id)
+    }
+
+    /// Removes several items at once — used after a successful drag-out so the
+    /// tiles you dropped elsewhere leave the shelf.
+    func removeItems(_ ids: [UUID]) {
+        let set = Set(ids)
+        items.removeAll { set.contains($0.id) }
+        selection.subtract(set)
     }
 
     func clear() {
         items = []
+        selection = []
     }
 
-    /// The drag-out representation for an item.
-    func provider(for item: Item) -> NSItemProvider {
+    func toggleSelection(_ id: UUID) {
+        if selection.contains(id) { selection.remove(id) } else { selection.insert(id) }
+    }
+
+    func selectedItems() -> [Item] {
+        items.filter { selection.contains($0.id) }
+    }
+
+    /// The pasteboard representation used when dragging an item out of the shelf.
+    func pasteboardWriter(for item: Item) -> NSPasteboardWriting {
         switch item.payload {
-        case let .file(url): return NSItemProvider(contentsOf: url) ?? NSItemProvider(object: url as NSURL)
-        case let .text(text): return NSItemProvider(object: text as NSString)
-        case let .link(url): return NSItemProvider(object: url as NSURL)
+        case let .file(url): return url as NSURL
+        case let .text(text): return text as NSString
+        case let .link(url): return url as NSURL
         }
     }
 
@@ -254,6 +277,23 @@ final class ShelfService: ObservableObject {
 
     func hide() {
         panel?.orderOut(nil)
+    }
+
+    /// Re-fits the panel to its content (anchored at the top-left) after items
+    /// change while it's on screen — e.g. dropping a file onto a shelf that was
+    /// summoned empty by a shake. Deferred so SwiftUI lays out first.
+    private func scheduleRefit() {
+        DispatchQueue.main.async { [weak self] in self?.refitIfVisible() }
+    }
+
+    private func refitIfVisible() {
+        guard let panel, panel.isVisible else { return }
+        let view = panel.contentViewController!.view
+        view.layoutSubtreeIfNeeded()
+        let size = view.fittingSize
+        let top = panel.frame.maxY
+        panel.setFrame(NSRect(x: panel.frame.minX, y: top - size.height, width: size.width, height: size.height),
+                       display: true, animate: false)
     }
 
     private func position(_ panel: NSPanel) {

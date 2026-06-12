@@ -248,6 +248,9 @@ struct Strings {
     let shelfTitle: String
     let shelfEmpty: String
     let shelfClearAll: String
+    let shelfRemoveSelected: String
+    let shelfSelectedFormat: String      // + count
+    let shelfHint: String
     let shelfItemImage: String
 
     // MARK: Panel — per-app breakdown
@@ -518,6 +521,9 @@ extension Strings {
         shelfTitle: "Área temporária",
         shelfEmpty: "Arraste itens aqui",
         shelfClearAll: "Limpar tudo",
+        shelfRemoveSelected: "Remover selecionados",
+        shelfSelectedFormat: "%d selecionados",
+        shelfHint: "Clique para selecionar; arraste para fora para usar (e sai daqui).",
         shelfItemImage: "Imagem",
 
         breakdownMeasuring: "Medindo…",
@@ -783,6 +789,9 @@ extension Strings {
         shelfTitle: "Shelf",
         shelfEmpty: "Drag items here",
         shelfClearAll: "Clear all",
+        shelfRemoveSelected: "Remove selected",
+        shelfSelectedFormat: "%d selected",
+        shelfHint: "Click to select; drag out to use (and clear from here).",
         shelfItemImage: "Image",
 
         breakdownMeasuring: "Measuring…",

@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.4.3] — 2026-06-12
+
+### Changed
+- **Shelf**: tiles are now AppKit-backed so you can select several items (click
+  to select) and drag them all out in a single drag
+
+### Fixed
+- **Shelf**: you can move the panel again — drag its top bar to reposition it,
+  while grabbing a tile still drags the item
+- **Shelf**: dropping item(s) somewhere now removes them from the shelf
+  automatically (a cancelled drag keeps them)
+
 ## [2.4.2] — 2026-06-12
 
 ### Fixed
