@@ -57,6 +57,33 @@ analytics, no network calls.
 - Every app holding an audio connection appears, with a live indicator for the
   ones playing now; volumes persist per app, and 100% = untouched audio
 
+### ✂️ Cut & paste files in Finder
+- Press **⌘X** to cut the current Finder selection and **⌘V** to move it into
+  the folder you're viewing — the move people coming from Windows expect
+- Handles multiple files and folders; a floating HUD shows what's held and
+  confirms the move. Text fields keep their normal ⌘X / ⌘V
+
+### ❌ Quit on last window close
+- When an app's last window closes, the app quits — a tidy way to free memory,
+  the way it works on Windows
+- Apps that run window-less are never touched, and a per-app exception list
+  keeps any app you choose running
+
+### 🗑️ Complete app uninstaller
+- Drag an app in (or pick one) to find the caches, preferences, logs, containers
+  and other files it leaves behind, each with its size
+- Review the list, then move the selected items to the Trash (reversible, never a
+  hard delete) and see the space recovered
+
+### 📥 Temporary shelf
+- A floating spot to gather files, images, text and links, then drag them back
+  out into any app, window or Space later
+- Summon it at the cursor with **⌃⌥⌘D** or by shaking the mouse mid-drag — no
+  permissions required
+
+> The four utilities above are opt-in. Turn each on during onboarding or in
+> **Settings › Features**, where every one has its own page.
+
 ## Install
 
 ### Download (recommended)
@@ -97,13 +124,18 @@ you through each grant:
 
 | Permission | Used by | Without it |
 |---|---|---|
-| **Accessibility** | Scroll inverter, switcher keyboard handling | Both features stay off |
+| **Accessibility** | Scroll inverter, switcher keyboard, cut & paste, quit on close | Those features stay off |
 | **Screen Recording** | Window titles & thumbnails in the switcher | Switcher shows app icons only |
 | **Notifications** | Session end & battery protection alerts | Silent operation |
-| **Administrator (once, optional)** | Password-free closed-lid toggling | Password prompt per toggle |
+| **Full Disk Access** (optional) | A more thorough uninstaller scan | Scans the accessible locations only |
+| **Administrator** (once, optional) | Password-free closed-lid toggling | Password prompt per toggle |
 
-The first launch opens a 7-step onboarding (language, permissions, monitor
-tour, optional features, status check). Revisit it anytime from
+The cut & paste and switcher-tabs features also ask macOS for Automation consent
+the first time they talk to Finder or a browser. The shelf needs no permissions.
+
+The first launch opens a guided onboarding (language, permissions, monitor tour
+and an opt-in page for each feature). People updating from an earlier version
+see a short what's-new pass once. Revisit it anytime from
 **Settings › About › Review introduction**.
 
 ## Architecture
@@ -118,6 +150,10 @@ Sources/VorssaintUtils/
 │   ├── ScrollInverter.swift    # CGEventTap, mouse-only inversion
 │   ├── SystemMonitor/          # SMC client, CPU/GPU usage, memory pressure
 │   ├── Switcher/               # enumeration, AX activation, SCK previews, tap
+│   ├── Finder/                 # cut & paste move via an event tap
+│   ├── AutoQuit/               # AX observers, quit on last window close
+│   ├── Uninstall/              # leftover-file scan and trashing
+│   ├── Shelf/                  # floating drag-and-drop shelf
 │   └── …                       # hotkey, notifications, shell helpers
 ├── Support/                    # selftest & sensor dump
 └── UI/                         # SwiftUI: panel, settings, onboarding, switcher

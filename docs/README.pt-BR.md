@@ -52,6 +52,33 @@ sem analytics, sem chamadas de rede.
 - Todo app com conexão de áudio aparece, com indicador ao vivo para os que estão
   tocando; volumes persistem por app, e 100% = áudio intocado
 
+### ✂️ Recortar e colar no Finder
+- Pressione **⌘X** para recortar a seleção do Finder e **⌘V** para movê-la para
+  a pasta que você está vendo — o "mover" que quem vem do Windows espera
+- Funciona com vários arquivos e pastas; um HUD flutuante mostra o que está
+  guardado e confirma o movimento. Em campos de texto, ⌘X e ⌘V seguem normais
+
+### ❌ Encerrar ao fechar a última janela
+- Quando a última janela de um app fecha, o app é encerrado — uma forma limpa de
+  liberar memória, como no Windows
+- Apps que rodam sem janela nunca são tocados, e uma lista de exceções mantém
+  aberto qualquer app que você escolher
+
+### 🗑️ Desinstalação completa de apps
+- Arraste um app (ou escolha um) para encontrar caches, preferências, logs,
+  contêineres e outros resíduos que ele deixa, com o tamanho de cada um
+- Revise a lista e mova os selecionados para a Lixeira (reversível, nunca uma
+  exclusão definitiva) e veja o espaço recuperado
+
+### 📥 Área temporária
+- Um espaço flutuante para juntar arquivos, imagens, textos e links e arrastá-los
+  depois para qualquer app, janela ou desktop
+- Chame-a perto do cursor com **⌃⌥⌘D** ou sacudindo o mouse durante o arraste —
+  sem precisar de nenhuma permissão
+
+> Os quatro utilitários acima são opcionais. Ative cada um no onboarding ou em
+> **Ajustes › Recursos**, onde cada um tem sua própria página.
+
 ## Instalação
 
 ### Download (recomendado)
@@ -82,13 +109,19 @@ concessão:
 
 | Permissão | Usada por | Sem ela |
 |---|---|---|
-| **Acessibilidade** | Inversor de rolagem, teclado do alternador | Os dois recursos ficam desligados |
+| **Acessibilidade** | Inversor de rolagem, teclado do alternador, recortar e colar, encerrar ao fechar | Esses recursos ficam desligados |
 | **Gravação de Tela** | Títulos e miniaturas no alternador | Alternador mostra só ícones |
 | **Notificações** | Avisos de fim de sessão e proteção de bateria | Operação silenciosa |
-| **Administrador (uma vez, opcional)** | Tampa fechada sem senha | Pede senha a cada uso |
+| **Acesso Total ao Disco** (opcional) | Varredura mais completa do desinstalador | Varre só os locais acessíveis |
+| **Administrador** (uma vez, opcional) | Tampa fechada sem senha | Pede senha a cada uso |
 
-A primeira abertura traz um onboarding em 7 etapas (idioma, permissões, tour
-do monitor, recursos opcionais, verificação). Revise quando quiser em
+Recortar/colar e as abas do alternador também pedem ao macOS o consentimento de
+Automação na primeira vez que falam com o Finder ou um navegador. A área
+temporária não precisa de nenhuma permissão.
+
+A primeira abertura traz um onboarding guiado (idioma, permissões, tour do
+monitor e uma página opcional por recurso). Quem atualiza de uma versão anterior
+vê uma breve apresentação das novidades, uma única vez. Revise quando quiser em
 **Ajustes › Sobre › Rever introdução**.
 
 ## Licença

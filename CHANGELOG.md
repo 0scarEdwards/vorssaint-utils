@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] — 2026-06-12
+
+### Added
+- **Cut & paste files in Finder**: ⌘X cuts the current selection and ⌘V moves it
+  into the folder you're viewing, with a floating HUD showing the held items.
+  Text fields keep their normal shortcuts. Opt-in
+- **Quit on last window close**: when an app that had a window closes its last
+  one, it quits — with a per-app exception list (Finder excepted by default).
+  Opt-in
+- **Complete app uninstaller**: drag an app (or pick one) to find the caches,
+  preferences, logs, containers and other files it leaves behind, each with its
+  size, then move the selected ones to the Trash and see the space recovered.
+  Opt-in
+- **Temporary shelf**: a floating area, summoned at the cursor with ⌃⌥⌘D or by
+  shaking the mouse mid-drag, that holds files, images, text and links to drag
+  back out into any app later — needs no permissions. Opt-in
+- A visual onboarding page for each new feature; people updating from an earlier
+  version see a one-time "what's new" pass to discover and configure them
+
+### Changed
+- Settings moved from a tab bar to a System-Settings-style sidebar, giving every
+  feature its own page with room for examples and options
+
 ## [2.3.0] — 2026-06-12
 
 ### Added
