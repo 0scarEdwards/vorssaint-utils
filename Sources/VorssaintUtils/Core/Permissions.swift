@@ -11,6 +11,10 @@ final class Permissions: ObservableObject {
 
     @Published private(set) var accessibility = false
     @Published private(set) var screenRecording = false
+    /// Optional — only used to make the uninstaller's scan more thorough by
+    /// reaching protected locations. There is no API prompt for it; the user
+    /// grants it in System Settings.
+    @Published private(set) var fullDiskAccess = false
 
     private init() {
         refresh()
@@ -25,10 +29,22 @@ final class Permissions: ObservableObject {
     func refresh() {
         let ax = AXIsProcessTrusted()
         let sr = CGPreflightScreenCaptureAccess()
+        let fda = Self.probeFullDiskAccess()
         DispatchQueue.main.async {
             if self.accessibility != ax { self.accessibility = ax }
             if self.screenRecording != sr { self.screenRecording = sr }
+            if self.fullDiskAccess != fda { self.fullDiskAccess = fda }
         }
+    }
+
+    /// Reading the TCC database succeeds only with Full Disk Access — the
+    /// standard, prompt-free way to detect it.
+    private static func probeFullDiskAccess() -> Bool {
+        let path = (NSHomeDirectory() as NSString)
+            .appendingPathComponent("Library/Application Support/com.apple.TCC/TCC.db")
+        guard let handle = FileHandle(forReadingAtPath: path) else { return false }
+        handle.closeFile()
+        return true
     }
 
     /// Shows the system Accessibility prompt (once per TCC reset).
@@ -48,6 +64,10 @@ final class Permissions: ObservableObject {
 
     func openScreenRecordingSettings() {
         open(pane: "Privacy_ScreenCapture")
+    }
+
+    func openFullDiskAccessSettings() {
+        open(pane: "Privacy_AllFiles")
     }
 
     private func open(pane: String) {

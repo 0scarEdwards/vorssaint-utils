@@ -5,7 +5,7 @@ import SwiftUI
 /// the Features section, so every feature gets its own page.
 enum SettingsPage: Hashable {
     case general, energy
-    case mouse, switcher, cutPaste, autoQuit
+    case mouse, switcher, cutPaste, autoQuit, uninstaller
     case about
 }
 
@@ -27,6 +27,7 @@ struct SettingsView: View {
                     Label(l10n.s.tabSwitcher, systemImage: "rectangle.on.rectangle").tag(SettingsPage.switcher)
                     Label(l10n.s.cutPasteName, systemImage: "scissors").tag(SettingsPage.cutPaste)
                     Label(l10n.s.autoQuitName, systemImage: "xmark.rectangle").tag(SettingsPage.autoQuit)
+                    Label(l10n.s.uninstallerName, systemImage: "trash").tag(SettingsPage.uninstaller)
                 }
 
                 Label(l10n.s.tabAbout, systemImage: "info.circle").tag(SettingsPage.about)
@@ -50,6 +51,7 @@ struct SettingsView: View {
         case .switcher: SwitcherSettings()
         case .cutPaste: CutPasteSettings()
         case .autoQuit: AutoQuitSettings()
+        case .uninstaller: UninstallerSettings()
         case .about: AboutSettings()
         }
     }

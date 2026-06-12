@@ -193,6 +193,42 @@ struct Strings {
     let autoQuitExceptionsEmpty: String
     let autoQuitAddApp: String
 
+    // MARK: Feature — complete app uninstaller
+    let uninstallerName: String
+    let uninstallerEnable: String
+    let uninstallerEnableCaption: String
+    let uninstallerHowTitle: String
+    let uninstallerStep1: String
+    let uninstallerStep2: String
+    let uninstallerStep3: String
+    let uninstallerOpen: String
+    let uninstallerMenuItem: String
+    let uninstallerWindowTitle: String
+    let uninstallerDropTitle: String
+    let uninstallerDropSubtitle: String
+    let uninstallerChoose: String
+    let uninstallerEmptyNote: String
+    let uninstallerFDANote: String
+    let uninstallerScanning: String
+    let uninstallerRemoving: String
+    let uninstallerFoundTitle: String
+    let uninstallerSelectedFormat: String   // + selected, total
+    let uninstallerRemove: String
+    let uninstallerCancel: String
+    let uninstallerDoneTitle: String
+    let uninstallerFreedFormat: String      // + size string
+    let uninstallerSomeFailed: String
+    let uninstallerAnother: String
+    let uninstallerClose: String
+    let uninstallerCatApp: String
+    let uninstallerCatSupport: String
+    let uninstallerCatCaches: String
+    let uninstallerCatPreferences: String
+    let uninstallerCatContainers: String
+    let uninstallerCatLogs: String
+    let uninstallerCatState: String
+    let uninstallerCatOther: String
+
     // MARK: Panel — per-app breakdown
     let breakdownMeasuring: String
 
@@ -406,6 +442,41 @@ extension Strings {
         autoQuitExceptionsEmpty: "Nenhuma exceção",
         autoQuitAddApp: "Adicionar app…",
 
+        uninstallerName: "Desinstalador",
+        uninstallerEnable: "Desinstalação completa de apps",
+        uninstallerEnableCaption: "Remove um app junto com os caches, preferências, logs e resíduos que ele deixa para trás.",
+        uninstallerHowTitle: "Como usar",
+        uninstallerStep1: "Arraste um app para a janela ou escolha um da lista.",
+        uninstallerStep2: "Revise os arquivos encontrados e quanto espaço ocupam.",
+        uninstallerStep3: "Mova o que quiser para a Lixeira — nada é apagado de forma definitiva.",
+        uninstallerOpen: "Abrir desinstalador…",
+        uninstallerMenuItem: "Desinstalar um app…",
+        uninstallerWindowTitle: "Desinstalar app",
+        uninstallerDropTitle: "Arraste um app aqui",
+        uninstallerDropSubtitle: "ou escolha um para analisar",
+        uninstallerChoose: "Escolher app…",
+        uninstallerEmptyNote: "Nada é removido sem a sua confirmação.",
+        uninstallerFDANote: "Conceda Acesso Total ao Disco para uma análise mais completa.",
+        uninstallerScanning: "Analisando arquivos…",
+        uninstallerRemoving: "Movendo para a Lixeira…",
+        uninstallerFoundTitle: "encontrado",
+        uninstallerSelectedFormat: "%d de %d selecionados",
+        uninstallerRemove: "Mover para a Lixeira",
+        uninstallerCancel: "Cancelar",
+        uninstallerDoneTitle: "Pronto!",
+        uninstallerFreedFormat: "%@ recuperados",
+        uninstallerSomeFailed: "Alguns itens exigem privilégios de administrador e não foram removidos.",
+        uninstallerAnother: "Desinstalar outro",
+        uninstallerClose: "Fechar",
+        uninstallerCatApp: "Aplicativo",
+        uninstallerCatSupport: "Suporte",
+        uninstallerCatCaches: "Caches",
+        uninstallerCatPreferences: "Preferências",
+        uninstallerCatContainers: "Contêineres",
+        uninstallerCatLogs: "Logs",
+        uninstallerCatState: "Estado salvo",
+        uninstallerCatOther: "Outros",
+
         breakdownMeasuring: "Medindo…",
 
         mixerSection: "Mixer de volume",
@@ -613,6 +684,41 @@ extension Strings {
         autoQuitExceptionsCaption: "Apps on this list stay open even with no windows.",
         autoQuitExceptionsEmpty: "No exceptions",
         autoQuitAddApp: "Add app…",
+
+        uninstallerName: "Uninstaller",
+        uninstallerEnable: "Complete app uninstall",
+        uninstallerEnableCaption: "Removes an app together with the caches, preferences, logs and leftovers it leaves behind.",
+        uninstallerHowTitle: "How to use",
+        uninstallerStep1: "Drag an app onto the window, or pick one from the list.",
+        uninstallerStep2: "Review the files found and how much space they take.",
+        uninstallerStep3: "Move what you want to the Trash — nothing is deleted permanently.",
+        uninstallerOpen: "Open uninstaller…",
+        uninstallerMenuItem: "Uninstall an app…",
+        uninstallerWindowTitle: "Uninstall app",
+        uninstallerDropTitle: "Drag an app here",
+        uninstallerDropSubtitle: "or choose one to scan",
+        uninstallerChoose: "Choose app…",
+        uninstallerEmptyNote: "Nothing is removed without your confirmation.",
+        uninstallerFDANote: "Grant Full Disk Access for a more thorough scan.",
+        uninstallerScanning: "Scanning files…",
+        uninstallerRemoving: "Moving to the Trash…",
+        uninstallerFoundTitle: "found",
+        uninstallerSelectedFormat: "%d of %d selected",
+        uninstallerRemove: "Move to Trash",
+        uninstallerCancel: "Cancel",
+        uninstallerDoneTitle: "Done!",
+        uninstallerFreedFormat: "%@ recovered",
+        uninstallerSomeFailed: "Some items need administrator privileges and weren't removed.",
+        uninstallerAnother: "Uninstall another",
+        uninstallerClose: "Close",
+        uninstallerCatApp: "Application",
+        uninstallerCatSupport: "Support",
+        uninstallerCatCaches: "Caches",
+        uninstallerCatPreferences: "Preferences",
+        uninstallerCatContainers: "Containers",
+        uninstallerCatLogs: "Logs",
+        uninstallerCatState: "Saved state",
+        uninstallerCatOther: "Other",
 
         breakdownMeasuring: "Measuring…",
 

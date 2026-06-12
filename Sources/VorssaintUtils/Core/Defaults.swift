@@ -20,6 +20,7 @@ enum DefaultsKey {
     static let finderCutPasteEnabled = "finderCutPasteEnabled"
     static let autoQuitEnabled = "autoQuitEnabled"
     static let autoQuitExceptions = "autoQuitExceptions"  // [bundle id] kept running
+    static let uninstallerEnabled = "uninstallerEnabled"
 }
 
 enum Defaults {

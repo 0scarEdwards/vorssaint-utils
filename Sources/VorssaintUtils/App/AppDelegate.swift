@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private var cancellables = Set<AnyCancellable>()
     private var settingsWindow: NSWindow?
     private var onboardingWindow: NSWindow?
+    private var uninstallerWindow: NSWindow?
 
     // MARK: - Lifecycle
 
@@ -166,6 +167,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         aboutItem.target = self
         menu.addItem(aboutItem)
 
+        if UserDefaults.standard.bool(forKey: DefaultsKey.uninstallerEnabled) {
+            let uninstallItem = NSMenuItem(title: strings.uninstallerMenuItem,
+                                           action: #selector(menuOpenUninstaller), keyEquivalent: "")
+            uninstallItem.target = self
+            menu.addItem(uninstallItem)
+        }
+
         let updatesItem = NSMenuItem(title: strings.menuCheckUpdates, action: #selector(menuCheckUpdates), keyEquivalent: "")
         updatesItem.target = self
         menu.addItem(updatesItem)
@@ -193,6 +201,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     @objc private func menuOpenSettings() {
         openSettingsWindow()
+    }
+
+    @objc private func menuOpenUninstaller() {
+        openUninstallerWindow()
     }
 
     @objc private func menuCheckUpdates() {
@@ -228,6 +240,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         settingsWindow?.title = L10n.shared.s.settingsTitle
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    func openUninstallerWindow() {
+        closePopover()
+        AppUninstaller.shared.reset()
+        if uninstallerWindow == nil {
+            let host = NSHostingController(rootView: UninstallerView())
+            let window = NSWindow(contentViewController: host)
+            window.styleMask = [.titled, .closable, .resizable]
+            window.isReleasedWhenClosed = false
+            window.center()
+            uninstallerWindow = window
+        }
+        uninstallerWindow?.title = L10n.shared.s.uninstallerWindowTitle
+        NSApp.activate(ignoringOtherApps: true)
+        uninstallerWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    func closeUninstallerWindow() {
+        uninstallerWindow?.close()
     }
 
     func showOnboarding() {
