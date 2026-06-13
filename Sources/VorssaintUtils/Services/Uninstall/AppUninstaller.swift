@@ -60,8 +60,8 @@ final class AppUninstaller: ObservableObject {
     func select(appURL: URL) {
         guard let bundle = Bundle(url: appURL) else { return }
         let bundleID = bundle.bundleIdentifier
-        let name = FileManager.default.displayName(atPath: appURL.path)
-            .replacingOccurrences(of: ".app", with: "")
+        var name = FileManager.default.displayName(atPath: appURL.path)
+        if name.hasSuffix(".app") { name.removeLast(4) }
         let icon = NSWorkspace.shared.icon(forFile: appURL.path)
 
         target = Target(name: name, bundleID: bundleID, url: appURL, icon: icon)
@@ -71,7 +71,9 @@ final class AppUninstaller: ObservableObject {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let found = Self.collect(bundleID: bundleID, name: name, appURL: appURL)
             DispatchQueue.main.async {
-                guard let self, self.phase == .scanning else { return }
+                // Drop the result if the user picked a different app (or reset)
+                // while this scan was running — never show A's files under B.
+                guard let self, self.phase == .scanning, self.target?.url == appURL else { return }
                 self.items = found
                 self.phase = .results
             }
@@ -117,8 +119,10 @@ final class AppUninstaller: ObservableObject {
                 }
             }
             DispatchQueue.main.async {
-                self?.items = []
-                self?.phase = .done(freed: freed, failed: failed)
+                // The user may have dismissed the flow while files moved.
+                guard let self, self.phase == .removing else { return }
+                self.items = []
+                self.phase = .done(freed: freed, failed: failed)
             }
         }
     }

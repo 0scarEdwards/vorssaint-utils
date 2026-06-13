@@ -192,7 +192,7 @@ struct UninstallerView: View {
             Button(l10n.s.uninstallerRemove) { uninstaller.removeSelected() }
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
-                .disabled(uninstaller.selectedSize == 0 && uninstaller.items.filter(\.include).isEmpty)
+                .disabled(!uninstaller.items.contains(where: \.include))
         }
         .padding(16)
     }
