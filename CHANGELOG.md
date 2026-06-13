@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.5.1] - 2026-06-13
+
+### Fixed
+- **A 2.5.0 install updated from an older version could move itself to the
+  Trash on first launch.** The startup cleanup compared bundle locations too
+  strictly and mistook the just-updated app (still at the old path, because the
+  previous updater installs in place) for a leftover copy. It now renames that
+  bundle to `Vorssaint.app` through a helper that runs only after the app quits,
+  always reopening the app, and the leftover cleanup only runs for a bundle that
+  is provably not the one running. Recover a trashed copy by reinstalling from
+  the DMG: the bundle id is unchanged, so permissions and settings return intact
+
 ## [2.5.0] - 2026-06-13
 
 ### Changed
