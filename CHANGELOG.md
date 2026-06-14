@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [2.7.0] - 2026-06-14
 
+### Fixed
+- **Quit on last window close** no longer quits an app when you leave full screen
+  with the green button. Exiting full screen briefly leaves the app without a
+  window for a moment, which was being read as the last window closing; it now
+  confirms the app is really window-less, after the transition settles, before
+  quitting it.
+
 ### Added
 - **Advanced settings page** with two clean-up tools, each behind a confirmation:
   - **Clear all permissions** resets every permission you granted Vorssaint

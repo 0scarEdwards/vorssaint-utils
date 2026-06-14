@@ -133,13 +133,25 @@ final class AutoQuitService: ObservableObject {
         }
     }
 
-    private func checkWindows(pid: pid_t) {
+    private func checkWindows(pid: pid_t, confirm: Bool = true) {
         guard running, hadWindows[pid] == true,
               let app = NSRunningApplication(processIdentifier: pid), !app.isTerminated else { return }
         if let bundleID = app.bundleIdentifier, exceptions.contains(bundleID) { return }
 
         let appElement = AXUIElementCreateApplication(pid)
         guard standardWindows(of: appElement).isEmpty else { return }
+
+        // Zero windows can be a transient state, most notably when leaving full
+        // screen with the green button: the full-screen window is destroyed a
+        // moment before the windowed one reappears. Quitting on that flicker
+        // would close the app as if the user pressed Cmd-Q. So re-check once the
+        // transition has settled, and only quit if the app is still window-less.
+        if confirm {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+                self?.checkWindows(pid: pid, confirm: false)
+            }
+            return
+        }
 
         hadWindows[pid] = false
         app.terminate()
