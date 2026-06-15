@@ -13,15 +13,37 @@ final class StatusItemController {
     private var titleTimer: Timer?
     private var defaultsObserver: NSObjectProtocol?
 
+    /// Cached so the countdown tooltip doesn't allocate a DateFormatter (expensive)
+    /// on every refresh while a keep-awake session is active.
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
     var button: NSStatusBarButton? { statusItem.button }
 
     init() {
+        installStatusItem()
+        bind()
+
+        titleTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
+            self?.refresh()
+        }
+        titleTimer?.tolerance = 5
+    }
+
+    /// Creates the status item and configures its button. The menu bar item is the
+    /// app's only entry point, so an empty behavior set keeps it from being dragged
+    /// off the bar (reordering still works), and forcing isVisible undoes any hidden
+    /// state macOS may have persisted. If it ever goes missing, re-opening the app
+    /// recovers access (see applicationShouldHandleReopen) and the "Show menu bar
+    /// icon" button in Settings rebuilds it.
+    private func installStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        // The menu bar item is the app's only entry point, so it must never be
-        // lost for good. An empty behavior set keeps it from being dragged off the
-        // bar (reordering still works), and forcing isVisible undoes any hidden
-        // state macOS may have persisted from a previous removal. If it ever does
-        // go missing, re-opening the app restores it (see applicationShouldHandleReopen).
+        // A stable identity so macOS remembers the item's position across launches
+        // and across rebuilds, instead of re-placing it at the crowded default spot.
+        statusItem.autosaveName = "VorssaintMenuBarItem"
         statusItem.behavior = []
         statusItem.isVisible = true
         if let button = statusItem.button {
@@ -34,16 +56,18 @@ final class StatusItemController {
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
             button.wantsLayer = true
         }
-
-        bind()
         refresh()
         syncMonitorMode()
         updateIconAppearance()
+    }
 
-        titleTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
-            self?.refresh()
-        }
-        titleTimer?.tolerance = 5
+    /// Tears the status item down and builds a fresh one. macOS sometimes drops an
+    /// item from a crowded or notched menu bar and won't re-place it; a brand new
+    /// item forces it to re-register, which usually brings the icon back. Backs the
+    /// "Show menu bar icon" button in Settings.
+    func recreateStatusItem() {
+        if let statusItem { NSStatusBar.system.removeStatusItem(statusItem) }
+        installStatusItem()
     }
 
     private func bind() {
@@ -190,9 +214,7 @@ final class StatusItemController {
 
         if manager.isActive {
             if let end = manager.endDate {
-                let formatter = DateFormatter()
-                formatter.timeStyle = .short
-                button.toolTip = "\(strings.statusActiveUntil) \(formatter.string(from: end))"
+                button.toolTip = "\(strings.statusActiveUntil) \(Self.timeFormatter.string(from: end))"
             } else {
                 button.toolTip = strings.statusActiveIndefinite
             }
@@ -255,9 +277,19 @@ enum BlackHoleGlyph {
     /// Keeps a recognizable presence if the bundled asset is ever missing
     /// (e.g. running the bare binary from build/).
     private static func fallback(active: Bool) -> NSImage? {
-        let image = NSImage(systemSymbolName: "circle.fill", accessibilityDescription: AppInfo.name)?
-            .withSymbolConfiguration(.init(pointSize: 13, weight: active ? .bold : .regular))
-        image?.isTemplate = true
-        return image
+        if let symbol = NSImage(systemSymbolName: "circle.fill", accessibilityDescription: AppInfo.name)?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: active ? .bold : .regular)) {
+            symbol.isTemplate = true
+            return symbol
+        }
+        // Guaranteed last resort: draw a filled circle so the button always has a
+        // visible, clickable image and can never become a zero-width, invisible item.
+        let drawn = NSImage(size: NSSize(width: 14, height: 14), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(ovalIn: rect.insetBy(dx: 2, dy: 2)).fill()
+            return true
+        }
+        drawn.isTemplate = true
+        return drawn
     }
 }

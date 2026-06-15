@@ -76,16 +76,21 @@ final class PowerSampler {
             }
             if let cycles = props["CycleCount"] as? Int { reading.cycleCount = cycles }
             if let design = props["DesignCapacity"] as? Int, design > 0 {
-                // Match the "Maximum Capacity" macOS reports in System Information.
-                // On Apple Silicon that figure tracks NominalChargeCapacity, a
-                // smoothed full-charge capacity that reads a few points higher than
-                // the raw AppleRawMaxCapacity (which is what we used before, and what
-                // made the app show a lower number than System Report). Fall back to
-                // the raw value only when the nominal one is missing.
+                // Fallback estimate from IORegistry: a full-charge capacity over
+                // design. NominalChargeCapacity is the smoothed value (closest of
+                // the raw fields); fall back to AppleRawMaxCapacity when absent.
                 let fullCharge = (props["NominalChargeCapacity"] as? Int) ?? (props["AppleRawMaxCapacity"] as? Int)
                 if let fullCharge, fullCharge > 0 {
                     reading.healthPercent = min(100, Double(fullCharge) / Double(design) * 100)
                 }
+            }
+            // Prefer the exact "Maximum Capacity" macOS shows in System Information
+            // (a smoothed value no raw ratio reproduces). Cached + off the hot path;
+            // the ratio above stands in until the first reading lands or when macOS
+            // doesn't expose the field.
+            MaxCapacityProbe.shared.refreshIfStale()
+            if let exact = MaxCapacityProbe.shared.percent {
+                reading.healthPercent = Double(exact)
             }
         }
 

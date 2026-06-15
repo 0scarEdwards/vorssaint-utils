@@ -69,7 +69,9 @@ enum OnboardingInfo {
     // 2: system monitor — network, power, history graphs and the configurable
     // menu bar. Existing users see the one-time "what's new" pass for it, opening
     // straight on the menu bar setup page.
-    static let currentFeatureSet = 2
+    // 3: Buy Me a Coffee support. Updaters see a one-time, gentle announcement
+    // that the project now accepts donations (and stays free), with a link.
+    static let currentFeatureSet = 3
 }
 
 enum Defaults {

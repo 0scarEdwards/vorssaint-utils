@@ -14,11 +14,13 @@ enum OnboardingMode {
         switch self {
         case .full:
             return [.welcome, .accessibility, .screenRecording, .monitor, .menuBarSetup,
-                    .panelSetup, .optionalFeatures, .cutPaste, .autoQuit, .uninstaller, .shelf, .status, .done]
+                    .panelSetup, .optionalFeatures, .cutPaste, .autoQuit, .uninstaller, .shelf,
+                    .status, .donate, .done]
         case .whatsNew:
-            // This version's headline is the system monitor; configure the menu bar,
-            // then the panel (the exact new pages), then wrap up.
-            return [.menuBarSetup, .panelSetup, .done]
+            // This version's headline is donation support: a short, gentle
+            // announcement that the project now accepts coffees (and stays free),
+            // then wrap up.
+            return [.donate, .done]
         }
     }
 }
@@ -26,7 +28,7 @@ enum OnboardingMode {
 enum OnboardingStep {
     case welcome, accessibility, screenRecording, monitor, menuBarSetup, panelSetup, optionalFeatures
     case whatsNew, cutPaste, autoQuit, uninstaller, shelf
-    case status, done
+    case status, donate, done
 }
 
 struct OnboardingView: View {
@@ -83,6 +85,7 @@ struct OnboardingView: View {
         case .uninstaller: UninstallerShowcaseStep()
         case .shelf: ShelfShowcaseStep()
         case .status: StatusStep()
+        case .donate: DonateStep()
         case .done: DoneStep()
         }
     }
@@ -600,6 +603,52 @@ private struct StatusStep: View {
             Text(granted ? l10n.s.permissionGranted : l10n.s.permissionMissing)
                 .font(.caption)
                 .foregroundStyle(granted ? .green : (needed ? .orange : .secondary))
+        }
+    }
+}
+
+// MARK: - Donate announcement (one-time "what's new" headline)
+
+/// Gentle, good-looking announcement that the project now accepts support. Shown
+/// once to updaters and near the end of the first-run flow. Never gated or pushy:
+/// the message, a coffee button, and a thank-you.
+private struct DonateStep: View {
+    @ObservedObject private var l10n = L10n.shared
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                Theme.spaceGradient
+                VStack(spacing: 14) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 44))
+                        .foregroundStyle(.white)
+                    Text(l10n.s.obStepDonateTitle)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 30)
+                }
+            }
+            .frame(height: 240)
+
+            VStack(spacing: 16) {
+                Text(l10n.s.donateMessage)
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 42)
+
+                CoffeeButton()
+
+                Text(l10n.s.donateThanks)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.top, 26)
+
+            Spacer()
         }
     }
 }

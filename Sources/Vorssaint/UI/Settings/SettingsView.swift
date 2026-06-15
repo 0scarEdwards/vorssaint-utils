@@ -6,7 +6,7 @@ import SwiftUI
 enum SettingsPage: Hashable {
     case general, energy, monitor
     case mouse, switcher, cutPaste, autoQuit, uninstaller, shelf
-    case advanced, about
+    case advanced, about, support
 }
 
 /// Selects the visible Settings page; the menu bar uses it to open Settings
@@ -42,6 +42,7 @@ struct SettingsView: View {
 
                 Label(l10n.s.tabAdvanced, systemImage: "wrench.and.screwdriver").tag(SettingsPage.advanced)
                 Label(l10n.s.tabAbout, systemImage: "info.circle").tag(SettingsPage.about)
+                Label(l10n.s.tabSupport, systemImage: "heart.fill").tag(SettingsPage.support)
             }
             .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 198, ideal: 210, max: 240)
@@ -67,6 +68,7 @@ struct SettingsView: View {
         case .shelf: ShelfSettings()
         case .advanced: AdvancedSettings()
         case .about: AboutSettings()
+        case .support: SupportSettings()
         }
     }
 }
@@ -110,6 +112,12 @@ struct GeneralSettings: View {
             }
             Section(l10n.s.menuBarSection) {
                 Toggle(l10n.s.showCountdown, isOn: $showCountdown)
+                Button(l10n.s.showMenuBarIcon) {
+                    appDelegate()?.reshowStatusItem()
+                }
+                Text(l10n.s.showMenuBarIconCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             Section(l10n.s.globalHotkeySection) {
                 Toggle(l10n.s.hotkeyToggle, isOn: $hotkeyEnabled)
@@ -373,6 +381,67 @@ struct AboutSettings: View {
                 .padding(.bottom, 10)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Support / donate
+
+/// A calm, visual page inviting people to support the project. Nothing is
+/// nagged or gated: the message and a single Buy Me a Coffee button that opens
+/// the donate page in the browser.
+struct SupportSettings: View {
+    @ObservedObject private var l10n = L10n.shared
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            ZStack {
+                Circle()
+                    .fill(Theme.spaceGradient)
+                    .frame(width: 84, height: 84)
+                Image(systemName: "cup.and.saucer.fill")
+                    .font(.system(size: 33))
+                    .foregroundStyle(.white)
+            }
+            Text(l10n.s.donateHeading)
+                .font(.title2.bold())
+            Text(l10n.s.donateMessage)
+                .font(.system(size: 12.5))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 360)
+            CoffeeButton()
+                .padding(.top, 4)
+            Text(l10n.s.donateThanks)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+/// The Buy Me a Coffee call to action, shared by the Support page and the
+/// onboarding announcement. Opens the donate page in the default browser.
+struct CoffeeButton: View {
+    @ObservedObject private var l10n = L10n.shared
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        Button {
+            openURL(AppInfo.donateURL)
+        } label: {
+            HStack(spacing: 8) {
+                Text("☕").font(.system(size: 15))
+                Text(l10n.s.donateButton)
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundStyle(.black)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 11)
+            .background(Capsule().fill(Color(red: 1.0, green: 0.84, blue: 0.0)))
+        }
+        .buttonStyle(.plain)
     }
 }
 

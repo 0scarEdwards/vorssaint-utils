@@ -54,7 +54,9 @@ enum MenuBarSegment {
 enum MenuBarRenderer {
     static func segments(for snapshot: SystemSnapshot, metrics: [MenuBarMetric]) -> [MenuBarSegment] {
         var segments: [MenuBarSegment] = []
-        func separate() { if !segments.isEmpty { segments.append(.text("  ")) } }
+        // Single-space separator (not two): keeps metrics readable while trimming
+        // the item's width, since macOS hides the widest third-party item first.
+        func separate() { if !segments.isEmpty { segments.append(.text(" ")) } }
 
         for metric in metrics {
             switch metric {

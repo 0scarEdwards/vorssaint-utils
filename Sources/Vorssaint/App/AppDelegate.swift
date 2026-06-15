@@ -78,14 +78,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     /// alive. Without this, a hidden icon would strand the app running with no way
     /// in. (A cold launch can't happen while running, so this is the recovery path.)
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        statusController?.statusItem.isVisible = true
-        if !flag, !popover.isShown {
-            // A deliberate reopen should always present the panel, so clear the
-            // just-dismissed debounce that togglePopover() would otherwise honor.
-            popoverClosedAt = .distantPast
-            togglePopover()
+        guard !flag else { return true }
+        // A deliberate reopen with no windows showing is the user's recovery action.
+        // Rebuild the menu bar item unconditionally: macOS keeps the button's window
+        // non-nil even when it has dropped the icon for lack of room, so there's no
+        // cheap way to detect that, and only a fresh item makes the OS re-place it.
+        statusController?.recreateStatusItem()
+        // Decide on the next run-loop turn: a freshly rebuilt status item has no
+        // laid-out on-screen frame yet this turn, so iconIsOnScreen() would read a
+        // not-ready frame and wrongly skip the panel. After layout: pop the panel
+        // when the icon is genuinely on screen, else fall back to the Settings
+        // window. Either way the user ALWAYS gets back in.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if self.iconIsOnScreen(), !self.popover.isShown {
+                self.popoverClosedAt = .distantPast
+                self.togglePopover()
+            }
+            if !self.popover.isShown {
+                self.openSettingsWindow()
+            }
         }
         return true
+    }
+
+    /// Whether the menu bar icon is actually visible on a screen, rather than
+    /// present in the status bar but clipped or dropped by a crowded/notched menu
+    /// bar (in which case the button still has a window, just not an on-screen one).
+    private func iconIsOnScreen() -> Bool {
+        guard let frame = statusController?.statusItem.button?.window?.frame,
+              frame.width > 0, frame.height > 0 else { return false }
+        return NSScreen.screens.contains { $0.frame.intersects(frame) }
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }
@@ -172,6 +195,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     @objc private func appBecameActive() {
         // Coming back to the app is a good moment to surface a fresh release.
+        // (Menu bar icon recovery happens on a deliberate reopen, not here: this
+        // fires on every activation, so rebuilding here would cause churn/flicker.)
         UpdateService.shared.checkIfStale()
     }
 
@@ -336,6 +361,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         settingsWindow?.title = L10n.shared.s.settingsTitle
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    /// Rebuilds the menu bar item so the icon reappears when the OS has dropped it
+    /// from a crowded or notched menu bar. Backs the "Show menu bar icon" button.
+    func reshowStatusItem() {
+        statusController?.recreateStatusItem()
     }
 
     /// Quits and reopens the app. Full Disk Access only applies to a fresh

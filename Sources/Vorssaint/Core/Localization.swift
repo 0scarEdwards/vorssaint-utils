@@ -411,6 +411,16 @@ struct Strings {
     let cleaningOverlayMouseHint: String
     let cleaningNeedsAxTitle: String
     let cleaningNeedsAxBody: String
+
+    // MARK: Support / donate
+    let tabSupport: String
+    let donateHeading: String
+    let donateMessage: String
+    let donateButton: String
+    let donateThanks: String
+    let obStepDonateTitle: String
+    let showMenuBarIcon: String
+    let showMenuBarIconCaption: String
 }
 
 // MARK: - Português (Brasil)
@@ -751,7 +761,16 @@ extension Strings {
         cleaningOverlayUnlock: "Desbloquear",
         cleaningOverlayMouseHint: "O mouse e o trackpad continuam funcionando",
         cleaningNeedsAxTitle: "Precisa de Acessibilidade",
-        cleaningNeedsAxBody: "Para bloquear o teclado com segurança, o Vorssaint precisa da permissão de Acessibilidade. Conceda em Ajustes do Sistema e tente de novo."
+        cleaningNeedsAxBody: "Para bloquear o teclado com segurança, o Vorssaint precisa da permissão de Acessibilidade. Conceda em Ajustes do Sistema e tente de novo.",
+
+        tabSupport: "Apoiar",
+        donateHeading: "Apoie o Vorssaint",
+        donateMessage: "Todos os meus projetos públicos são, e sempre serão, totalmente gratuitos: sem assinatura, sem anúncios. O apoio da comunidade é a única forma de manter tudo vivo. Se o Vorssaint te ajuda, um café faz diferença de verdade.",
+        donateButton: "Buy me a coffee",
+        donateThanks: "Obrigado por estar aqui. 🖤",
+        obStepDonateTitle: "Agora dá pra apoiar 🖤",
+        showMenuBarIcon: "Mostrar ícone na barra de menus",
+        showMenuBarIconCaption: "Se o ícone do Vorssaint sumir (o macOS pode esconder ícones quando a barra de menus fica sem espaço, comum em Macs com notch), reabra o Vorssaint pela pasta Aplicativos ou pelo Spotlight: isso recria o ícone e, se ele ainda estiver escondido, abre esta janela. O botão acima faz o mesmo quando você já consegue chegar aqui. Manter menos ícones na barra, ou menos métricas no Vorssaint, reduz bastante a chance."
     )
 }
 
@@ -1093,6 +1112,15 @@ extension Strings {
         cleaningOverlayUnlock: "Unlock",
         cleaningOverlayMouseHint: "Your mouse and trackpad still work",
         cleaningNeedsAxTitle: "Accessibility needed",
-        cleaningNeedsAxBody: "To lock the keyboard safely, Vorssaint needs Accessibility permission. Grant it in System Settings and try again."
+        cleaningNeedsAxBody: "To lock the keyboard safely, Vorssaint needs Accessibility permission. Grant it in System Settings and try again.",
+
+        tabSupport: "Support",
+        donateHeading: "Support Vorssaint",
+        donateMessage: "Every one of my public projects is, and always will be, completely free: no subscription, no ads. Community support is the only thing that keeps it alive. If Vorssaint helps you, a coffee genuinely makes a difference.",
+        donateButton: "Buy me a coffee",
+        donateThanks: "Thank you for being here. 🖤",
+        obStepDonateTitle: "You can support the project now 🖤",
+        showMenuBarIcon: "Show menu bar icon",
+        showMenuBarIconCaption: "If Vorssaint's icon disappears (macOS can hide menu bar icons when the bar runs out of room, common on Macs with a notch), reopen Vorssaint from Applications or Spotlight: that rebuilds the icon and, if it's still hidden, opens this window. The button above does the same when you can already get here. Keeping fewer menu bar icons, or fewer Vorssaint metrics, makes it far less likely."
     )
 }

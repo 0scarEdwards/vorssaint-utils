@@ -4,7 +4,7 @@
 
 *Read in [English](../README.md).*
 
-Se o Vorssaint te ajuda, uma ⭐ rápida significa muito. Ele é 100% gratuito, então dar uma estrela é, por enquanto, a única forma de apoiar o projeto, e ainda ajuda mais gente a encontrá-lo.
+Se o Vorssaint te ajuda, uma ⭐ rápida significa muito e ainda ajuda mais gente a encontrar o projeto. Ele é, e sempre será, 100% gratuito e sem assinatura; o apoio da comunidade é o que mantém tudo vivo, então se quiser ajudar você também pode [me pagar um café](https://buymeacoffee.com/vorssaint) ☕.
 
 Um app pequeno na barra de menus que faz o trabalho para o qual você instalaria
 (e pagaria) vários utilitários separados: manter o Mac acordado, ver o que está

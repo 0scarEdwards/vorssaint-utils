@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.12.0] - 2026-06-15
+
+### Added
+- **Support the project.** A new Support tab in Settings, and a brief one-time note
+  when you update, let you back Vorssaint with a coffee if you'd like. It stays
+  free, with no subscription, always.
+
+### Fixed
+- **Battery health matches macOS.** The health percentage now lines up with the
+  "Maximum Capacity" shown in System Information.
+- **The menu bar icon is recoverable.** macOS can hide menu bar icons when the bar
+  runs out of room, common on Macs with a notch. Now reopening Vorssaint from
+  Applications brings the icon back, a new "Show menu bar icon" button in Settings
+  rebuilds it, and the icon remembers its position.
+- Fixed the Support tab hiding the rest of the Settings sidebar.
+
 ## [2.11.0] - 2026-06-15
 
 ### Added
