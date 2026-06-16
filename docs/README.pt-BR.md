@@ -11,8 +11,8 @@ Se o Vorssaint te ajuda, uma ⭐ rápida significa muito e ainda ajuda mais gent
 
 Um app pequeno na barra de menus que faz o trabalho para o qual você instalaria
 (e pagaria) vários utilitários separados: manter o Mac acordado, ver o que está
-deixando ele lento, ajustar o volume por app, alternar janelas, e resolver
-algumas chatices do dia a dia.
+deixando ele lento, ajustar o volume por app, alternar janelas, carregar arquivos
+entre apps, remover sobras e resolver algumas chatices do dia a dia.
 
 **Grátis. Open source. Local.** Sem conta, sem assinatura, sem telemetria.
 Nada sai do seu Mac, exceto uma verificação de atualização que você pode
@@ -27,16 +27,18 @@ brew install --cask vorssaint/tap/vorssaint
 Já tem o Vorssaint instalado? Adote a sua cópia no Homebrew sem reinstalar: `brew install --cask --adopt vorssaint/tap/vorssaint`. Você também pode [baixar o .dmg](https://github.com/vorssaint/vorssaint-utils/releases).
 
 <p align="center">
-  <img src="screenshot.png" alt="O painel do Vorssaint na barra de menus: manter acordado, mixer de volume por app e monitor do sistema ao vivo com temperaturas, uso de CPU e GPU e pressão de memória" width="420">
+  <img src="demo.gif" alt="O Vorssaint rodando pela barra de menus, com métricas ao vivo e o painel compacto por seções" width="780">
 </p>
 
 ## O que ele faz
 
-Cada recurso é opcional e tem a sua própria página nos Ajustes.
+Os recursos podem ser ajustados pelos Ajustes ou direto pelo painel.
 
 ### 🌡️ Veja o que está deixando o Mac lento
-Temperaturas de CPU, GPU e bateria, uso de CPU/GPU ao vivo e pressão de memória,
-direto na barra de menus. Toque em qualquer leitura para ver quais apps estão por trás.
+Temperaturas de CPU, GPU e bateria, uso de CPU/GPU ao vivo, pressão de memória,
+tempo ativo, saúde e ciclos da bateria, velocidade e totais de rede, consumo de
+energia e gráficos históricos. Fixe CPU, GPU, RAM, Rede, Energia ou Bateria
+direto na barra de menus.
 
 ### 🎚️ Ajuste o volume por app
 Abaixe um app sem mexer no resto do Mac. O mixer por app que o macOS nunca
@@ -49,6 +51,20 @@ janelas do mesmo app, e um toque rápido que volta para a última janela usada.
 ### ⚡ Mantenha o Mac acordado sob demanda
 Para um download, um build ou uma apresentação: com tempo definido ou até você
 desligar, mesmo com a tampa fechada. A proteção de bateria desliga quando a carga fica baixa.
+
+### 📥 Carregue arquivos com a Shelf
+Uma bandeja flutuante, chamada perto do cursor, que guarda arquivos, imagens,
+textos e links para você arrastar entre apps, janelas e desktops. Solte vários
+arquivos de uma vez para manter um lote, ou jogue itens soltos em uma pilha existente.
+
+### 🧭 Mantenha o painel compacto
+Alterne entre a lista completa e o painel por seções com um clique. As seções
+ficam no topo, o painel cresce só o necessário para a seção ativa, e o Modo de
+limpeza fica em Utilidades.
+
+### 🧼 Limpe o teclado com segurança
+O Modo de limpeza bloqueia o teclado para uma limpeza rápida, depois desbloqueia
+pelo overlay, por uma sequência de tecla repetida ou automaticamente após um tempo curto.
 
 ### 🖱️ Corrija a direção da rolagem do mouse
 Inverte a roda do mouse sem mexer na rolagem natural do trackpad.
@@ -65,9 +81,9 @@ uma lista de exceções para os apps que você prefere manter abertos.
 Solte um app nos Ajustes para encontrar caches, preferências, logs e outros
 resíduos, revise a lista e mande tudo para a Lixeira.
 
-### 📥 Uma área para carregar arquivos
-Uma bandeja flutuante, chamada perto do cursor, que guarda arquivos, imagens,
-textos e links para você arrastar entre apps, janelas e desktops.
+### 🧪 Fan Control beta
+Uma entrada beta de Fan Control está disponível para teste. Os controles manuais
+ficam desativados até que os modelos de Mac sejam validados com segurança.
 
 ## Por que é feito assim
 
@@ -76,8 +92,8 @@ textos e links para você arrastar entre apps, janelas e desktops.
   rede verifica se há nova versão no GitHub, e dá para desligar.
 - **Nativo e leve.** SwiftUI + AppKit puro, sem dependências externas, um app
   pequeno no lugar de vários.
-- **Opcional por princípio.** Cada recurso vem desligado até você ativar, pede
-  permissão só quando precisa e funciona de forma degradada sem ela.
+- **Opcional por princípio.** Os recursos podem ser ajustados ou desativados,
+  pedem permissão só quando precisam e funcionam de forma degradada sem ela.
 
 ## Instalação
 

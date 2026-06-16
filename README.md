@@ -16,7 +16,8 @@ If Vorssaint is useful to you, a quick ⭐ means a lot and helps others find the
 
 One small menu bar app that does the jobs you'd otherwise buy a handful of
 separate utilities for: keep your Mac awake, see what's slowing it down, set the
-volume per app, switch windows, and fix a few everyday annoyances.
+volume per app, switch windows, carry files between apps, remove leftovers and
+fix a few everyday annoyances.
 
 **Free. Open source. Local.** No account, no subscription, no telemetry.
 Nothing leaves your Mac except an update check you can turn off. It's built
@@ -31,16 +32,17 @@ brew install --cask vorssaint/tap/vorssaint
 Already have Vorssaint installed? Adopt your copy into Homebrew with no reinstall: `brew install --cask --adopt vorssaint/tap/vorssaint`. You can also [download the .dmg](https://github.com/vorssaint/vorssaint-utils/releases).
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="The Vorssaint menu bar panel: keep awake, a per-app volume mixer, and a live system monitor with temperatures, CPU and GPU load and memory pressure" width="420">
+  <img src="docs/demo.gif" alt="Vorssaint running from the menu bar with live metrics and the compact section-based panel" width="780">
 </p>
 
 ## What it does
 
-Every feature is optional and has its own page in Settings.
+Features are configurable from Settings or directly from the panel.
 
 ### 🌡️ See what's slowing your Mac down
-CPU, GPU and battery temperatures, live CPU/GPU load and memory pressure, right
-in the menu bar. Tap any reading to see which apps are behind it.
+CPU, GPU and battery temperatures, live CPU/GPU load, memory pressure, uptime,
+battery health and cycles, network speed and totals, power draw and history
+graphs. Pin CPU, GPU, RAM, Network, Power or Battery right in the menu bar.
 
 ### 🎚️ Set the volume per app
 Turn one app down without changing the rest of your Mac. The per-app mixer macOS
@@ -53,6 +55,20 @@ the same app, and a quick flick that toggles straight back to the last one you u
 ### ⚡ Keep your Mac awake on demand
 For a download, a build or a presentation: on a timer or until you stop it, even
 with the lid closed. Battery protection switches it off when the charge runs low.
+
+### 📥 Carry files with the Shelf
+A floating tray, summoned at the cursor, that holds files, images, text and
+links so you can drag them between apps, windows and Spaces. Drop several files
+at once to keep them as a batch, or add loose items into an existing stack.
+
+### 🧭 Keep the panel compact
+Switch between the full list and a section-based panel with one click. Sections
+stay at the top, the panel grows only as much as the active section needs, and
+Cleaning Mode lives in its own Utilities section.
+
+### 🧼 Clean the keyboard safely
+Cleaning Mode locks the keyboard for a quick wipe-down, then unlocks from the
+overlay, a repeated-key gesture, or automatically after a short timeout.
 
 ### 🖱️ Fix the mouse scroll direction
 Invert the mouse wheel without touching the trackpad's natural scrolling.
@@ -69,9 +85,9 @@ exception list for the apps you'd rather keep running.
 Drop an app onto Settings to find its caches, preferences, logs and other
 leftovers, review the list, and send it all to the Trash.
 
-### 📥 A shelf to carry files around
-A floating tray, summoned at the cursor, that holds files, images, text and
-links so you can drag them between apps, windows and Spaces.
+### 🧪 Fan Control beta
+A beta Fan Control entry is available for testing. Manual controls stay disabled
+until Mac models are validated safely.
 
 ## Why it's built this way
 
@@ -80,8 +96,8 @@ links so you can drag them between apps, windows and Spaces.
   call checks GitHub for a new version, and you can turn it off.
 - **Native and light.** Plain SwiftUI + AppKit, no external dependencies, a
   single small app instead of several.
-- **Opt-in by design.** Each feature is off until you turn it on, asks for a
-  permission only when it needs one, and degrades gracefully without it.
+- **Optional by design.** Features can be adjusted or disabled, ask for a
+  permission only when they need one, and degrade gracefully without it.
 
 ## Install
 
@@ -160,7 +176,7 @@ its permissions.
 Sources/Vorssaint/
 ├── main.swift                  # entry point (--selftest, --sensors)
 ├── App/                        # AppDelegate, menu bar status item
-├── Core/                       # localization (pt-BR/en-US), permissions, defaults
+├── Core/                       # localization, permissions, defaults
 ├── Services/                   # all behavior: energy, monitor, scroll, switcher,
 │                               #   audio mixer, Finder, auto-quit, uninstall, shelf
 ├── Support/                    # selftest & sensor dump
@@ -168,7 +184,7 @@ Sources/Vorssaint/
 ```
 
 Strict separation: **UI** observes **services**. Every user-facing string lives
-in `Core/Localization.swift`, compiler-checked for both languages.
+in `Core/Localization.swift`, compiler-checked for every supported language.
 
 ## Contributing
 
