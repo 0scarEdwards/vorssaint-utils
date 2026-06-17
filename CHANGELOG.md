@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.17.2] - 2026-06-17
+
+### Fixed
+- Shelf and Cut & Paste HUDs no longer use the native rectangular panel shadow,
+  avoiding extra outlines on some macOS display/window configurations.
+
 ## [2.17.1] - 2026-06-17
 
 ### Fixed

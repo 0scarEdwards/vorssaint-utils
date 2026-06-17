@@ -982,9 +982,6 @@ final class ShelfService: ObservableObject {
         let top = panel.frame.maxY
         panel.setFrame(NSRect(x: panel.frame.minX, y: top - size.height, width: size.width, height: size.height),
                        display: true, animate: false)
-        // Recompute the borderless window's shadow for the new size; a cached
-        // shadow from the previous frame would otherwise linger as an outline.
-        panel.invalidateShadow()
     }
 
     private func position(_ panel: NSPanel) {
@@ -998,7 +995,6 @@ final class ShelfService: ObservableObject {
         x = min(max(screen.minX + 8, x), screen.maxX - size.width - 8)
         y = min(max(screen.minY + 8, y), screen.maxY - size.height - 8)
         panel.setFrame(NSRect(x: x, y: y, width: size.width, height: size.height), display: true)
-        panel.invalidateShadow()
     }
 
     private func ensurePanel() -> NSPanel {
@@ -1009,7 +1005,7 @@ final class ShelfService: ObservableObject {
         panel.level = .floating
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        panel.hasShadow = true
+        panel.hasShadow = false
         // Not movable by background: dragging a tile must start an item drag,
         // not move the whole panel.
         panel.hidesOnDeactivate = false
