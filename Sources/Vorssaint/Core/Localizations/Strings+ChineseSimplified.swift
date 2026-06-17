@@ -287,6 +287,7 @@ extension Strings {
         obStepDoneBody: "Vorssaint 已开始照看你的 Mac。",
         obDoneHint: "在菜单栏（屏幕右上角）寻找那个黑洞图标。",
         obWhatsNewTitle: "此版本的新功能",
+        obWhatsNewFallback: "此更新包含最新的修复和改进。",
         obLanguageUpdateTitle: "现在支持你的语言",
         obLanguageUpdateBody: "Vorssaint 现在支持多种语言。选择你想使用的语言，随时可在设置中更改。",
 

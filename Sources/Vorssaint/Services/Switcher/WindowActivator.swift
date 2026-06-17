@@ -12,6 +12,11 @@ enum WindowActivator {
     private static let focusRetryDelay: TimeInterval = 0.12
 
     static func activate(_ item: SwitcherItem) {
+        if item.pid == ProcessInfo.processInfo.processIdentifier {
+            activateOwnWindow(item)
+            return
+        }
+
         guard let app = NSRunningApplication(processIdentifier: item.pid) else { return }
 
         app.unhide()
@@ -25,6 +30,16 @@ enum WindowActivator {
             focusWindow(windowID: windowID, pid: pid)
             activateApp(app)
         }
+    }
+
+    private static func activateOwnWindow(_ item: SwitcherItem) {
+        guard let window = NSApp.windows.first(where: { $0.windowNumber == Int(item.windowID) }) else { return }
+        if window.isMiniaturized {
+            window.deminiaturize(nil)
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
     }
 
     private static func activateApp(_ app: NSRunningApplication) {

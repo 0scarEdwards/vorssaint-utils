@@ -287,6 +287,7 @@ extension Strings {
         obStepDoneBody: "Vorssaint ya está cuidando de tu Mac.",
         obDoneHint: "Busca el agujero negro en la barra de menús, en la esquina superior derecha de la pantalla.",
         obWhatsNewTitle: "Novedades de esta versión",
+        obWhatsNewFallback: "Esta actualización incluye las correcciones y mejoras más recientes.",
         obLanguageUpdateTitle: "Ahora en tu idioma",
         obLanguageUpdateBody: "Vorssaint ahora habla varios idiomas. Elige el que quieras usar; puedes cambiarlo cuando quieras en Ajustes.",
 

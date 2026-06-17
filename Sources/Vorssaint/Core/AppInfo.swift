@@ -7,6 +7,7 @@ import Foundation
 enum AppInfo {
     static let name = "Vorssaint"
     static let copyright = "© 2026 Vorssaint"
+    static let websiteURL = URL(string: "https://vorssaint.com")!
     static let repositoryURL = URL(string: "https://github.com/vorssaint/vorssaint-utils")!
     /// Buy Me a Coffee page. The project stays free; donations and stars are how
     /// the community keeps it alive. Confirm the handle is exactly right before

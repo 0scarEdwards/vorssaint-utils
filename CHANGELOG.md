@@ -4,6 +4,28 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.17.3] - 2026-06-17
+
+### Website
+- Official site: [vorssaint.com](https://vorssaint.com).
+
+### Added
+- Every update now opens a What's New window with the latest release notes and a
+  discreet vorssaint.com link.
+- The Uninstaller is now available directly in the menu panel's Utilities
+  section, with drag-and-drop and Choose app support.
+- The menu panel header now includes a Buy Me a Coffee shortcut.
+
+### Changed
+- Settings and What's New windows can now be focused from the window switcher.
+- The menu bar icon no longer bounces when opening the panel.
+- The README now uses focused screenshots and GIFs for each feature.
+
+### Fixed
+- Quit on close now detects the last-window close more reliably for apps like
+  Safari and WhatsApp.
+- The post-update What's New window now opens centered on screen.
+
 ## [2.17.2] - 2026-06-17
 
 ### Fixed

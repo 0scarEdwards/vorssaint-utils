@@ -113,6 +113,43 @@ struct MetricsTests {
         expectClose(Defaults.sanitizedAppVolume(-1), 0, "negative app volume clamps to mute")
         expectClose(Defaults.sanitizedAppVolume(.infinity), 1, "non-finite app volume falls back to unity")
 
+        // MARK: Release notes parsing
+
+        let changelog = """
+        # Changelog
+
+        ## [2.17.2] - 2026-06-17
+
+        ### Fixed
+        - **Shelf** no longer shows an extra outline.
+        - The update window opens centered
+          on the visible screen.
+
+        ### Added
+        - Coffee shortcut in the menu panel.
+
+        ### Website
+        - Official site: [vorssaint.com](https://vorssaint.com).
+
+        ## [2.17.1] - 2026-06-17
+
+        ### Fixed
+        - Older release note.
+        """
+        let notes = ReleaseNotes.notes(for: "2.17.2", changelog: changelog)
+        expect(notes.version == "2.17.2", "release notes version is parsed")
+        expect(notes.date == "2026-06-17", "release notes date is parsed")
+        expect(notes.sections.count == 2, "release notes keep sections for the requested version")
+        expect(notes.sections.first?.title == "Fixed", "release notes first section title is parsed")
+        expect(notes.sections.first?.items.first == "Shelf no longer shows an extra outline.",
+               "release notes strip simple markdown emphasis")
+        expect(notes.sections.first?.items.dropFirst().first == "The update window opens centered on the visible screen.",
+               "release notes join continuation lines")
+        expect(notes.sections.last?.items == ["Coffee shortcut in the menu panel."],
+               "release notes stop before the next version")
+        expect(!notes.sections.contains(where: { $0.title == "Website" }),
+               "release notes hide website sections from the feature list")
+
         // MARK: Localization format contracts
 
         let localizedStrings: [(AppLanguage, Strings)] = [

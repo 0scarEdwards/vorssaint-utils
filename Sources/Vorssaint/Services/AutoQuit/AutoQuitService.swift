@@ -114,9 +114,12 @@ final class AutoQuitService: ObservableObject {
     }
 
     /// Called from the C observer callback (on the main run loop).
-    func handleAX(element: AXUIElement, notification: String) {
+    func handleAX(observer: AXObserver, element: AXUIElement, notification: String) {
         var pid: pid_t = 0
         AXUIElementGetPid(element, &pid)
+        if pid == 0, let observerPID = pidForObserver(observer) {
+            pid = observerPID
+        }
         guard pid != 0 else { return }
 
         if notification == (kAXWindowCreatedNotification as String) {
@@ -171,6 +174,10 @@ final class AutoQuitService: ObservableObject {
 
     private func watch(window: AXUIElement, observer: AXObserver, refcon: UnsafeMutableRawPointer) {
         AXObserverAddNotification(observer, window, kAXUIElementDestroyedNotification as CFString, refcon)
+    }
+
+    private func pidForObserver(_ observer: AXObserver) -> pid_t? {
+        observers.first { entry in CFEqual(entry.value, observer) }?.key
     }
 
     private func standardWindows(of appElement: AXUIElement) -> [AXUIElement] {
@@ -244,6 +251,11 @@ final class AutoQuitService: ObservableObject {
                   let width = (bounds["Width"] as? NSNumber)?.doubleValue,
                   let height = (bounds["Height"] as? NSNumber)?.doubleValue,
                   width >= 80, height >= 80 else { continue }
+            let title = window[kCGWindowName as String] as? String ?? ""
+            let isOnScreen = (window[kCGWindowIsOnscreen as String] as? NSNumber)?.boolValue
+                ?? (window[kCGWindowIsOnscreen as String] as? Bool)
+                ?? false
+            if !isOnScreen && title.isEmpty { continue }
             return true
         }
         return false
@@ -284,5 +296,5 @@ private func autoQuitAXCallback(_ observer: AXObserver,
                                 _ refcon: UnsafeMutableRawPointer?) {
     guard let refcon else { return }
     let service = Unmanaged<AutoQuitService>.fromOpaque(refcon).takeUnretainedValue()
-    service.handleAX(element: element, notification: notification as String)
+    service.handleAX(observer: observer, element: element, notification: notification as String)
 }

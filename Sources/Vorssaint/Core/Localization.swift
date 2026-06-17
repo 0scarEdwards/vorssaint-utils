@@ -386,6 +386,7 @@ struct Strings {
     let obStepDoneBody: String
     let obDoneHint: String
     let obWhatsNewTitle: String
+    let obWhatsNewFallback: String
     let obLanguageUpdateTitle: String
     let obLanguageUpdateBody: String
 
@@ -778,6 +779,7 @@ extension Strings {
         obStepDoneBody: "O Vorssaint já está cuidando do seu Mac.",
         obDoneHint: "Procure o buraco negro na barra de menus, no canto superior direito da tela.",
         obWhatsNewTitle: "Novidades nesta versão",
+        obWhatsNewFallback: "Esta atualização inclui as correções e melhorias mais recentes.",
         obLanguageUpdateTitle: "Agora no seu idioma",
         obLanguageUpdateBody: "O Vorssaint agora fala vários idiomas. Escolha o que você prefere usar; dá para mudar quando quiser nos Ajustes.",
 
@@ -1163,6 +1165,7 @@ extension Strings {
         obStepDoneBody: "Vorssaint is already looking after your Mac.",
         obDoneHint: "Look for the black hole in the menu bar, at the top right of the screen.",
         obWhatsNewTitle: "What's new in this version",
+        obWhatsNewFallback: "This update includes the latest fixes and improvements.",
         obLanguageUpdateTitle: "Now in your language",
         obLanguageUpdateBody: "Vorssaint now speaks several languages. Choose the one you’d like to use; you can change it anytime in Settings.",
 

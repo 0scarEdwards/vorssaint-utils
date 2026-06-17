@@ -2,6 +2,8 @@
 
 > O conjunto de utilitários gratuito e open source que substitui vários apps pagos do Mac.
 
+<p align="center"><strong><a href="https://vorssaint.com">vorssaint.com</a></strong></p>
+
 *Read in [English](../README.md).*
 
 <p align="center">🇺🇸 🇧🇷 🇪🇸 🇩🇪 🇫🇷 🇮🇹 🇯🇵 🇨🇳</p>
@@ -26,64 +28,91 @@ brew install --cask vorssaint/tap/vorssaint
 
 Já tem o Vorssaint instalado? Adote a sua cópia no Homebrew sem reinstalar: `brew install --cask --adopt vorssaint/tap/vorssaint`. Você também pode [baixar o .dmg](https://github.com/vorssaint/vorssaint-utils/releases).
 
-<p align="center">
-  <img src="demo.gif" alt="O Vorssaint rodando pela barra de menus, com métricas ao vivo e o painel compacto por seções" width="780">
-</p>
-
 ## O que ele faz
 
 Os recursos podem ser ajustados pelos Ajustes ou direto pelo painel.
 
-### 🌡️ Veja o que está deixando o Mac lento
-Temperaturas de CPU, GPU e bateria, uso de CPU/GPU ao vivo, pressão de memória,
-tempo ativo, saúde e ciclos da bateria, velocidade e totais de rede, consumo de
-energia e gráficos históricos. Fixe CPU, GPU, RAM, Rede, Energia ou Bateria
-direto na barra de menus.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>⚡ Mantenha acordado, até com a tampa fechada</strong><br>
+      <sub>Use um timer ou mantenha ativo até desligar. O modo tampa fechada é opcional e escopado.</sub><br><br>
+      <img src="assets/readme/keep-awake-lid-closed.png" alt="Controles de manter acordado e tampa fechada" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🌡️ Monitor do sistema com gráficos</strong><br>
+      <sub>Acompanhe CPU, GPU, memória, temperaturas, bateria e uptime num painel compacto.</sub><br><br>
+      <img src="assets/readme/system-monitor-graph.png" alt="Monitor do sistema com gráficos ao vivo" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>🌐 Velocidade e totais de rede</strong><br>
+      <sub>Veja upload/download ao vivo, totais da sessão e um teste de velocidade embutido.</sub><br><br>
+      <img src="assets/readme/network-section.png" alt="Seção de rede do monitor" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🔋 Energia e bateria</strong><br>
+      <sub>Veja consumo do sistema, entrada do adaptador, fluxo da bateria, saúde e ciclos.</sub><br><br>
+      <img src="assets/readme/power-section.png" alt="Seção de energia e bateria" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>🎚️ Mixer de volume por app</strong><br>
+      <sub>Abaixe ou aumente um app sem mexer no volume do resto do Mac.</sub><br><br>
+      <img src="assets/readme/volume-mixer.png" alt="Mixer de volume por app" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🪟 Alternador de janelas</strong><br>
+      <sub>Substitui o ⌘Tab por miniaturas reais, incluindo várias janelas do mesmo app.</sub><br><br>
+      <img src="assets/readme/window-switcher.gif" alt="Alternador de janelas com miniaturas reais" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>📥 Shelf para arquivos temporários</strong><br>
+      <sub>Guarde arquivos, imagens, textos e links perto do cursor para arrastar depois.</sub><br><br>
+      <img src="assets/readme/shelf-demonstration.gif" alt="Shelf guardando itens arrastados" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🧭 Painel compacto por seções</strong><br>
+      <sub>Alterne entre lista e seções, com Utilidades sempre por perto.</sub><br><br>
+      <img src="assets/readme/utilities-section.png" alt="Seção de utilidades no painel compacto" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>✂️ Recorte e cole arquivos no Finder</strong><br>
+      <sub>Use ⌘X e ⌘V para mover arquivos selecionados sem quebrar atalhos de texto.</sub><br><br>
+      <img src="assets/readme/cut-and-paste.gif" alt="Recortar e colar arquivos no Finder" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>❌ Encerre apps ao fechar a última janela</strong><br>
+      <sub>Feche a última janela e o app encerra, com exceções por app.</sub><br><br>
+      <img src="assets/readme/quit-on-close.gif" alt="App encerrando ao fechar a última janela" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>🗑️ Remova sobras de apps</strong><br>
+      <sub>Solte um app nos Ajustes, revise caches, preferências e logs, e mande tudo para a Lixeira.</sub><br><br>
+      <img src="assets/readme/uninstall-demo.gif" alt="Desinstalador encontrando sobras de apps" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🧼 Limpe o teclado com segurança</strong><br>
+      <sub>O Modo de limpeza bloqueia o teclado e desbloqueia pelo overlay ou por uma sequência de tecla.</sub><br><br>
+      <img src="assets/readme/utilities-section.png" alt="Modo de limpeza dentro de Utilidades" width="330">
+    </td>
+  </tr>
+</table>
 
-### 🎚️ Ajuste o volume por app
-Abaixe um app sem mexer no resto do Mac. O mixer por app que o macOS nunca
-trouxe, com um ponto ao vivo no que está tocando. (macOS 14.4 ou mais recente.)
+### Também incluído
 
-### 🪟 Vá para qualquer janela na hora
-Substitui o ⌘Tab por uma grade com miniaturas reais das janelas, incluindo várias
-janelas do mesmo app, e um toque rápido que volta para a última janela usada.
-
-### ⚡ Mantenha o Mac acordado sob demanda
-Para um download, um build ou uma apresentação: com tempo definido ou até você
-desligar, mesmo com a tampa fechada. A proteção de bateria desliga quando a carga fica baixa.
-
-### 📥 Carregue arquivos com a Shelf
-Uma bandeja flutuante, chamada perto do cursor, que guarda arquivos, imagens,
-textos e links para você arrastar entre apps, janelas e desktops. Solte vários
-arquivos de uma vez para manter um lote, ou jogue itens soltos em uma pilha existente.
-
-### 🧭 Mantenha o painel compacto
-Alterne entre a lista completa e o painel por seções com um clique. As seções
-ficam no topo, o painel cresce só o necessário para a seção ativa, e o Modo de
-limpeza fica em Utilidades.
-
-### 🧼 Limpe o teclado com segurança
-O Modo de limpeza bloqueia o teclado para uma limpeza rápida, depois desbloqueia
-pelo overlay, por uma sequência de tecla repetida ou automaticamente após um tempo curto.
-
-### 🖱️ Corrija a direção da rolagem do mouse
-Inverte a roda do mouse sem mexer na rolagem natural do trackpad.
-
-### ✂️ Mova arquivos no Finder com ⌘X / ⌘V
-Recorte arquivos e pastas e cole em outra pasta: o "mover" que falta no Finder.
-Campos de texto seguem com os atalhos normais.
-
-### ❌ Feche a última janela e o app encerra
-Quando a última janela de um app fecha, ele é encerrado e libera a memória, com
-uma lista de exceções para os apps que você prefere manter abertos.
-
-### 🗑️ Remova um app e tudo que ele deixou para trás
-Solte um app nos Ajustes para encontrar caches, preferências, logs e outros
-resíduos, revise a lista e mande tudo para a Lixeira.
-
-### 🧪 Fan Control beta
-Uma entrada beta de Fan Control está disponível para teste. Os controles manuais
-ficam desativados até que os modelos de Mac sejam validados com segurança.
+- **🖱️ Corrija a direção da rolagem do mouse**: inverte a roda do mouse sem
+  mexer na rolagem natural do trackpad.
+- **🧪 Fan Control beta**: entrada de teste disponível, com controles manuais
+  desativados até que os modelos de Mac sejam validados com segurança.
 
 ## Por que é feito assim
 

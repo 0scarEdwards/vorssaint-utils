@@ -10,7 +10,9 @@ import CoreGraphics
 /// are minimized or parked on other Spaces are included. The result is then
 /// ordered by the app activation MRU (see `AppActivationTracker`), so the
 /// switcher matches the system ⌘Tab toggle. Window titles require Screen
-/// Recording on modern macOS — without it entries fall back to app names.
+/// Recording on modern macOS; Vorssaint's own titled windows use NSWindow
+/// metadata so Settings and What's New remain reachable even though the app is
+/// a menu-bar accessory.
 enum WindowEnumerator {
     /// Window surfaces larger than this are considered real, switchable windows.
     private static let minimumSize = CGSize(width: 80, height: 60)
@@ -27,6 +29,7 @@ enum WindowEnumerator {
         for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
             regularApps[app.processIdentifier] = app.localizedName ?? ""
         }
+        regularApps[pid_t(ownPid)] = AppInfo.name
 
         var seen = Set<CGWindowID>()
         var windows: [SwitcherItem] = []
@@ -37,8 +40,6 @@ enum WindowEnumerator {
                   let windowID = (info[kCGWindowNumber as String] as? NSNumber)?.uint32Value,
                   !seen.contains(windowID),
                   let pid = (info[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value,
-                  pid != ownPid,
-                  let appName = regularApps[pid],
                   let boundsDict = info[kCGWindowBounds as String] as? [String: Any]
             else { continue }
 
@@ -55,13 +56,25 @@ enum WindowEnumerator {
                 ?? (info[kCGWindowIsOnscreen as String] as? Bool)
                 ?? false
 
+            let appName: String
+            let displayTitle: String
+            if pid == ownPid {
+                guard let title = ownWindowTitle(for: windowID) else { continue }
+                appName = AppInfo.name
+                displayTitle = title
+            } else {
+                guard let name = regularApps[pid] else { continue }
+                appName = name
+                displayTitle = title
+            }
+
             // Off-screen *and* untitled windows are usually invisible helpers
             // (web pickers, framework shells), not something to switch to.
-            if !isOnScreen && title.isEmpty { continue }
+            if !isOnScreen && displayTitle.isEmpty { continue }
 
             seen.insert(windowID)
             windows.append(.window(id: windowID,
-                                   title: title,
+                                   title: displayTitle,
                                    appName: appName,
                                    pid: pid,
                                    isOnScreen: isOnScreen,
@@ -71,6 +84,13 @@ enum WindowEnumerator {
             windows = groupWindowsByApp(windows)
         }
         return orderByActivation(windows)
+    }
+
+    private static func ownWindowTitle(for windowID: CGWindowID) -> String? {
+        guard let window = NSApp.windows.first(where: { $0.windowNumber == Int(windowID) }),
+              window.styleMask.contains(.titled),
+              window.canBecomeKey else { return nil }
+        return window.title.isEmpty ? AppInfo.name : window.title
     }
 
     /// Groups windows by app in most-recently-used order while preserving the

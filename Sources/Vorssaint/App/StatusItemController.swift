@@ -4,9 +4,8 @@
 import AppKit
 import Combine
 
-/// Owns the menu bar presence: the black hole glyph, the click
-/// micro-interaction, the optional countdown title and the tooltip. Click
-/// handling is delegated back to the AppDelegate.
+/// Owns the menu bar presence: the black hole glyph, the optional countdown
+/// title and the tooltip. Click handling is delegated back to the AppDelegate.
 final class StatusItemController {
     var onLeftClick: (() -> Void)?
     var onRightClick: (() -> Void)?
@@ -57,7 +56,6 @@ final class StatusItemController {
             button.target = self
             button.action = #selector(clicked)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.wantsLayer = true
         }
         refresh()
         syncMonitorMode()
@@ -142,32 +140,11 @@ final class StatusItemController {
     }
 
     @objc private func clicked() {
-        pulse()
         if NSApp.currentEvent?.type == .rightMouseUp {
             onRightClick?()
         } else {
             onLeftClick?()
         }
-    }
-
-    /// Quick, springy scale dip — the click micro-interaction.
-    private func pulse() {
-        guard let layer = statusItem.button?.layer else { return }
-        // AppKit resets layer geometry on layout, so re-center the anchor at
-        // click time to scale from the middle of the icon.
-        let frame = layer.frame
-        layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        layer.position = CGPoint(x: frame.midX, y: frame.midY)
-        let animation = CAKeyframeAnimation(keyPath: "transform.scale")
-        animation.values = [1.0, 0.84, 1.06, 1.0]
-        animation.keyTimes = [0, 0.35, 0.72, 1]
-        animation.duration = 0.28
-        animation.timingFunctions = [
-            CAMediaTimingFunction(name: .easeOut),
-            CAMediaTimingFunction(name: .easeInEaseOut),
-            CAMediaTimingFunction(name: .easeOut),
-        ]
-        layer.add(animation, forKey: "vorssaint.pulse")
     }
 
     /// Updates the countdown title and tooltip from the current session state.

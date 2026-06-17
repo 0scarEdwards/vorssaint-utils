@@ -4,7 +4,7 @@
 import AppKit
 import CoreGraphics
 
-/// One selectable entry in the switcher: a real window of a regular app.
+/// One selectable entry in the switcher: a real user-facing window.
 /// Multiple windows of the same app appear as independent entries, so the
 /// switcher can move between them the way the system moves between apps.
 struct SwitcherItem: Identifiable, Equatable {

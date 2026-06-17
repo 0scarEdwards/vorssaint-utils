@@ -2,6 +2,8 @@
 
 > The free, open-source toolkit that replaces several paid Mac utilities.
 
+<p align="center"><strong><a href="https://vorssaint.com">vorssaint.com</a></strong></p>
+
 [![Release](https://img.shields.io/github/v/release/vorssaint/vorssaint-utils?label=release)](https://github.com/vorssaint/vorssaint-utils/releases)
 [![CI](https://github.com/vorssaint/vorssaint-utils/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/vorssaint/vorssaint-utils/actions/workflows/ci.yml)
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B%20(Apple%20Silicon)-black)](#requirements)
@@ -31,63 +33,91 @@ brew install --cask vorssaint/tap/vorssaint
 
 Already have Vorssaint installed? Adopt your copy into Homebrew with no reinstall: `brew install --cask --adopt vorssaint/tap/vorssaint`. You can also [download the .dmg](https://github.com/vorssaint/vorssaint-utils/releases).
 
-<p align="center">
-  <img src="docs/demo.gif" alt="Vorssaint running from the menu bar with live metrics and the compact section-based panel" width="780">
-</p>
-
 ## What it does
 
 Features are configurable from Settings or directly from the panel.
 
-### 🌡️ See what's slowing your Mac down
-CPU, GPU and battery temperatures, live CPU/GPU load, memory pressure, uptime,
-battery health and cycles, network speed and totals, power draw and history
-graphs. Pin CPU, GPU, RAM, Network, Power or Battery right in the menu bar.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>⚡ Keep awake, even with the lid closed</strong><br>
+      <sub>Run a timer or keep going until you stop it. Closed-lid mode is optional and scoped.</sub><br><br>
+      <img src="docs/assets/readme/keep-awake-lid-closed.png" alt="Keep awake and closed-lid controls" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🌡️ System monitor with history graphs</strong><br>
+      <sub>Track CPU, GPU, memory, temperatures, battery details and uptime in one compact panel.</sub><br><br>
+      <img src="docs/assets/readme/system-monitor-graph.png" alt="System monitor with live usage graphs" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>🌐 Network speed and totals</strong><br>
+      <sub>See live upload/download rates, session totals and a built-in speed test.</sub><br><br>
+      <img src="docs/assets/readme/network-section.png" alt="Network monitoring section" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🔋 Power and battery insight</strong><br>
+      <sub>Watch system draw, adapter input, battery flow, health and cycles.</sub><br><br>
+      <img src="docs/assets/readme/power-section.png" alt="Power and battery monitoring section" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>🎚️ Per-app volume mixer</strong><br>
+      <sub>Turn one app down or boost it without changing the rest of your Mac.</sub><br><br>
+      <img src="docs/assets/readme/volume-mixer.png" alt="Per-app volume mixer" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🪟 Window switcher</strong><br>
+      <sub>Replace ⌘Tab with live window thumbnails, including multiple windows from the same app.</sub><br><br>
+      <img src="docs/assets/readme/window-switcher.gif" alt="Window switcher with live thumbnails" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>📥 Shelf for temporary files</strong><br>
+      <sub>Hold files, images, text and links near the cursor, then drag them anywhere later.</sub><br><br>
+      <img src="docs/assets/readme/shelf-demonstration.gif" alt="Shelf holding temporary dragged items" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🧭 Compact section panel</strong><br>
+      <sub>Switch between list and section navigation, with Utilities kept close at hand.</sub><br><br>
+      <img src="docs/assets/readme/utilities-section.png" alt="Utilities section in the compact panel" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>✂️ Cut and paste files in Finder</strong><br>
+      <sub>Use ⌘X and ⌘V to move selected files while text fields keep their normal shortcuts.</sub><br><br>
+      <img src="docs/assets/readme/cut-and-paste.gif" alt="Cut and paste files in Finder" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>❌ Quit apps when the last window closes</strong><br>
+      <sub>Close the final window and the app quits, with per-app exceptions.</sub><br><br>
+      <img src="docs/assets/readme/quit-on-close.gif" alt="App quitting after its last window closes" width="330">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>🗑️ Remove app leftovers</strong><br>
+      <sub>Drop an app onto Settings, review caches, preferences and logs, then move them to the Trash.</sub><br><br>
+      <img src="docs/assets/readme/uninstall-demo.gif" alt="Uninstaller finding leftover files" width="330">
+    </td>
+    <td width="50%" valign="top">
+      <strong>🧼 Clean the keyboard safely</strong><br>
+      <sub>Cleaning Mode locks the keyboard for a wipe-down and unlocks from the overlay or a repeated-key gesture.</sub><br><br>
+      <img src="docs/assets/readme/utilities-section.png" alt="Cleaning Mode inside Utilities" width="330">
+    </td>
+  </tr>
+</table>
 
-### 🎚️ Set the volume per app
-Turn one app down without changing the rest of your Mac. The per-app mixer macOS
-never shipped, with a live dot on whatever is playing. (macOS 14.4 and later.)
+### Also included
 
-### 🪟 Jump to any window instantly
-Replace ⌘Tab with a grid of live window thumbnails, including multiple windows of
-the same app, and a quick flick that toggles straight back to the last one you used.
-
-### ⚡ Keep your Mac awake on demand
-For a download, a build or a presentation: on a timer or until you stop it, even
-with the lid closed. Battery protection switches it off when the charge runs low.
-
-### 📥 Carry files with the Shelf
-A floating tray, summoned at the cursor, that holds files, images, text and
-links so you can drag them between apps, windows and Spaces. Drop several files
-at once to keep them as a batch, or add loose items into an existing stack.
-
-### 🧭 Keep the panel compact
-Switch between the full list and a section-based panel with one click. Sections
-stay at the top, the panel grows only as much as the active section needs, and
-Cleaning Mode lives in its own Utilities section.
-
-### 🧼 Clean the keyboard safely
-Cleaning Mode locks the keyboard for a quick wipe-down, then unlocks from the
-overlay, a repeated-key gesture, or automatically after a short timeout.
-
-### 🖱️ Fix the mouse scroll direction
-Invert the mouse wheel without touching the trackpad's natural scrolling.
-
-### ✂️ Move files in Finder with ⌘X / ⌘V
-Cut files and folders and paste them into another folder: the move Finder leaves
-out. Text fields keep their normal shortcuts.
-
-### ❌ Close the last window, quit the app
-When an app's last window closes, it quits and frees its memory, with a per-app
-exception list for the apps you'd rather keep running.
-
-### 🗑️ Remove an app and everything it left behind
-Drop an app onto Settings to find its caches, preferences, logs and other
-leftovers, review the list, and send it all to the Trash.
-
-### 🧪 Fan Control beta
-A beta Fan Control entry is available for testing. Manual controls stay disabled
-until Mac models are validated safely.
+- **🖱️ Fix the mouse scroll direction**: invert the mouse wheel without touching
+  the trackpad's natural scrolling.
+- **🧪 Fan Control beta**: a testing entry is available, with manual controls
+  disabled until Mac models are validated safely.
 
 ## Why it's built this way
 

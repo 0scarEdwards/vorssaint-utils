@@ -88,7 +88,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
                 if defaults.integer(forKey: DefaultsKey.featuresOnboardingVersion) < OnboardingInfo.panelNavigationFeatureSet {
                     defaults.set(true, forKey: DefaultsKey.panelNavigationEnabled)
                 }
-                showOnboarding(mode: .update(includePanelNavigation: needsFeatureIntro))
+                showOnboarding(mode: .update)
             }
         }
     }
@@ -206,6 +206,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             matching: [.leftMouseDown, .rightMouseDown]
         ) { [weak self] _ in
             guard let self, self.popover.isShown else { return }
+            guard !PanelInteractionState.shared.keepsPopoverOpen else { return }
             self.closePopover()
         }
 
@@ -235,6 +236,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     }
 
     private func shouldDismissPopover(forLocalEvent event: NSEvent) -> Bool {
+        guard !PanelInteractionState.shared.keepsPopoverOpen else { return false }
         guard event.window === settingsWindow,
               let settingsFrame = settingsWindow?.frame,
               let popoverFrame = popover.contentViewController?.view.window?.frame else {
@@ -246,7 +248,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     @objc private func appResignedActive() {
         // Leaving the app entirely (e.g. ⌘Tab) dismisses the panel; switching to
         // our own Settings window keeps the app active, so it stays open.
-        if popover.isShown { closePopover() }
+        if popover.isShown, !PanelInteractionState.shared.keepsPopoverOpen {
+            closePopover()
+        }
     }
 
     @objc private func appBecameActive() {
@@ -334,6 +338,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     func popoverDidClose(_ notification: Notification) {
         SystemMonitor.shared.panelDidDisappear()
         removePopoverDismissMonitor()
+        PanelInteractionState.shared.keepsPopoverOpen = false
         popoverClosedAt = Date()
         popoverIsClosing = false
         runPopoverCloseCompletions()
@@ -629,18 +634,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             Notifier.requestPermission()
             self?.onboardingWindow?.close()
         })
+        host.sizingOptions = .preferredContentSize
         let window = NSWindow(contentViewController: host)
         window.title = mode.title(L10n.shared.s)
         window.styleMask = [.titled, .closable, .fullSizeContentView]
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.isReleasedWhenClosed = false
+        window.isRestorable = false
         window.isMovableByWindowBackground = true
         window.delegate = self
-        window.center()
+        centerOnboardingWindow(window)
         onboardingWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+        DispatchQueue.main.async { [weak self, weak window] in
+            guard let self, let window, window === self.onboardingWindow else { return }
+            self.centerOnboardingWindow(window)
+        }
+    }
+
+    private func centerOnboardingWindow(_ window: NSWindow) {
+        window.contentView?.layoutSubtreeIfNeeded()
+        let screen = window.screen ?? popover.contentViewController?.view.window?.screen ?? NSScreen.withMouse
+        let visible = screen.visibleFrame
+        let margin: CGFloat = 40
+        let availableWidth = max(1, visible.width - margin)
+        let availableHeight = max(1, visible.height - margin)
+        let width = min(max(window.frame.width, 540), availableWidth)
+        let height = min(max(window.frame.height, 600), availableHeight)
+        let frame = NSRect(x: visible.midX - width / 2,
+                           y: visible.midY - height / 2,
+                           width: width,
+                           height: height)
+        window.setFrame(frame.integral, display: false)
     }
 
     func windowWillClose(_ notification: Notification) {

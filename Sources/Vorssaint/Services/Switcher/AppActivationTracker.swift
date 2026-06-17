@@ -12,7 +12,6 @@ final class AppActivationTracker {
     static let shared = AppActivationTracker()
 
     private(set) var mru: [pid_t] = []
-    private let ownPid = ProcessInfo.processInfo.processIdentifier
     private var started = false
 
     private init() {}
@@ -53,9 +52,6 @@ final class AppActivationTracker {
     }
 
     private func record(_ pid: pid_t) {
-        // The non-activating switcher panel never steals focus, but guard our
-        // own pid anyway so it can't pollute the order.
-        guard pid != ownPid else { return }
         mru.removeAll { $0 == pid }
         mru.insert(pid, at: 0)
     }

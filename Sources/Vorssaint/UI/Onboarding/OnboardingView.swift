@@ -9,7 +9,7 @@ import SwiftUI
 /// status verification and the final summary.
 enum OnboardingMode {
     case full
-    case update(includePanelNavigation: Bool)
+    case update
 
     var steps: [OnboardingStep] {
         switch self {
@@ -17,8 +17,8 @@ enum OnboardingMode {
             return [.welcome, .accessibility, .screenRecording, .monitor, .menuBarSetup,
                     .panelSetup, .panelNavigation, .optionalFeatures, .cutPaste, .autoQuit, .uninstaller, .shelf,
                     .status, .donate, .done]
-        case let .update(includePanelNavigation):
-            return (includePanelNavigation ? [.panelNavigation] : []) + [.donate, .done]
+        case .update:
+            return [.whatsNew]
         }
     }
 
@@ -33,7 +33,7 @@ enum OnboardingMode {
 enum OnboardingStep {
     case welcome, accessibility, screenRecording, monitor, menuBarSetup, panelSetup, optionalFeatures
     case panelNavigation, cutPaste, autoQuit, uninstaller, shelf
-    case status, donate, done
+    case status, donate, done, whatsNew
 }
 
 struct OnboardingView: View {
@@ -94,6 +94,7 @@ struct OnboardingView: View {
         case .status: StatusStep()
         case .donate: DonateStep()
         case .done: DoneStep()
+        case .whatsNew: WhatsNewStep()
         }
     }
 
@@ -673,6 +674,112 @@ private struct StatusStep: View {
             Text(granted ? l10n.s.permissionGranted : l10n.s.permissionMissing)
                 .font(.caption)
                 .foregroundStyle(granted ? .green : (needed ? .orange : .secondary))
+        }
+    }
+}
+
+// MARK: - Update notes
+
+private struct WhatsNewStep: View {
+    @ObservedObject private var l10n = L10n.shared
+    private let notes = ReleaseNotes.current
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                Theme.spaceGradient
+                VStack(spacing: 10) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 42, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Text(l10n.s.obWhatsNewTitle)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.white)
+                    Text(versionLine)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.white.opacity(0.82))
+                }
+                .padding(.horizontal, 30)
+            }
+            .frame(height: 170)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    if notes.sections.isEmpty {
+                        fallbackNote
+                    } else {
+                        ForEach(Array(notes.sections.enumerated()), id: \.offset) { _, section in
+                            releaseSection(section)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(24)
+            }
+
+            Divider()
+            Link(destination: AppInfo.websiteURL) {
+                HStack(spacing: 7) {
+                    Image(systemName: "globe")
+                    Text("vorssaint.com")
+                }
+                .font(.system(size: 12.5, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(.vertical, 10)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var versionLine: String {
+        if let date = notes.date {
+            return "v\(notes.version) · \(date)"
+        }
+        return "v\(notes.version)"
+    }
+
+    private var fallbackNote: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 18, alignment: .center)
+            Text(l10n.s.obWhatsNewFallback)
+                .font(.system(size: 12.5))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func releaseSection(_ section: ReleaseNoteSection) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            if !section.title.isEmpty {
+                Text(section.title.uppercased())
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .tracking(1.2)
+            }
+            ForEach(Array(section.items.enumerated()), id: \.offset) { _, item in
+                HStack(alignment: .top, spacing: 9) {
+                    Image(systemName: iconName(for: section.title))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .frame(width: 18, alignment: .center)
+                    Text(item)
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private func iconName(for title: String) -> String {
+        switch title.lowercased() {
+        case "added": return "plus.circle.fill"
+        case "changed": return "slider.horizontal.3"
+        case "fixed": return "checkmark.circle.fill"
+        default: return "circle.fill"
         }
     }
 }

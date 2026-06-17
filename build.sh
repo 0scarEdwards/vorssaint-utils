@@ -50,8 +50,10 @@ if (( TEST )); then
     mkdir -p build
     swiftc -O -target "$TARGET" -sdk "$SDK" \
         Sources/Vorssaint/Core/Defaults.swift \
+        Sources/Vorssaint/Core/AppInfo.swift \
         Sources/Vorssaint/Core/Localization.swift \
         Sources/Vorssaint/Core/Localizations/Strings+*.swift \
+        Sources/Vorssaint/Core/ReleaseNotes.swift \
         Sources/Vorssaint/Services/Metrics/MetricFormat.swift \
         Sources/Vorssaint/Services/CleaningMode/CleaningUnlockCounter.swift \
         Tests/MetricsTests.swift \
@@ -75,6 +77,7 @@ STAGE="$(mktemp -d)/$APP_NAME.app"
 mkdir -p "$STAGE/Contents/MacOS" "$STAGE/Contents/Resources"
 cp "build/$EXECUTABLE" "$STAGE/Contents/MacOS/$EXECUTABLE"
 cp Resources/Info.plist "$STAGE/Contents/Info.plist"
+cp CHANGELOG.md "$STAGE/Contents/Resources/CHANGELOG.md"
 if (( DEV )); then
     # A distinct identity so the Developer build installs and runs next to the
     # official app, with its own permissions, preferences and login item.

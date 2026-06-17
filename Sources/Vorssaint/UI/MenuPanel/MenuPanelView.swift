@@ -133,7 +133,7 @@ struct MenuPanelView: View {
         case .network: return 190
         case .power: return 170
         case .fanControl: return 92
-        case .utilities: return 82
+        case .utilities: return 190
         }
     }
 
@@ -213,6 +213,21 @@ struct MenuPanelView: View {
                 keepAwakeStatusIndicator
             }
             Spacer()
+            Button {
+                NSWorkspace.shared.open(AppInfo.donateURL)
+            } label: {
+                Image(systemName: "cup.and.saucer.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .frame(width: 30, height: 30)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .background(
+                Circle()
+                    .fill(Color.primary.opacity(0.07))
+            )
+            .help(l10n.s.donateButton)
         }
     }
 
@@ -292,33 +307,72 @@ struct MenuPanelView: View {
 
 struct UtilitiesSection: View {
     @ObservedObject private var l10n = L10n.shared
+    @State private var showUninstaller = false
     var collapsible = true
     var startCleaning: () -> Void
 
     var body: some View {
         PanelSection(.utilities, title: l10n.s.utilitiesSection, collapsible: collapsible) {
-            Button(action: startCleaning) {
-                HStack(spacing: 9) {
-                    Image(systemName: "keyboard")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                        .frame(width: 22)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(l10n.s.cleaningMenuItem)
-                            .font(.system(size: 12, weight: .semibold))
-                        Text(l10n.s.cleaningPanelCaption)
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
+            if showUninstaller {
+                PanelUninstallerView {
+                    withAnimation(.easeInOut(duration: 0.16)) {
+                        showUninstaller = false
                     }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.tertiary)
                 }
-                .panelCard()
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    UtilityActionButton(title: l10n.s.cleaningMenuItem,
+                                        caption: l10n.s.cleaningPanelCaption,
+                                        systemImage: "keyboard",
+                                        action: startCleaning)
+                    UtilityActionButton(title: l10n.s.uninstallerName,
+                                        caption: l10n.s.uninstallerEnableCaption,
+                                        systemImage: "trash",
+                                        action: {
+                                            withAnimation(.easeInOut(duration: 0.16)) {
+                                                showUninstaller = true
+                                            }
+                                        })
+                }
             }
-            .buttonStyle(.plain)
         }
+        .onDisappear {
+            PanelInteractionState.shared.keepsPopoverOpen = false
+        }
+    }
+}
+
+private struct UtilityActionButton: View {
+    let title: String
+    let caption: String
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .frame(width: 22)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(1)
+                    Text(caption)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .panelCard()
+        }
+        .buttonStyle(.plain)
     }
 }
 
