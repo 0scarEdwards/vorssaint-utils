@@ -134,6 +134,7 @@ struct MenuPanelView: View {
         case .power: return 170
         case .fanControl: return 92
         case .utilities: return 190
+        case .controls: return 360
         }
     }
 
@@ -150,6 +151,7 @@ struct MenuPanelView: View {
         case .power: if showPower { PowerSection(collapsible: collapsible) }
         case .fanControl: if showFanControlBeta { FanControlSection(collapsible: collapsible) }
         case .utilities: UtilitiesSection(collapsible: collapsible, startCleaning: startCleaning)
+        case .controls: QuickControlsSection(collapsible: collapsible)
         }
     }
 
@@ -162,6 +164,7 @@ struct MenuPanelView: View {
         case .power: return showPower
         case .fanControl: return showFanControlBeta
         case .utilities: return true
+        case .controls: return true
         }
     }
 
@@ -213,21 +216,6 @@ struct MenuPanelView: View {
                 keepAwakeStatusIndicator
             }
             Spacer()
-            Button {
-                NSWorkspace.shared.open(AppInfo.donateURL)
-            } label: {
-                Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                    .frame(width: 30, height: 30)
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.secondary)
-            .background(
-                Circle()
-                    .fill(Color.primary.opacity(0.07))
-            )
-            .help(l10n.s.donateButton)
         }
     }
 
@@ -307,32 +295,67 @@ struct MenuPanelView: View {
 
 struct UtilitiesSection: View {
     @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var permissions = Permissions.shared
     @State private var showUninstaller = false
+    @State private var showURLCleaner = false
+    @AppStorage(DefaultsKey.panelUtilityCleaning) private var showCleaning = true
+    @AppStorage(DefaultsKey.panelUtilityURLCleaner) private var showCleanURL = true
+    @AppStorage(DefaultsKey.panelUtilityUninstaller) private var showUninstallerAction = true
     var collapsible = true
     var startCleaning: () -> Void
 
     var body: some View {
-        PanelSection(.utilities, title: l10n.s.utilitiesSection, collapsible: collapsible) {
+        PanelSection(.utilities, title: l10n.s.utilitiesSection, collapsible: collapsible,
+                     supportsEditing: !showUninstaller && !showURLCleaner) { editing in
             if showUninstaller {
                 PanelUninstallerView {
                     withAnimation(.easeInOut(duration: 0.16)) {
                         showUninstaller = false
                     }
                 }
+            } else if showURLCleaner {
+                PanelURLCleanerView {
+                    withAnimation(.easeInOut(duration: 0.16)) {
+                        showURLCleaner = false
+                    }
+                }
             } else {
                 VStack(alignment: .leading, spacing: 8) {
-                    UtilityActionButton(title: l10n.s.cleaningMenuItem,
-                                        caption: l10n.s.cleaningPanelCaption,
-                                        systemImage: "keyboard",
-                                        action: startCleaning)
-                    UtilityActionButton(title: l10n.s.uninstallerName,
-                                        caption: l10n.s.uninstallerEnableCaption,
-                                        systemImage: "trash",
-                                        action: {
-                                            withAnimation(.easeInOut(duration: 0.16)) {
-                                                showUninstaller = true
-                                            }
-                                        })
+                    if editing || showCleaning {
+                        UtilityActionButton(title: l10n.s.cleaningMenuItem,
+                                            caption: cleaningCaption,
+                                            systemImage: "keyboard",
+                                            isEditing: editing,
+                                            visibility: $showCleaning,
+                                            needsAttention: cleaningNeedsAccessibility,
+                                            permissionButtonTitle: l10n.s.permissionRequest,
+                                            permissionAction: cleaningNeedsAccessibility ? grantAccessibility : nil,
+                                            action: startCleaning)
+                    }
+                    if editing || showCleanURL {
+                        UtilityActionButton(title: l10n.s.urlCleanerName,
+                                            caption: l10n.s.urlCleanerEnableCaption,
+                                            systemImage: "link",
+                                            isEditing: editing,
+                                            visibility: $showCleanURL,
+                                            action: {
+                                                withAnimation(.easeInOut(duration: 0.16)) {
+                                                    showURLCleaner = true
+                                                }
+                                            })
+                    }
+                    if editing || showUninstallerAction {
+                        UtilityActionButton(title: l10n.s.uninstallerName,
+                                            caption: l10n.s.uninstallerEnableCaption,
+                                            systemImage: "trash",
+                                            isEditing: editing,
+                                            visibility: $showUninstallerAction,
+                                            action: {
+                                                withAnimation(.easeInOut(duration: 0.16)) {
+                                                    showUninstaller = true
+                                                }
+                                            })
+                    }
                 }
             }
         }
@@ -340,39 +363,381 @@ struct UtilitiesSection: View {
             PanelInteractionState.shared.keepsPopoverOpen = false
         }
     }
+
+    private var cleaningNeedsAccessibility: Bool {
+        showCleaning && !permissions.accessibility
+    }
+
+    private var cleaningCaption: String {
+        cleaningNeedsAccessibility
+            ? "\(l10n.s.permissionRequired): \(l10n.s.permissionAccessibility)"
+            : l10n.s.cleaningPanelCaption
+    }
+
+    private func grantAccessibility() {
+        Permissions.shared.requestAccessibility()
+        Permissions.shared.openAccessibilitySettings()
+    }
+}
+
+struct QuickControlsSection: View {
+    @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var permissions = Permissions.shared
+    @ObservedObject private var inverter = ScrollInverter.shared
+    @ObservedObject private var switcher = AppSwitcher.shared
+    @ObservedObject private var cutPaste = FinderCutPaste.shared
+    @ObservedObject private var autoQuit = AutoQuitService.shared
+    @ObservedObject private var windowMaximizer = WindowMaximizer.shared
+    @AppStorage(DefaultsKey.scrollInverterEnabled) private var scrollEnabled = false
+    @AppStorage(DefaultsKey.switcherEnabled) private var switcherEnabled = true
+    @AppStorage(DefaultsKey.finderCutPasteEnabled) private var cutPasteEnabled = false
+    @AppStorage(DefaultsKey.autoQuitEnabled) private var autoQuitEnabled = false
+    @AppStorage(DefaultsKey.shelfEnabled) private var shelfEnabled = false
+    @AppStorage(DefaultsKey.windowMaximizeEnabled) private var windowMaximizeEnabled = false
+    @AppStorage(DefaultsKey.panelControlMouseScroll) private var showScroll = true
+    @AppStorage(DefaultsKey.panelControlSwitcher) private var showSwitcher = true
+    @AppStorage(DefaultsKey.panelControlCutPaste) private var showCutPaste = true
+    @AppStorage(DefaultsKey.panelControlAutoQuit) private var showAutoQuit = true
+    @AppStorage(DefaultsKey.panelControlShelf) private var showShelf = true
+    @AppStorage(DefaultsKey.panelControlWindowMaximize) private var showWindowMaximize = true
+    var collapsible = true
+
+    var body: some View {
+        PanelSection(.controls, title: l10n.s.quickControlsSection, collapsible: collapsible,
+                     supportsEditing: true) { editing in
+            VStack(alignment: .leading, spacing: 8) {
+                if editing || showScroll {
+                    PanelToggleRow(title: l10n.s.invertMouseScroll,
+                                   caption: caption(l10n.s.invertMouseScrollCaption, needsAccessibility: scrollEnabled),
+                                   systemImage: "computermouse",
+                                   isOn: $scrollEnabled,
+                                   isEditing: editing,
+                                   visibility: $showScroll,
+                                   isActive: scrollEnabled && inverter.isRunning,
+                                   activeText: l10n.s.scrollActiveNow,
+                                   needsAttention: scrollEnabled && !permissions.accessibility,
+                                   permissionButtonTitle: l10n.s.permissionRequest,
+                                   permissionAction: accessibilityPermissionAction(scrollEnabled))
+                        .onChange(of: scrollEnabled) { _, enabled in
+                            ScrollInverter.shared.syncWithPreferences()
+                            requestAccessibilityIfNeeded(enabled)
+                        }
+                }
+
+                if editing || showSwitcher {
+                    PanelToggleRow(title: l10n.s.switcherSection,
+                                   caption: switcherCaption,
+                                   systemImage: "rectangle.on.rectangle",
+                                   isOn: $switcherEnabled,
+                                   isEditing: editing,
+                                   visibility: $showSwitcher,
+                                   isActive: switcherEnabled && switcher.isRunning,
+                                   needsAttention: switcherEnabled && (!permissions.accessibility || !permissions.screenRecording),
+                                   permissionButtonTitle: l10n.s.permissionRequest,
+                                   permissionAction: switcherPermissionAction)
+                        .onChange(of: switcherEnabled) { _, enabled in
+                            AppSwitcher.shared.syncWithPreferences()
+                            guard enabled else { return }
+                            if !permissions.accessibility {
+                                grantAccessibility()
+                            } else if !permissions.screenRecording {
+                                grantScreenRecording()
+                            }
+                        }
+                }
+
+                if editing || showCutPaste {
+                    PanelToggleRow(title: l10n.s.cutPasteName,
+                                   caption: caption(l10n.s.cutPasteEnableCaption, needsAccessibility: cutPasteEnabled),
+                                   systemImage: "scissors",
+                                   isOn: $cutPasteEnabled,
+                                   isEditing: editing,
+                                   visibility: $showCutPaste,
+                                   isActive: cutPasteEnabled && cutPaste.isRunning,
+                                   activeText: l10n.s.cutPasteActiveNow,
+                                   needsAttention: cutPasteEnabled && !permissions.accessibility,
+                                   permissionButtonTitle: l10n.s.permissionRequest,
+                                   permissionAction: accessibilityPermissionAction(cutPasteEnabled))
+                        .onChange(of: cutPasteEnabled) { _, enabled in
+                            FinderCutPaste.shared.syncWithPreferences()
+                            requestAccessibilityIfNeeded(enabled)
+                        }
+                }
+
+                if editing || showAutoQuit {
+                    PanelToggleRow(title: l10n.s.autoQuitName,
+                                   caption: caption(l10n.s.autoQuitEnableCaption, needsAccessibility: autoQuitEnabled),
+                                   systemImage: "xmark.rectangle",
+                                   isOn: $autoQuitEnabled,
+                                   isEditing: editing,
+                                   visibility: $showAutoQuit,
+                                   isActive: autoQuitEnabled && autoQuit.isRunning,
+                                   activeText: l10n.s.autoQuitActiveNow,
+                                   needsAttention: autoQuitEnabled && !permissions.accessibility,
+                                   permissionButtonTitle: l10n.s.permissionRequest,
+                                   permissionAction: accessibilityPermissionAction(autoQuitEnabled))
+                        .onChange(of: autoQuitEnabled) { _, enabled in
+                            AutoQuitService.shared.syncWithPreferences()
+                            requestAccessibilityIfNeeded(enabled)
+                        }
+                }
+
+                if editing || showShelf {
+                    PanelToggleRow(title: l10n.s.shelfName,
+                                   caption: l10n.s.shelfEnableCaption,
+                                   systemImage: "tray.full",
+                                   isOn: $shelfEnabled,
+                                   isEditing: editing,
+                                   visibility: $showShelf,
+                                   isActive: shelfEnabled)
+                        .onChange(of: shelfEnabled) { _, _ in
+                            ShelfService.shared.syncWithPreferences()
+                        }
+                }
+
+                if editing || showWindowMaximize {
+                    PanelToggleRow(title: l10n.s.windowMaximizeName,
+                                   caption: caption(l10n.s.windowMaximizeCaption, needsAccessibility: windowMaximizeEnabled),
+                                   systemImage: "arrow.up.left.and.arrow.down.right",
+                                   isOn: $windowMaximizeEnabled,
+                                   isEditing: editing,
+                                   visibility: $showWindowMaximize,
+                                   isActive: windowMaximizeEnabled && windowMaximizer.isRunning,
+                                   activeText: l10n.s.windowMaximizeActiveNow,
+                                   needsAttention: windowMaximizeEnabled && !permissions.accessibility,
+                                   permissionButtonTitle: l10n.s.permissionRequest,
+                                   permissionAction: accessibilityPermissionAction(windowMaximizeEnabled))
+                        .onChange(of: windowMaximizeEnabled) { _, enabled in
+                            WindowMaximizer.shared.syncWithPreferences()
+                            requestAccessibilityIfNeeded(enabled)
+                        }
+                }
+            }
+        }
+    }
+
+    private var switcherCaption: String {
+        guard switcherEnabled else { return l10n.s.switcherEnableCaption }
+        if !permissions.accessibility { return missingPermission(l10n.s.permissionAccessibility) }
+        if !permissions.screenRecording { return missingPermission(l10n.s.permissionScreenRecording) }
+        return l10n.s.switcherEnableCaption
+    }
+
+    private func caption(_ text: String, needsAccessibility: Bool) -> String {
+        needsAccessibility && !permissions.accessibility
+            ? missingPermission(l10n.s.permissionAccessibility)
+            : text
+    }
+
+    private func missingPermission(_ name: String) -> String {
+        "\(l10n.s.permissionRequired): \(name)"
+    }
+
+    private func requestAccessibilityIfNeeded(_ enabled: Bool) {
+        guard enabled, !permissions.accessibility else { return }
+        grantAccessibility()
+    }
+
+    private func accessibilityPermissionAction(_ enabled: Bool) -> (() -> Void)? {
+        guard enabled, !permissions.accessibility else { return nil }
+        return { grantAccessibility() }
+    }
+
+    private var switcherPermissionAction: (() -> Void)? {
+        guard switcherEnabled else { return nil }
+        if !permissions.accessibility {
+            return { grantAccessibility() }
+        }
+        if !permissions.screenRecording {
+            return { grantScreenRecording() }
+        }
+        return nil
+    }
+
+    private func grantAccessibility() {
+        Permissions.shared.requestAccessibility()
+        Permissions.shared.openAccessibilitySettings()
+    }
+
+    private func grantScreenRecording() {
+        Permissions.shared.requestScreenRecording()
+        Permissions.shared.openScreenRecordingSettings()
+    }
 }
 
 private struct UtilityActionButton: View {
     let title: String
     let caption: String
     let systemImage: String
+    var isEditing = false
+    var visibility: Binding<Bool>? = nil
+    var needsAttention = false
+    var permissionButtonTitle: String? = nil
+    var permissionAction: (() -> Void)? = nil
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 9) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color.accentColor)
-                    .frame(width: 22)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(title)
-                        .font(.system(size: 12, weight: .semibold))
-                        .lineLimit(1)
-                    Text(caption)
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
+        Group {
+            if isEditing {
+                rowContent(showChevron: false)
+                    .panelCard()
+            } else if permissionAction != nil {
+                VStack(alignment: .leading, spacing: 7) {
+                    rowContent(showChevron: false)
+                    permissionButton
                 }
-                Spacer(minLength: 0)
+                .panelCard()
+            } else {
+                Button(action: action) {
+                    rowContent(showChevron: true)
+                        .panelCard()
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func rowContent(showChevron: Bool) -> some View {
+        HStack(spacing: 9) {
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(iconColor)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(isHiddenInEditor ? Color.secondary : Color.primary)
+                    .lineLimit(1)
+                Text(caption)
+                    .font(.system(size: 10))
+                    .foregroundStyle(captionColor)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            if isEditing, let visibility {
+                if !visibility.wrappedValue {
+                    PanelHiddenBadge()
+                }
+                PanelInlineHideButton(isVisible: visibility)
+            } else if showChevron {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 9, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
-            .panelCard()
         }
-        .buttonStyle(.plain)
+    }
+
+    private var permissionButton: some View {
+        Button {
+            permissionAction?()
+        } label: {
+            Label(permissionButtonTitle ?? "", systemImage: "hand.raised.fill")
+                .font(.system(size: 10, weight: .semibold))
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.mini)
+    }
+
+    private var iconColor: Color {
+        if isHiddenInEditor { return .secondary }
+        return needsAttention ? .orange : .accentColor
+    }
+
+    private var captionColor: Color {
+        if isHiddenInEditor { return Color.secondary.opacity(0.55) }
+        return needsAttention ? .orange : .secondary
+    }
+
+    private var isHiddenInEditor: Bool {
+        isEditing && visibility?.wrappedValue == false
+    }
+}
+
+private struct PanelToggleRow: View {
+    let title: String
+    let caption: String
+    let systemImage: String
+    @Binding var isOn: Bool
+    var isEditing = false
+    var visibility: Binding<Bool>? = nil
+    var isActive = false
+    var activeText: String? = nil
+    var needsAttention = false
+    var permissionButtonTitle: String? = nil
+    var permissionAction: (() -> Void)? = nil
+
+    var body: some View {
+        rowContent
+            .panelCard()
+    }
+
+    private var rowContent: some View {
+        HStack(spacing: 9) {
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(iconColor)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(isHiddenInEditor ? Color.secondary : Color.primary)
+                    .lineLimit(1)
+                Text(caption)
+                    .font(.system(size: 10))
+                    .foregroundStyle(captionColor)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                if isActive, let activeText {
+                    Label(activeText, systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundStyle(.green)
+                        .lineLimit(1)
+                }
+                if needsAttention, let permissionAction {
+                    Button {
+                        permissionAction()
+                    } label: {
+                        Label(permissionButtonTitle ?? "", systemImage: "hand.raised.fill")
+                            .font(.system(size: 9.5, weight: .semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                }
+            }
+            Spacer(minLength: 0)
+            trailingControl
+        }
+    }
+
+    @ViewBuilder
+    private var trailingControl: some View {
+        if isEditing, let visibility {
+            if !visibility.wrappedValue {
+                PanelHiddenBadge()
+            }
+            PanelInlineHideButton(isVisible: visibility)
+        } else {
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .controlSize(.small)
+                .toggleStyle(.switch)
+        }
+    }
+
+    private var iconColor: Color {
+        if isHiddenInEditor { return .secondary }
+        if needsAttention { return .orange }
+        return isOn ? .accentColor : .secondary
+    }
+
+    private var captionColor: Color {
+        if isHiddenInEditor { return Color.secondary.opacity(0.55) }
+        return needsAttention ? .orange : .secondary
+    }
+
+    private var isHiddenInEditor: Bool {
+        isEditing && visibility?.wrappedValue == false
     }
 }
 
@@ -616,7 +981,8 @@ struct KeepAwakeCard: View {
                 optionRow(title: l10n.s.clamshellTitle,
                           caption: clamshellCaption,
                           isOn: $awake.clamshellPreferred,
-                          disabled: false)
+                          disabled: awake.clamshellSetupInProgress,
+                          captionIsError: awake.clamshellSetupFailed)
             }
             .panelCard()
         }
@@ -644,6 +1010,12 @@ struct KeepAwakeCard: View {
     }
 
     private var clamshellCaption: String {
+        if awake.clamshellSetupInProgress {
+            return l10n.s.configuring
+        }
+        if awake.clamshellSetupFailed {
+            return l10n.s.sudoersFailed
+        }
         if awake.clamshellActive {
             return l10n.s.clamshellOnCaption
         }
@@ -666,7 +1038,11 @@ struct KeepAwakeCard: View {
         )
     }
 
-    private func optionRow(title: String, caption: String?, isOn: Binding<Bool>, disabled: Bool) -> some View {
+    private func optionRow(title: String,
+                           caption: String?,
+                           isOn: Binding<Bool>,
+                           disabled: Bool,
+                           captionIsError: Bool = false) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
@@ -674,7 +1050,7 @@ struct KeepAwakeCard: View {
                 if let caption {
                     Text(caption)
                         .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(captionIsError ? Color.red : Color.secondary)
                 }
             }
             Spacer()

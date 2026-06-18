@@ -17,17 +17,23 @@ final class KeepAwakeManager: ObservableObject {
     @Published private(set) var endDate: Date? // nil = indefinite
     @Published private(set) var clamshellActive = false
     @Published private(set) var passwordlessClamshell = false
+    @Published private(set) var clamshellSetupInProgress = false
+    @Published private(set) var clamshellSetupFailed = false
 
     /// Persistent preference: when on, every keep-awake session also disables
     /// lid sleep, and ending the session restores it — no per-session setup.
     @Published var clamshellPreferred: Bool {
         didSet {
+            guard clamshellPreferred != oldValue else { return }
             UserDefaults.standard.set(clamshellPreferred, forKey: DefaultsKey.clamshellPreferred)
-            guard isActive else { return }
+            clamshellSetupFailed = false
             if clamshellPreferred {
-                enableClamshell()
+                applyClamshellPreference()
             } else if clamshellActive {
+                clamshellSetupInProgress = false
                 disableClamshell(synchronous: false)
+            } else {
+                clamshellSetupInProgress = false
             }
         }
     }
@@ -82,7 +88,7 @@ final class KeepAwakeManager: ObservableObject {
         }
         startBatteryWatch()
         if clamshellPreferred {
-            enableClamshell()
+            applyClamshellPreference()
         }
     }
 
@@ -160,14 +166,66 @@ final class KeepAwakeManager: ObservableObject {
 
     // MARK: - Closed lid (pmset disablesleep)
 
+    private func applyClamshellPreference() {
+        if passwordlessClamshell {
+            if isActive {
+                enableClamshell()
+            }
+        } else {
+            prepareClamshellPreference()
+        }
+    }
+
+    private func prepareClamshellPreference() {
+        guard clamshellPreferred, !clamshellSetupInProgress else { return }
+        clamshellSetupInProgress = true
+        clamshellSetupFailed = false
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            if Sudoers.isConfigured() {
+                DispatchQueue.main.async {
+                    self.finishClamshellSetup(ok: true)
+                }
+                return
+            }
+
+            Sudoers.install { ok in
+                DispatchQueue.main.async {
+                    self.finishClamshellSetup(ok: ok)
+                }
+            }
+        }
+    }
+
+    private func finishClamshellSetup(ok: Bool) {
+        clamshellSetupInProgress = false
+        passwordlessClamshell = ok
+
+        guard ok else {
+            if clamshellPreferred {
+                clamshellPreferred = false
+                clamshellSetupFailed = true
+            }
+            return
+        }
+
+        if isActive, clamshellPreferred {
+            enableClamshell()
+        }
+    }
+
     private func enableClamshell() {
         guard !clamshellActive else { return }
         DispatchQueue.global(qos: .userInitiated).async {
-            // Silent path first (sudoers rule); otherwise the administrator prompt.
             let ok = Sudoers.pmsetDisableSleep(true)
-                || AdminShell.runSync("pmset disablesleep 1", prompt: L10n.shared.s.adminPromptClamshellOn)
             DispatchQueue.main.async {
-                guard ok else { return }
+                guard ok else {
+                    self.passwordlessClamshell = false
+                    if self.clamshellPreferred {
+                        self.prepareClamshellPreference()
+                    }
+                    return
+                }
                 UserDefaults.standard.set(true, forKey: DefaultsKey.sleepDisabledFlag)
                 if self.isActive, self.clamshellPreferred {
                     self.clamshellActive = true

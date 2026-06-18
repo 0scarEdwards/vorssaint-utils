@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Vorssaint
 
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// The uninstaller, embedded as a Settings page: drop an app (or pick one),
 /// review the leftover files it found with their sizes, then move the selected
@@ -12,6 +11,7 @@ struct UninstallerView: View {
     @ObservedObject private var uninstaller = AppUninstaller.shared
     @ObservedObject private var permissions = Permissions.shared
     @State private var dropTargeted = false
+    @State private var showingAppPicker = false
 
     var body: some View {
         content
@@ -67,6 +67,14 @@ struct UninstallerView: View {
             Spacer()
         }
         .padding(28)
+        .sheet(isPresented: $showingAppPicker) {
+            AppPickerView {
+                showingAppPicker = false
+            } onSelect: { url in
+                showingAppPicker = false
+                uninstaller.select(appURL: url)
+            }
+        }
         .dropDestination(for: URL.self) { urls, _ in
             guard let app = urls.first(where: { $0.pathExtension == "app" }) ?? urls.first else { return false }
             uninstaller.select(appURL: app)
@@ -237,14 +245,7 @@ struct UninstallerView: View {
     }
 
     private func choose() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.application]
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.directoryURL = URL(fileURLWithPath: "/Applications")
-        if panel.runModal() == .OK, let url = panel.url {
-            uninstaller.select(appURL: url)
-        }
+        showingAppPicker = true
     }
 
     private func prettyPath(_ url: URL) -> String {

@@ -17,6 +17,7 @@ struct MonitorSettings: View {
     @AppStorage(DefaultsKey.menuBarNetwork) private var menuBarNetwork = false
     @AppStorage(DefaultsKey.menuBarBattery) private var menuBarBattery = false
     @AppStorage(DefaultsKey.menuBarPower) private var menuBarPower = false
+    @AppStorage(DefaultsKey.menuBarLabelStyle) private var labelStyle = "compact"
     @AppStorage(DefaultsKey.menuBarMemoryStyle) private var memoryStyle = "percent"
     @AppStorage(DefaultsKey.monitorInterval) private var interval = 2
     @AppStorage(DefaultsKey.temperatureUnit) private var temperatureUnit = TemperatureUnit.celsius.rawValue
@@ -32,6 +33,13 @@ struct MonitorSettings: View {
     var body: some View {
         Form {
             Section(l10n.s.monitorMenuBarSection) {
+                MenuBarMetricsPreview()
+                    .padding(.vertical, 4)
+                Picker(l10n.s.monitorLabelStyleLabel, selection: $labelStyle) {
+                    Text(l10n.s.menuBarLabelStyleCompact).tag("compact")
+                    Text(l10n.s.menuBarLabelStyleClassic).tag("classic")
+                }
+                .pickerStyle(.segmented)
                 Toggle(l10n.s.monitorShowCPU, isOn: $menuBarCPU)
                 Toggle(l10n.s.monitorShowGPU, isOn: $menuBarGPU)
                 Toggle(l10n.s.monitorShowMemory, isOn: $menuBarMemory)
@@ -94,11 +102,16 @@ struct MonitorSettings: View {
         }
         .formStyle(.grouped)
         .onAppear {
+            SystemMonitor.shared.panelDidAppear()
             interval = Defaults.sanitizedMonitorInterval(interval)
+            labelStyle = Defaults.sanitizedMenuBarLabelStyle(labelStyle)
             memoryStyle = Defaults.sanitizedMenuBarMemoryStyle(memoryStyle)
             if TemperatureUnit(rawValue: temperatureUnit) == nil {
                 temperatureUnit = TemperatureUnit.celsius.rawValue
             }
+        }
+        .onDisappear {
+            SystemMonitor.shared.panelDidDisappear()
         }
     }
 }

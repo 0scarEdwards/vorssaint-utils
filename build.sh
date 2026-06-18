@@ -31,6 +31,44 @@ else
     EXECUTABLE="Vorssaint"
 fi
 TARGET="arm64-apple-macosx14.0"
+ENTITLEMENTS="Resources/Vorssaint.entitlements"
+LEGACY_IDENTITY="Vorssaint Utils Signing"
+
+developer_id_identity() {
+    security find-identity -v -p codesigning 2>/dev/null \
+        | grep 'Developer ID Application' \
+        | head -1 \
+        | sed -E 's/.*"(.*)".*/\1/' || true
+}
+
+finalize_installed_bundle_after_child() {
+    local bundle="$1"
+    local devid
+    devid="$(developer_id_identity)"
+
+    echo "▸ Finalizing installed signature…"
+    sleep 3
+    if [[ -n "$devid" ]]; then
+        /usr/bin/codesign --force --strip-disallowed-xattrs --options runtime --timestamp \
+            --entitlements "$ENTITLEMENTS" --sign "$devid" "$bundle"
+    elif security find-identity -p codesigning 2>/dev/null | grep -q "$LEGACY_IDENTITY"; then
+        /usr/bin/codesign --force --strip-disallowed-xattrs --sign "$LEGACY_IDENTITY" "$bundle"
+    else
+        /usr/bin/codesign --force --strip-disallowed-xattrs --sign - "$bundle"
+    fi
+    /usr/bin/codesign --verify --deep --strict "$bundle"
+    echo "✓ Signature ready: $bundle"
+}
+
+if (( INSTALL && ! TEST )) && [[ "${VORSSAINT_INSTALL_CHILD:-0}" != "1" ]]; then
+    VORSSAINT_INSTALL_CHILD=1 "$0" "$@"
+    child_status=$?
+    if (( child_status != 0 )); then
+        exit "$child_status"
+    fi
+    finalize_installed_bundle_after_child "/Applications/$APP_NAME.app"
+    exit 0
+fi
 
 # Prefer the macOS 26 SDK when present: the 27 SDK turns SwiftUI property wrappers
 # into macros (SwiftUIMacros plugin) that the Command Line Tools cannot load yet.
@@ -54,6 +92,7 @@ if (( TEST )); then
         Sources/Vorssaint/Core/Localization.swift \
         Sources/Vorssaint/Core/Localizations/Strings+*.swift \
         Sources/Vorssaint/Core/ReleaseNotes.swift \
+        Sources/Vorssaint/Core/URLCleaning.swift \
         Sources/Vorssaint/Services/Metrics/MetricFormat.swift \
         Sources/Vorssaint/Services/CleaningMode/CleaningUnlockCounter.swift \
         Tests/MetricsTests.swift \
@@ -71,6 +110,7 @@ swiftc -O -target "$TARGET" -sdk "$SDK" \
 
 echo "▸ Generating app icon…"
 swift Tools/MakeIcon.swift build/AppIcon.iconset
+xattr -c -r build/AppIcon.iconset build/AppIcon.icns build/MenuBarIcon.png build/MenuBarIcon@2x.png build/BrandMark.png 2>/dev/null || true
 
 echo "▸ Assembling and signing bundle…"
 STAGE="$(mktemp -d)/$APP_NAME.app"
@@ -94,9 +134,9 @@ if (( DEV )); then
     echo "  stamped dev build: $SHA"
 fi
 printf 'APPL????' > "$STAGE/Contents/PkgInfo"
-iconutil -c icns build/AppIcon.iconset -o "$STAGE/Contents/Resources/AppIcon.icns"
+cp build/AppIcon.icns "$STAGE/Contents/Resources/AppIcon.icns"
 cp build/MenuBarIcon.png build/MenuBarIcon@2x.png build/BrandMark.png "$STAGE/Contents/Resources/"
-xattr -cr "$STAGE"
+xattr -c -r "$STAGE" 2>/dev/null || true
 
 # Signing, in order of preference:
 #   1. Developer ID Application — the real, Apple-issued identity used for
@@ -108,25 +148,22 @@ xattr -cr "$STAGE"
 #      as a fallback so contributors without a Developer ID still get a constant
 #      designated requirement across their local builds.
 #   3. Ad-hoc — fresh clone with no identity at all.
-ENTITLEMENTS="Resources/Vorssaint.entitlements"
-DEVID="$(security find-identity -v -p codesigning 2>/dev/null | grep 'Developer ID Application' | head -1 | sed -E 's/.*"(.*)".*/\1/')"
-LEGACY_IDENTITY="Vorssaint Utils Signing"
+DEVID="$(developer_id_identity)"
 codesign_target() {
     local target="$1"
     if [[ -n "$DEVID" ]]; then
-        codesign --force --options runtime --timestamp \
+        codesign --force --strip-disallowed-xattrs --options runtime --timestamp \
             --entitlements "$ENTITLEMENTS" --sign "$DEVID" "$target"
     elif security find-identity -p codesigning 2>/dev/null | grep -q "$LEGACY_IDENTITY"; then
-        codesign --force --sign "$LEGACY_IDENTITY" "$target"
+        codesign --force --strip-disallowed-xattrs --sign "$LEGACY_IDENTITY" "$target"
     else
-        codesign --force --sign - "$target"
+        codesign --force --strip-disallowed-xattrs --sign - "$target"
     fi
 }
 
 sign_bundle() {
     local bundle="$1"
     local executable="$bundle/Contents/MacOS/$EXECUTABLE"
-    xattr -cr "$bundle"
 
     if [[ -n "$DEVID" ]]; then
         echo "  signing with Developer ID (hardened runtime): $DEVID"
@@ -137,17 +174,21 @@ sign_bundle() {
     fi
     codesign_target "$bundle"
 
-    # macOS can attach provenance metadata immediately after file creation.
-    # If that lands just after signing, sign once more against the settled bundle
-    # so the app remains valid when launched or copied to /Applications.
-    sleep 0.2
+    # If local filesystem metadata invalidates the first signature, sign once
+    # more. The installed Developer bundle is signed again after the final copy.
     if ! codesign --verify --deep --strict "$bundle" >/dev/null 2>&1; then
         echo "  re-signing after filesystem metadata settled"
-        xattr -cr "$bundle"
+        xattr -c -r "$bundle" 2>/dev/null || true
         codesign_target "$bundle"
     fi
     [[ -f "$executable" ]] && codesign --verify --strict "$executable"
     codesign --verify --deep --strict "$bundle"
+}
+
+sign_installed_bundle() {
+    local bundle="$1"
+    wait_for_install_metadata "$bundle"
+    sign_bundle "$bundle"
 }
 
 sign_bundle "$STAGE"
@@ -178,25 +219,29 @@ stop_process() {
     return 1
 }
 
-wait_for_launch_metadata() {
+wait_for_install_metadata() {
     local bundle="$1"
-    for _ in {1..100}; do
-        if xattr -p com.apple.macl "$bundle" >/dev/null 2>&1; then
-            # LaunchServices and provenance tagging can continue touching the
-            # bundle for several seconds after the first launch on recent macOS.
-            sleep 12
+    local missing
+    for _ in {1..50}; do
+        missing=0
+        while IFS= read -r file; do
+            if ! xattr -p com.apple.provenance "$file" >/dev/null 2>&1; then
+                missing=1
+                break
+            fi
+        done < <(find "$bundle/Contents" -type f ! -path "*/_CodeSignature/*")
+        if (( missing == 0 )); then
             return 0
         fi
         sleep 0.1
     done
-    return 0
 }
 
 mkdir -p "build/stage"
 BUILD_STAGE="build/stage/$APP_NAME.app"
 rm -rf "$BUILD_STAGE"
-ditto "$STAGE" "$BUILD_STAGE"
-xattr -cr "$BUILD_STAGE"
+ditto --noextattr --noqtn "$STAGE" "$BUILD_STAGE"
+xattr -c -r "$BUILD_STAGE" 2>/dev/null || true
 if ! codesign --verify --deep --strict "$BUILD_STAGE" >/dev/null 2>&1; then
     if xattr -lr "$BUILD_STAGE" 2>/dev/null | grep -Eq 'com\.apple\.(FinderInfo|ResourceFork|provenance|fileprovider)'; then
         echo "  build/stage copy has local filesystem metadata; temp bundle was verified"
@@ -219,18 +264,9 @@ if (( INSTALL )); then
             echo "  (legacy $name.app removed)"
         fi
     done
-    sleep 0.5
     INSTALL_DEST="/Applications/$APP_NAME.app"
     rm -rf "$INSTALL_DEST"
-    ditto "$STAGE" "$INSTALL_DEST"
-    sleep 2
-    sign_bundle "$INSTALL_DEST"
-    open "$INSTALL_DEST"
-    wait_for_launch_metadata "$INSTALL_DEST"
-    stop_process "$EXECUTABLE"
-    sign_bundle "$INSTALL_DEST"
+    ditto --noextattr --noqtn "$STAGE" "$INSTALL_DEST"
+    sign_installed_bundle "$INSTALL_DEST"
     echo "✓ Installed: $INSTALL_DEST"
-    open "$INSTALL_DEST"
-    wait_for_launch_metadata "$INSTALL_DEST"
-    codesign --verify --deep --strict "$INSTALL_DEST"
 fi

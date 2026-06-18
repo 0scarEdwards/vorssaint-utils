@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [3.0.0] - 2026-06-18
+
+### Added
+- Clean URL is now available in Utilities and Settings, with optional automatic
+  cleaning for copied links.
+- Panel sections can now be customized inline from the panel: the edit control
+  keeps the real panel visible, shows hidden items as muted rows and lets them
+  be restored from the same place.
+- Utilities now includes an optional green-button window maximizer that keeps
+  windows in the current Space and restores the previous size on the next click.
+- The menu panel now has a Controls section next to Utilities for quickly
+  turning feature-style options on or off.
+
+### Changed
+- Menu bar metrics now use a more compact layout with short labels, tighter
+  values, a steadier reserved width and an automatic two-line stack when several
+  metrics are enabled.
+- Menu bar metric labels can now be switched between compact and classic styles
+  from Monitor settings.
+- Updates no longer open a What's New window for existing users. Release notes
+  are available in Settings.
+- The Buy Me a Coffee shortcut was removed from the menu panel and first-run
+  introduction. It remains in Settings > Support.
+- Monitor graphs now include a zero baseline so current levels are easier to
+  read.
+
+### Fixed
+- The Uninstaller app chooser now stays inside Vorssaint instead of opening the
+  system file picker, avoiding unexpected language changes.
+
 ## [2.17.3] - 2026-06-17
 
 ### Website

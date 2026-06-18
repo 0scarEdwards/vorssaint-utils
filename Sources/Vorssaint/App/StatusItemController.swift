@@ -50,9 +50,10 @@ final class StatusItemController {
         statusItem.isVisible = true
         if let button = statusItem.button {
             button.image = BlackHoleGlyph.image(active: false)
-            // Fully monospaced (not just digits) so the fixed-width metric fields
-            // keep a constant pixel width and the item never jiggles.
-            button.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
+            button.font = MenuBarRenderer.statusFont(stacked: false)
+            button.alignment = .left
+            button.cell?.lineBreakMode = .byClipping
+            button.cell?.usesSingleLineMode = false
             button.target = self
             button.action = #selector(clicked)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -153,12 +154,12 @@ final class StatusItemController {
         let manager = KeepAwakeManager.shared
         let strings = L10n.shared.s
         let defaults = UserDefaults.standard
-        let font = button.font ?? NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
 
         // Compose the title from the keep-awake countdown (when shown) followed by
         // the pinned live metrics. Built attributed so the memory pressure dot can
         // carry its green/yellow/red color; all other runs stay adaptive.
         let title = NSMutableAttributedString()
+        var includesCountdown = false
         if manager.isActive, defaults.bool(forKey: DefaultsKey.showCountdown) {
             let countdown: String
             if let end = manager.endDate {
@@ -170,23 +171,52 @@ final class StatusItemController {
                 countdown = "∞"
             }
             title.append(NSAttributedString(string: countdown))
+            includesCountdown = true
         }
         let metrics = MenuBarMetric.enabled(in: defaults)
+        let textGap = " "
         if !metrics.isEmpty {
-            let metricsTitle = MenuBarRenderer.attributed(for: SystemMonitor.shared.snapshot, metrics: metrics)
+            let metricsTitle = MenuBarRenderer.attributed(for: SystemMonitor.shared.snapshot,
+                                                          metrics: metrics,
+                                                          allowStacked: !includesCountdown,
+                                                          linePrefix: textGap)
             if metricsTitle.length > 0 {
                 if title.length > 0 { title.append(NSAttributedString(string: "  ")) }
                 title.append(metricsTitle)
             }
         }
 
+        if includesCountdown || !metrics.isEmpty {
+            statusItem.length = MenuBarRenderer.reservedStatusItemLength(for: metrics,
+                                                                         includesCountdown: includesCountdown,
+                                                                         allowStacked: !includesCountdown)
+        } else {
+            statusItem.length = NSStatusItem.variableLength
+        }
+
         if title.length == 0 {
             button.attributedTitle = NSAttributedString(string: "")
             button.imagePosition = .imageOnly
         } else {
-            let full = NSMutableAttributedString(string: " ")
+            let full = NSMutableAttributedString(string: textGap)
             full.append(title)
+            let stacked = full.string.contains("\n")
+            let font = MenuBarRenderer.statusFont(stacked: stacked)
             full.addAttribute(.font, value: font, range: NSRange(location: 0, length: full.length))
+            if stacked {
+                let paragraph = NSMutableParagraphStyle()
+                paragraph.alignment = .left
+                paragraph.lineBreakMode = .byClipping
+                paragraph.minimumLineHeight = MenuBarRenderer.statusLineHeight(stacked: true)
+                paragraph.maximumLineHeight = MenuBarRenderer.statusLineHeight(stacked: true)
+                full.addAttribute(.paragraphStyle,
+                                  value: paragraph,
+                                  range: NSRange(location: 0, length: full.length))
+                full.addAttribute(.baselineOffset,
+                                  value: -0.4,
+                                  range: NSRange(location: 0, length: full.length))
+            }
+            button.font = font
             button.attributedTitle = full
             button.imagePosition = .imageLeading
         }

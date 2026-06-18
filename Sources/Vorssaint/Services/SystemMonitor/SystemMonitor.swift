@@ -193,12 +193,9 @@ final class SystemMonitor: ObservableObject {
             return
         }
         refreshInFlight = true
-        // Network and power are heavier to read, so sample them only when the
-        // panel is open or that metric is pinned to the menu bar.
         let defaults = UserDefaults.standard
         let needNetwork = full || defaults.bool(forKey: DefaultsKey.menuBarNetwork)
-        let needPower = full || defaults.bool(forKey: DefaultsKey.menuBarPower)
-            || defaults.bool(forKey: DefaultsKey.menuBarBattery)
+        let needPower = full || defaults.bool(forKey: DefaultsKey.menuBarPower) || defaults.bool(forKey: DefaultsKey.menuBarBattery)
         let needGPU = full || defaults.bool(forKey: DefaultsKey.menuBarGPU)
         queue.async { [weak self] in
             guard let self else { return }
@@ -208,9 +205,10 @@ final class SystemMonitor: ObservableObject {
 
             var next = SystemSnapshot()
 
-            // Light readings — always cheap, always sampled.
             next.cpuUsage = self.readCPUUsage()
-            if let cpu = next.cpuUsage { self.cpuHistory.push(cpu) }
+            if let cpu = next.cpuUsage {
+                self.cpuHistory.push(cpu)
+            }
 
             if let memory = SystemInfo.memoryUsage() {
                 next.memoryUsed = memory.used
@@ -256,12 +254,12 @@ final class SystemMonitor: ObservableObject {
             }
 
             next.cpuHistory = self.cpuHistory.values
-            next.gpuHistory = self.gpuHistory.values
+            next.gpuHistory = needGPU ? self.gpuHistory.values : []
             next.memoryHistory = self.memoryHistory.values
-            next.netDownHistory = self.netDownHistory.values
-            next.netUpHistory = self.netUpHistory.values
-            next.systemPowerHistory = self.powerHistory.values
-            next.batteryHistory = self.batteryHistory.values
+            next.netDownHistory = needNetwork ? self.netDownHistory.values : []
+            next.netUpHistory = needNetwork ? self.netUpHistory.values : []
+            next.systemPowerHistory = needPower ? self.powerHistory.values : []
+            next.batteryHistory = needPower ? self.batteryHistory.values : []
 
             DispatchQueue.main.async {
                 self.snapshot = next
@@ -277,9 +275,8 @@ final class SystemMonitor: ObservableObject {
 
     // MARK: - Sensor preparation
 
-    /// Opens the SMC and resolves the power sampler once (cheap). Temperature key
-    /// discovery is heavier (it enumerates every SMC key) so it waits for the
-    /// first full sample — the menu-bar-only path never pays for it.
+    /// Opens the SMC lazily. Temperature key discovery is heavier (it enumerates
+    /// every SMC key) so it waits until a full panel sample.
     private func prepareIfNeeded(full: Bool) {
         if !smcTried {
             smcTried = true

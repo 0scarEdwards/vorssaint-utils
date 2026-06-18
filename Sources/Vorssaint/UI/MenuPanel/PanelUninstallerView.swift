@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Vorssaint
 
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// Compact uninstaller flow for the menu panel. It reuses AppUninstaller so the
 /// scan and removal rules stay identical to the larger Settings page.
@@ -11,6 +10,7 @@ struct PanelUninstallerView: View {
     @ObservedObject private var permissions = Permissions.shared
     @ObservedObject private var uninstaller = AppUninstaller.shared
     @State private var dropTargeted = false
+    @State private var showingAppPicker = false
 
     var onClose: () -> Void
 
@@ -20,7 +20,11 @@ struct PanelUninstallerView: View {
             content
         }
         .dropDestination(for: URL.self) { urls, _ in
-            selectFirstApp(from: urls)
+            let selected = selectFirstApp(from: urls)
+            if selected {
+                showingAppPicker = false
+            }
+            return selected
         } isTargeted: { dropTargeted = $0 }
         .onAppear { PanelInteractionState.shared.keepsPopoverOpen = true }
         .onDisappear { PanelInteractionState.shared.keepsPopoverOpen = false }
@@ -29,7 +33,12 @@ struct PanelUninstallerView: View {
     @ViewBuilder
     private var content: some View {
         switch uninstaller.phase {
-        case .empty: emptyState
+        case .empty:
+            if showingAppPicker {
+                appPickerState
+            } else {
+                emptyState
+            }
         case .scanning: busyState(l10n.s.uninstallerScanning)
         case .results: resultsState
         case .removing: busyState(l10n.s.uninstallerRemoving)
@@ -75,6 +84,18 @@ struct PanelUninstallerView: View {
             if !permissions.fullDiskAccess {
                 fdaNote
             }
+        }
+        .panelCard()
+    }
+
+    private var appPickerState: some View {
+        AppPickerView(compact: true) {
+            withAnimation(.easeInOut(duration: 0.16)) {
+                showingAppPicker = false
+            }
+        } onSelect: { url in
+            showingAppPicker = false
+            uninstaller.select(appURL: url)
         }
         .panelCard()
     }
@@ -329,13 +350,8 @@ struct PanelUninstallerView: View {
     }
 
     private func choose() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.application]
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.directoryURL = URL(fileURLWithPath: "/Applications")
-        if panel.runModal() == .OK, let url = panel.url {
-            uninstaller.select(appURL: url)
+        withAnimation(.easeInOut(duration: 0.16)) {
+            showingAppPicker = true
         }
     }
 

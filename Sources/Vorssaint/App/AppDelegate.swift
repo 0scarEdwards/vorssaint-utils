@@ -53,6 +53,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         FinderCutPaste.shared.syncWithPreferences()
         AutoQuitService.shared.syncWithPreferences()
         ShelfService.shared.syncWithPreferences()
+        URLCleanerService.shared.syncWithPreferences()
+        WindowMaximizer.shared.syncWithPreferences()
         AppVolumeMixer.shared.start()
         UpdateService.shared.startAutomaticChecks()
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive),
@@ -68,6 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
                 AppSwitcher.shared.syncWithPreferences()
                 FinderCutPaste.shared.syncWithPreferences()
                 AutoQuitService.shared.syncWithPreferences()
+                WindowMaximizer.shared.syncWithPreferences()
             }
             .store(in: &cancellables)
 
@@ -82,19 +85,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         if !defaults.bool(forKey: DefaultsKey.hasOnboarded) {
             showOnboarding(mode: .full)
         } else {
-            let needsFeatureIntro = defaults.integer(forKey: DefaultsKey.featuresOnboardingVersion) < OnboardingInfo.currentFeatureSet
-            let needsVersionIntro = defaults.string(forKey: DefaultsKey.lastUpdateIntroVersion) != AppInfo.version
-            if needsFeatureIntro || needsVersionIntro {
-                if defaults.integer(forKey: DefaultsKey.featuresOnboardingVersion) < OnboardingInfo.panelNavigationFeatureSet {
-                    defaults.set(true, forKey: DefaultsKey.panelNavigationEnabled)
-                }
-                showOnboarding(mode: .update)
-            }
+            defaults.set(OnboardingInfo.currentFeatureSet, forKey: DefaultsKey.featuresOnboardingVersion)
+            defaults.set(AppInfo.version, forKey: DefaultsKey.lastUpdateIntroVersion)
         }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         isTerminating = true
+        URLCleanerService.shared.stop()
+        WindowMaximizer.shared.stop()
         AppVolumeMixer.shared.stopAll()
         KeepAwakeManager.shared.deactivate(reason: .quit)
     }

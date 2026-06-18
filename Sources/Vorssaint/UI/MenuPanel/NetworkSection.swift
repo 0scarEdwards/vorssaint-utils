@@ -17,20 +17,15 @@ struct NetworkSection: View {
     @AppStorage(DefaultsKey.monitorNetTest) private var netTest = true
 
     var body: some View {
-        Group {
-            if visibleBlocks.isEmpty {
-                EmptyView()
-            } else {
-                PanelSection(.network, title: l10n.s.networkSection, collapsible: collapsible) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(Array(visibleBlocks.enumerated()), id: \.element) { index, block in
-                            if index > 0 { Divider() }
-                            blockContent(block)
-                        }
-                    }
-                    .panelCard()
+        PanelSection(.network, title: l10n.s.networkSection, collapsible: collapsible,
+                     supportsEditing: true) { editing in
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(Array(blocks(editing: editing).enumerated()), id: \.element) { index, block in
+                    if index > 0 { Divider() }
+                    blockContent(block, editing: editing)
                 }
             }
+            .panelCard()
         }
     }
 
@@ -44,30 +39,47 @@ struct NetworkSection: View {
         return blocks
     }
 
+    private func blocks(editing: Bool) -> [Block] {
+        editing ? [.speed, .totals, .test] : visibleBlocks
+    }
+
     @ViewBuilder
-    private func blockContent(_ block: Block) -> some View {
+    private func blockContent(_ block: Block, editing: Bool) -> some View {
         switch block {
-        case .speed: speedBlock
-        case .totals: totalsRow
-        case .test: speedTestRow
+        case .speed: speedBlock(editing: editing)
+        case .totals: totalsRow(editing: editing)
+        case .test: speedTestRow(editing: editing)
         }
     }
 
-    private var speedBlock: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                rateColumn(icon: "arrow.down",
-                           label: l10n.s.networkDownload,
-                           value: monitor.snapshot.netDownBytesPerSec,
-                           color: .accentColor)
-                Divider().frame(height: 28)
-                rateColumn(icon: "arrow.up",
-                           label: l10n.s.networkUpload,
-                           value: monitor.snapshot.netUpBytesPerSec,
-                           color: PanelMetricColor.green(for: colorScheme))
-            }
-            if showGraph, monitor.snapshot.netDownHistory.count >= 2 {
-                graph
+    @ViewBuilder
+    private func speedBlock(editing: Bool) -> some View {
+        if !netSpeed {
+            PanelHiddenItemRow(title: l10n.s.monitorItemNetSpeed,
+                               systemImage: "arrow.down",
+                               isVisible: $netSpeed)
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                if editing {
+                    HStack {
+                        Spacer(minLength: 0)
+                        PanelInlineHideButton(isVisible: $netSpeed)
+                    }
+                }
+                HStack(spacing: 10) {
+                    rateColumn(icon: "arrow.down",
+                               label: l10n.s.networkDownload,
+                               value: monitor.snapshot.netDownBytesPerSec,
+                               color: .accentColor)
+                    Divider().frame(height: 28)
+                    rateColumn(icon: "arrow.up",
+                               label: l10n.s.networkUpload,
+                               value: monitor.snapshot.netUpBytesPerSec,
+                               color: PanelMetricColor.green(for: colorScheme))
+                }
+                if showGraph, monitor.snapshot.netDownHistory.count >= 2 {
+                    graph
+                }
             }
         }
     }
@@ -97,7 +109,7 @@ struct NetworkSection: View {
         let up = monitor.snapshot.netUpHistory
         let peak = max(down.max() ?? 0, up.max() ?? 0, 1)
         return ZStack {
-            Sparkline(values: down, color: .accentColor, maxValue: peak)
+            Sparkline(values: down, color: .accentColor, maxValue: peak, showsZeroBaseline: true)
             Sparkline(values: up,
                       color: PanelMetricColor.green(for: colorScheme),
                       maxValue: peak,
@@ -106,57 +118,77 @@ struct NetworkSection: View {
         .frame(height: 30)
     }
 
-    private var totalsRow: some View {
-        HStack(spacing: 6) {
-            Text(l10n.s.networkThisSession)
-                .font(.system(size: 10))
-                .foregroundStyle(.tertiary)
-            Spacer()
-            if let down = monitor.snapshot.netTotalDown, let up = monitor.snapshot.netTotalUp {
-                Text("↓\(MetricFormat.bytes(down))  ↑\(MetricFormat.bytes(up))")
-                    .font(.system(size: 10.5, weight: .medium))
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
+    @ViewBuilder
+    private func totalsRow(editing: Bool) -> some View {
+        if !netTotals {
+            PanelHiddenItemRow(title: l10n.s.monitorItemNetTotals,
+                               systemImage: "sum",
+                               isVisible: $netTotals)
+        } else {
+            HStack(spacing: 6) {
+                Text(l10n.s.networkThisSession)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                Spacer()
+                if let down = monitor.snapshot.netTotalDown, let up = monitor.snapshot.netTotalUp {
+                    Text("↓\(MetricFormat.bytes(down))  ↑\(MetricFormat.bytes(up))")
+                        .font(.system(size: 10.5, weight: .medium))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+                if editing {
+                    PanelInlineHideButton(isVisible: $netTotals)
+                }
             }
         }
     }
 
     /// On-demand internet speed test (latency, download, upload).
-    private var speedTestRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                if speed.isRunning {
-                    ProgressView().controlSize(.small)
-                    Text(l10n.s.speedTestTesting)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                } else {
-                    Button {
-                        speed.start()
-                    } label: {
-                        Label(speed.downloadMbps == nil ? l10n.s.speedTestRun : l10n.s.speedTestAgain,
-                              systemImage: "gauge.with.dots.needle.67percent")
+    @ViewBuilder
+    private func speedTestRow(editing: Bool) -> some View {
+        if !netTest {
+            PanelHiddenItemRow(title: l10n.s.monitorItemNetTest,
+                               systemImage: "gauge.with.dots.needle.67percent",
+                               isVisible: $netTest)
+        } else {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    if speed.isRunning {
+                        ProgressView().controlSize(.small)
+                        Text(l10n.s.speedTestTesting)
                             .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Button {
+                            speed.start()
+                        } label: {
+                            Label(speed.downloadMbps == nil ? l10n.s.speedTestRun : l10n.s.speedTestAgain,
+                                  systemImage: "gauge.with.dots.needle.67percent")
+                                .font(.system(size: 11))
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    Spacer()
+                    if let down = speed.downloadMbps, let up = speed.uploadMbps {
+                        Text("↓\(mbps(down)) ↑\(mbps(up)) Mbps")
+                            .font(.system(size: 11, weight: .semibold))
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
+                    }
+                    if editing {
+                        PanelInlineHideButton(isVisible: $netTest)
+                    }
                 }
-                Spacer()
-                if let down = speed.downloadMbps, let up = speed.uploadMbps {
-                    Text("↓\(mbps(down)) ↑\(mbps(up)) Mbps")
-                        .font(.system(size: 11, weight: .semibold))
-                        .monospacedDigit()
-                        .contentTransition(.numericText())
+                if case .failed = speed.phase {
+                    Text(l10n.s.speedTestFailed)
+                        .font(.system(size: 10))
+                        .foregroundStyle(PanelMetricColor.orange(for: colorScheme))
+                } else if let latency = speed.latencyMs {
+                    Text("\(l10n.s.speedTestLatency): \(Int(latency.rounded())) ms")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.tertiary)
                 }
-            }
-            if case .failed = speed.phase {
-                Text(l10n.s.speedTestFailed)
-                    .font(.system(size: 10))
-                    .foregroundStyle(PanelMetricColor.orange(for: colorScheme))
-            } else if let latency = speed.latencyMs {
-                Text("\(l10n.s.speedTestLatency): \(Int(latency.rounded())) ms")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
             }
         }
     }

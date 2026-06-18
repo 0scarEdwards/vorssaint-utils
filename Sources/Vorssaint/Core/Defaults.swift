@@ -8,7 +8,7 @@ enum DefaultsKey {
     static let language = "appLanguage"                   // AppLanguage.rawValue
     static let clamshellPreferred = "clamshellPreferred"  // apply closed-lid mode to every session
     static let onboardingStep = "onboardingStep"          // resume point if onboarding is interrupted
-    static let featuresOnboardingVersion = "featuresOnboardingVersion" // last feature-tour version the user saw
+    static let featuresOnboardingVersion = "featuresOnboardingVersion" // last feature-tour marker handled
     static let lastUpdateIntroVersion = "lastUpdateIntroVersion"
     static let defaultDuration = "defaultDurationMinutes" // 0 = indefinite
     static let batteryLimit = "batteryLimitPercent"       // 0 = never
@@ -26,6 +26,17 @@ enum DefaultsKey {
     static let autoQuitExceptions = "autoQuitExceptions"  // [bundle id] kept running
     static let shelfEnabled = "shelfEnabled"
     static let shelfShakeToOpen = "shelfShakeToOpen"
+    static let urlCleanerEnabled = "urlCleanerEnabled"
+    static let windowMaximizeEnabled = "windowMaximizeEnabled"
+    static let panelUtilityCleaning = "panelUtilityCleaning"
+    static let panelUtilityURLCleaner = "panelUtilityURLCleaner"
+    static let panelUtilityUninstaller = "panelUtilityUninstaller"
+    static let panelControlMouseScroll = "panelControlMouseScroll"
+    static let panelControlSwitcher = "panelControlSwitcher"
+    static let panelControlCutPaste = "panelControlCutPaste"
+    static let panelControlAutoQuit = "panelControlAutoQuit"
+    static let panelControlShelf = "panelControlShelf"
+    static let panelControlWindowMaximize = "panelControlWindowMaximize"
 
     // System monitor — live metrics shown next to the menu bar icon (opt-in).
     static let menuBarCPU = "menuBarCPU"
@@ -34,6 +45,7 @@ enum DefaultsKey {
     static let menuBarNetwork = "menuBarNetwork"
     static let menuBarBattery = "menuBarBattery"
     static let menuBarPower = "menuBarPower"
+    static let menuBarLabelStyle = "menuBarLabelStyle"     // compact | classic
     static let menuBarMemoryStyle = "menuBarMemoryStyle"   // dot | percent | both
     static let monitorInterval = "monitorIntervalSeconds"  // sampling cadence: 1/2/5
     static let temperatureUnit = "temperatureUnit"          // celsius | fahrenheit
@@ -76,12 +88,11 @@ enum DefaultsKey {
     static let simulateUpdate = "simulateUpdate"
 }
 
-/// Bump `currentFeatureSet` when a release needs an update intro.
+/// Bump `currentFeatureSet` when first-run feature defaults need a quiet marker.
 enum OnboardingInfo {
     // 2: system monitor, configurable panel and menu bar metrics.
-    // 3: app languages and Buy Me a Coffee support in first-run onboarding.
+    // 3: app languages and support settings.
     // 4: navigable menu panel sections.
-    static let panelNavigationFeatureSet = 4
     static let currentFeatureSet = 4
 }
 
@@ -89,6 +100,7 @@ enum Defaults {
     static let allowedDurations = [0, 15, 30, 60, 120, 240, 480]
     static let allowedBatteryLimits = [0, 5, 10, 15, 20]
     static let allowedMonitorIntervals = [1, 2, 5]
+    static let allowedMenuBarLabelStyles = ["compact", "classic"]
     static let allowedMenuBarMemoryStyles = ["dot", "percent", "both"]
 
     static let registeredDefaults: [String: Any] = [
@@ -106,11 +118,23 @@ enum Defaults {
         DefaultsKey.autoQuitExceptions: ["com.apple.finder"],
         // When the shelf is on, the shake gesture is on too (still toggleable).
         DefaultsKey.shelfShakeToOpen: true,
+        DefaultsKey.urlCleanerEnabled: false,
+        DefaultsKey.windowMaximizeEnabled: false,
+        DefaultsKey.panelUtilityCleaning: true,
+        DefaultsKey.panelUtilityURLCleaner: true,
+        DefaultsKey.panelUtilityUninstaller: true,
+        DefaultsKey.panelControlMouseScroll: true,
+        DefaultsKey.panelControlSwitcher: true,
+        DefaultsKey.panelControlCutPaste: true,
+        DefaultsKey.panelControlAutoQuit: true,
+        DefaultsKey.panelControlShelf: true,
+        DefaultsKey.panelControlWindowMaximize: true,
         // Menu bar metrics start off (the icon stays clean) and are opt-in.
         // The panel shows every monitoring block by default; users hide what
         // they don't want.
         DefaultsKey.monitorInterval: 2,
         DefaultsKey.temperatureUnit: TemperatureUnit.celsius.rawValue,
+        DefaultsKey.menuBarLabelStyle: "compact",
         DefaultsKey.menuBarMemoryStyle: "percent",
         DefaultsKey.monitorShowSystem: true,
         DefaultsKey.monitorShowNetwork: true,
@@ -154,6 +178,10 @@ enum Defaults {
 
     static func sanitizedMonitorInterval(_ seconds: Int) -> Int {
         allowedMonitorIntervals.contains(seconds) ? seconds : 2
+    }
+
+    static func sanitizedMenuBarLabelStyle(_ style: String) -> String {
+        allowedMenuBarLabelStyles.contains(style) ? style : "compact"
     }
 
     static func sanitizedMenuBarMemoryStyle(_ style: String) -> String {

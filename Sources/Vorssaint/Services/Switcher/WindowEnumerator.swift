@@ -11,8 +11,8 @@ import CoreGraphics
 /// ordered by the app activation MRU (see `AppActivationTracker`), so the
 /// switcher matches the system ⌘Tab toggle. Window titles require Screen
 /// Recording on modern macOS; Vorssaint's own titled windows use NSWindow
-/// metadata so Settings and What's New remain reachable even though the app is
-/// a menu-bar accessory.
+/// metadata so Settings remains reachable even though the app is a menu-bar
+/// accessory.
 enum WindowEnumerator {
     /// Window surfaces larger than this are considered real, switchable windows.
     private static let minimumSize = CGSize(width: 80, height: 60)

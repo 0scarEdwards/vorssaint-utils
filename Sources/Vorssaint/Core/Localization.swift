@@ -158,7 +158,6 @@ struct Strings {
     let notifyBatteryBody: String
 
     // MARK: Administrator prompts (shown by macOS password dialogs)
-    let adminPromptClamshellOn: String
     let adminPromptClamshellOff: String
     let adminPromptRecover: String
     let adminPromptSudoersInstall: String
@@ -265,6 +264,9 @@ struct Strings {
     let uninstallerDropTitle: String
     let uninstallerDropSubtitle: String
     let uninstallerChoose: String
+    let uninstallerPickerTitle: String
+    let uninstallerPickerSearch: String
+    let uninstallerPickerEmpty: String
     let uninstallerEmptyNote: String
     let uninstallerFDANote: String
     let uninstallerFDAGrant: String
@@ -288,6 +290,24 @@ struct Strings {
     let uninstallerCatLogs: String
     let uninstallerCatState: String
     let uninstallerCatOther: String
+
+    // MARK: Feature — URL cleaner
+    let urlCleanerName: String
+    let urlCleanerEnable: String
+    let urlCleanerEnableCaption: String
+    let urlCleanerActiveNow: String
+    let urlCleanerManualTitle: String
+    let urlCleanerInputPlaceholder: String
+    let urlCleanerOutputPlaceholder: String
+    let urlCleanerCleanButton: String
+    let urlCleanerPasteButton: String
+    let urlCleanerCopyButton: String
+    let urlCleanerClearButton: String
+    let urlCleanerNoURL: String
+    let urlCleanerNoChange: String
+    let urlCleanerCleaned: String
+    let urlCleanerCopied: String
+    let urlCleanerLocalNote: String
 
     // MARK: Feature — temporary shelf
     let shelfName: String
@@ -377,8 +397,6 @@ struct Strings {
     let obMonitorNoPermission: String
     let obStepOptionalTitle: String
     let obStepOptionalBody: String
-    let obPasswordlessToggle: String
-    let obPasswordlessCaption: String
     let obStepStatusTitle: String
     let obStepStatusBody: String
     let obStatusRecheck: String
@@ -443,6 +461,9 @@ struct Strings {
     let obStepMenuBarTitle: String
     let obStepMenuBarBody: String
     let obStepMenuBarNote: String
+    let monitorLabelStyleLabel: String
+    let menuBarLabelStyleCompact: String
+    let menuBarLabelStyleClassic: String
     let monitorMemoryStyleLabel: String
     let memoryStyleDot: String
     let memoryStylePercent: String
@@ -460,6 +481,9 @@ struct Strings {
 
     // MARK: Per-item panel config (Settings + onboarding)
     let monitorShowInPanel: String
+    let panelHideItem: String
+    let panelShowItem: String
+    let panelHiddenItem: String
     let monitorItemUptime: String
     let monitorItemNetSpeed: String
     let monitorItemNetTotals: String
@@ -475,6 +499,11 @@ struct Strings {
     // MARK: Cleaning mode
     let cleaningMenuItem: String
     let utilitiesSection: String
+    let quickControlsSection: String
+    let windowMaximizeName: String
+    let windowMaximizeCaption: String
+    let windowMaximizeActiveNow: String
+    let windowMaximizeNeedsAccessibility: String
     let cleaningPanelCaption: String
     let cleaningOverlayTitle: String
     let cleaningOverlaySubtitle: String
@@ -489,7 +518,6 @@ struct Strings {
     let donateMessage: String
     let donateButton: String
     let donateThanks: String
-    let obStepDonateTitle: String
     let showMenuBarIcon: String
     let showMenuBarIconCaption: String
 }
@@ -546,7 +574,7 @@ extension Strings {
         clamshellOnCaption: "Suspensão totalmente desativada. Atenção à energia",
         clamshellNeedsSession: "Será aplicada sempre que “Manter acordado” estiver ativo",
         clamshellReady: "Pronto. Liga e desliga sem senha",
-        clamshellNeedsPassword: "Pedirá a senha de administrador ao ativar",
+        clamshellNeedsPassword: "Pedirá a senha de administrador uma vez",
 
         systemSection: "Sistema",
         temperatures: "Temperaturas",
@@ -567,8 +595,6 @@ extension Strings {
         notifySessionEndedBody: "O tempo acabou. O Mac voltará a suspender normalmente.",
         notifyBatteryTitle: "Vorssaint desativado",
         notifyBatteryBody: "Bateria baixa. A suspensão normal foi restaurada para proteger a carga.",
-
-        adminPromptClamshellOn: "O Vorssaint precisa da sua senha para manter o Mac ativo com a tampa fechada. Dispense este pedido na introdução do app (Ajustes › Sobre).",
         adminPromptClamshellOff: "O Vorssaint precisa da sua senha para reativar a suspensão normal do Mac.",
         adminPromptRecover: "O Vorssaint foi encerrado com a suspensão do Mac desativada. Digite a senha para restaurar a suspensão normal.",
         adminPromptSudoersInstall: "O Vorssaint vai criar uma regra restrita (somente pmset disablesleep) para alternar a tampa fechada sem pedir senha. Esta é a única vez que a senha será necessária.",
@@ -665,6 +691,9 @@ extension Strings {
         uninstallerDropTitle: "Arraste um app aqui",
         uninstallerDropSubtitle: "ou escolha um para analisar",
         uninstallerChoose: "Escolher app…",
+        uninstallerPickerTitle: "Escolher app",
+        uninstallerPickerSearch: "Buscar apps",
+        uninstallerPickerEmpty: "Nenhum app encontrado",
         uninstallerEmptyNote: "Nada é removido sem a sua confirmação.",
         uninstallerFDANote: "Conceda Acesso Total ao Disco para uma análise mais completa.",
         uninstallerFDAGrant: "Conceder acesso…",
@@ -688,6 +717,23 @@ extension Strings {
         uninstallerCatLogs: "Logs",
         uninstallerCatState: "Estado salvo",
         uninstallerCatOther: "Outros",
+
+        urlCleanerName: "Limpar URL",
+        urlCleanerEnable: "Limpar URLs copiadas",
+        urlCleanerEnableCaption: "Remove parâmetros de rastreamento de links copiados.",
+        urlCleanerActiveNow: "Ativo e observando a área de transferência",
+        urlCleanerManualTitle: "Limpar agora",
+        urlCleanerInputPlaceholder: "Cole uma URL",
+        urlCleanerOutputPlaceholder: "A URL limpa aparece aqui",
+        urlCleanerCleanButton: "Limpar",
+        urlCleanerPasteButton: "Colar",
+        urlCleanerCopyButton: "Copiar",
+        urlCleanerClearButton: "Limpar campo",
+        urlCleanerNoURL: "Cole uma URL válida.",
+        urlCleanerNoChange: "Nada para limpar.",
+        urlCleanerCleaned: "URL limpa.",
+        urlCleanerCopied: "Copiado.",
+        urlCleanerLocalNote: "Local. Sem rede.",
 
         shelfName: "Área temporária",
         shelfEnable: "Área temporária para arrastar arquivos",
@@ -738,7 +784,7 @@ extension Strings {
         permissionGranted: "Concedida",
         permissionMissing: "Não concedida",
         permissionOpenSettings: "Abrir Ajustes do Sistema…",
-        permissionRequest: "Pedir permissão",
+        permissionRequest: "Conceder acesso",
         permissionRestartNote: "O macOS pode pedir para reabrir o app depois de conceder.",
 
         aboutDescription: "Central de utilidades para o seu Mac.\nEnergia, monitor do sistema, rolagem e alternador de janelas, direto na barra de menus.",
@@ -770,8 +816,6 @@ extension Strings {
         obMonitorNoPermission: "Não precisa de permissão. Os sensores são lidos direto do sistema.",
         obStepOptionalTitle: "Recursos opcionais",
         obStepOptionalBody: "Ative agora o que quiser usar. Tudo pode ser mudado depois nos Ajustes.",
-        obPasswordlessToggle: "Tampa fechada sem pedir senha",
-        obPasswordlessCaption: "Cria uma regra do sistema restrita a “pmset disablesleep”. A senha de administrador é pedida uma única vez, agora.",
         obStepStatusTitle: "Verificação",
         obStepStatusBody: "Confira se está tudo pronto para os recursos que você quer usar.",
         obStatusRecheck: "Verificar novamente",
@@ -832,6 +876,9 @@ extension Strings {
         obStepMenuBarTitle: "Métricas na barra de menus",
         obStepMenuBarBody: "Escolha o que mostrar ao lado do ícone. A prévia acima muda em tempo real.",
         obStepMenuBarNote: "Novidade: blocos de Rede e Energia e gráficos no painel. Ajuste tudo depois em Ajustes › Monitor.",
+        monitorLabelStyleLabel: "Rótulos",
+        menuBarLabelStyleCompact: "Compactos",
+        menuBarLabelStyleClassic: "Clássicos",
         monitorMemoryStyleLabel: "Mostrar memória como",
         memoryStyleDot: "Ponto",
         memoryStylePercent: "%",
@@ -847,6 +894,9 @@ extension Strings {
         speedTestFailed: "Falha no teste",
 
         monitorShowInPanel: "Mostrar no painel",
+        panelHideItem: "Ocultar do painel",
+        panelShowItem: "Mostrar no painel",
+        panelHiddenItem: "Oculto",
         monitorItemUptime: "Tempo ativo",
         monitorItemNetSpeed: "Velocidade ao vivo",
         monitorItemNetTotals: "Totais da sessão",
@@ -861,6 +911,11 @@ extension Strings {
 
         cleaningMenuItem: "Modo de limpeza",
         utilitiesSection: "Utilidades",
+        quickControlsSection: "Controles",
+        windowMaximizeName: "Maximizar janelas",
+        windowMaximizeCaption: "O botão verde maximiza sem criar outro Espaço.",
+        windowMaximizeActiveNow: "Ativo no botão verde",
+        windowMaximizeNeedsAccessibility: "Precisa de Acessibilidade para funcionar.",
         cleaningPanelCaption: "Bloqueia o teclado para limpar com segurança.",
         cleaningOverlayTitle: "Teclado bloqueado para limpeza",
         cleaningOverlaySubtitle: "Pressione a mesma tecla 5 vezes para desbloquear",
@@ -874,7 +929,6 @@ extension Strings {
         donateMessage: "Todos os meus projetos públicos são, e sempre serão, totalmente gratuitos: sem assinatura, sem anúncios. O apoio da comunidade é a única forma de manter tudo vivo. Se o Vorssaint te ajuda, um café faz diferença de verdade.",
         donateButton: "Buy me a coffee",
         donateThanks: "Obrigado por estar aqui. 🖤",
-        obStepDonateTitle: "Curtindo o Vorssaint? 🖤",
         showMenuBarIcon: "Mostrar ícone na barra de menus",
         showMenuBarIconCaption: "Se o ícone do Vorssaint sumir (o macOS pode esconder ícones quando a barra de menus fica sem espaço, comum em Macs com notch), reabra o Vorssaint pela pasta Aplicativos ou pelo Spotlight: isso recria o ícone e, se ele ainda estiver escondido, abre esta janela. O botão acima faz o mesmo quando você já consegue chegar aqui. Manter menos ícones na barra, ou menos métricas no Vorssaint, reduz bastante a chance."
     )
@@ -932,7 +986,7 @@ extension Strings {
         clamshellOnCaption: "Sleep fully disabled. Mind the power",
         clamshellNeedsSession: "Applied whenever “Keep awake” is active",
         clamshellReady: "Ready. Toggles without a password",
-        clamshellNeedsPassword: "Will ask for the administrator password when enabling",
+        clamshellNeedsPassword: "Will ask for the administrator password once",
 
         systemSection: "System",
         temperatures: "Temperatures",
@@ -953,8 +1007,6 @@ extension Strings {
         notifySessionEndedBody: "Time is up. The Mac will sleep normally again.",
         notifyBatteryTitle: "Vorssaint disabled",
         notifyBatteryBody: "Low battery. Normal sleep was restored to protect the charge.",
-
-        adminPromptClamshellOn: "Vorssaint needs your password to keep the Mac awake with the lid closed. Waive this prompt in the app introduction (Settings › About).",
         adminPromptClamshellOff: "Vorssaint needs your password to restore the Mac's normal sleep.",
         adminPromptRecover: "Vorssaint quit while the Mac's sleep was disabled. Enter the password to restore normal sleep.",
         adminPromptSudoersInstall: "Vorssaint will create a restricted rule (pmset disablesleep only) to toggle closed-lid mode without asking for a password. This is the only time the password is needed.",
@@ -1051,6 +1103,9 @@ extension Strings {
         uninstallerDropTitle: "Drag an app here",
         uninstallerDropSubtitle: "or choose one to scan",
         uninstallerChoose: "Choose app…",
+        uninstallerPickerTitle: "Choose app",
+        uninstallerPickerSearch: "Search apps",
+        uninstallerPickerEmpty: "No apps found",
         uninstallerEmptyNote: "Nothing is removed without your confirmation.",
         uninstallerFDANote: "Grant Full Disk Access for a more thorough scan.",
         uninstallerFDAGrant: "Grant access…",
@@ -1074,6 +1129,23 @@ extension Strings {
         uninstallerCatLogs: "Logs",
         uninstallerCatState: "Saved state",
         uninstallerCatOther: "Other",
+
+        urlCleanerName: "Clean URL",
+        urlCleanerEnable: "Clean copied URLs",
+        urlCleanerEnableCaption: "Removes tracking parameters from copied links.",
+        urlCleanerActiveNow: "Active and watching the clipboard",
+        urlCleanerManualTitle: "Clean now",
+        urlCleanerInputPlaceholder: "Paste a URL",
+        urlCleanerOutputPlaceholder: "The clean URL appears here",
+        urlCleanerCleanButton: "Clean",
+        urlCleanerPasteButton: "Paste",
+        urlCleanerCopyButton: "Copy",
+        urlCleanerClearButton: "Clear field",
+        urlCleanerNoURL: "Paste a valid URL.",
+        urlCleanerNoChange: "Nothing to clean.",
+        urlCleanerCleaned: "URL cleaned.",
+        urlCleanerCopied: "Copied.",
+        urlCleanerLocalNote: "Local. No network.",
 
         shelfName: "Shelf",
         shelfEnable: "Temporary area for dragging files",
@@ -1124,7 +1196,7 @@ extension Strings {
         permissionGranted: "Granted",
         permissionMissing: "Not granted",
         permissionOpenSettings: "Open System Settings…",
-        permissionRequest: "Request permission",
+        permissionRequest: "Grant access",
         permissionRestartNote: "macOS may ask to reopen the app after granting.",
 
         aboutDescription: "A utility hub for your Mac.\nEnergy, system monitor, scrolling and a window switcher, right in the menu bar.",
@@ -1156,8 +1228,6 @@ extension Strings {
         obMonitorNoPermission: "No permission needed. Sensors are read straight from the system.",
         obStepOptionalTitle: "Optional features",
         obStepOptionalBody: "Turn on what you want to use now. Everything can be changed later in Settings.",
-        obPasswordlessToggle: "Closed lid without a password prompt",
-        obPasswordlessCaption: "Creates a system rule restricted to “pmset disablesleep”. The administrator password is asked once, now.",
         obStepStatusTitle: "Checkup",
         obStepStatusBody: "Make sure everything is ready for the features you want.",
         obStatusRecheck: "Check again",
@@ -1218,6 +1288,9 @@ extension Strings {
         obStepMenuBarTitle: "Metrics in the menu bar",
         obStepMenuBarBody: "Pick what to show next to the icon. The preview above updates live.",
         obStepMenuBarNote: "New: Network and Power blocks and graphs in the panel. Fine-tune it all later in Settings › Monitor.",
+        monitorLabelStyleLabel: "Labels",
+        menuBarLabelStyleCompact: "Compact",
+        menuBarLabelStyleClassic: "Classic",
         monitorMemoryStyleLabel: "Show memory as",
         memoryStyleDot: "Dot",
         memoryStylePercent: "%",
@@ -1233,6 +1306,9 @@ extension Strings {
         speedTestFailed: "Test failed",
 
         monitorShowInPanel: "Show in panel",
+        panelHideItem: "Hide from panel",
+        panelShowItem: "Show in panel",
+        panelHiddenItem: "Hidden",
         monitorItemUptime: "Uptime",
         monitorItemNetSpeed: "Live speed",
         monitorItemNetTotals: "Session totals",
@@ -1247,6 +1323,11 @@ extension Strings {
 
         cleaningMenuItem: "Cleaning Mode",
         utilitiesSection: "Utilities",
+        quickControlsSection: "Controls",
+        windowMaximizeName: "Maximize windows",
+        windowMaximizeCaption: "The green button maximizes without creating another Space.",
+        windowMaximizeActiveNow: "Green button override active",
+        windowMaximizeNeedsAccessibility: "Needs Accessibility to work.",
         cleaningPanelCaption: "Locks the keyboard so you can clean safely.",
         cleaningOverlayTitle: "Keyboard locked for cleaning",
         cleaningOverlaySubtitle: "Press the same key 5 times to unlock",
@@ -1260,7 +1341,6 @@ extension Strings {
         donateMessage: "Every one of my public projects is, and always will be, completely free: no subscription, no ads. Community support is the only thing that keeps it alive. If Vorssaint helps you, a coffee genuinely makes a difference.",
         donateButton: "Buy me a coffee",
         donateThanks: "Thank you for being here. 🖤",
-        obStepDonateTitle: "Enjoying Vorssaint? 🖤",
         showMenuBarIcon: "Show menu bar icon",
         showMenuBarIconCaption: "If Vorssaint's icon disappears (macOS can hide menu bar icons when the bar runs out of room, common on Macs with a notch), reopen Vorssaint from Applications or Spotlight: that rebuilds the icon and, if it's still hidden, opens this window. The button above does the same when you can already get here. Keeping fewer menu bar icons, or fewer Vorssaint metrics, makes it far less likely."
     )

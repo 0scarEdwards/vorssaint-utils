@@ -87,10 +87,34 @@ struct MetricsTests {
                "update checks are on for clean installs")
         expect(registeredDefaults[DefaultsKey.shelfShakeToOpen] as? Bool == true,
                "shelf shake opens by default once shelf is enabled")
+        expect(registeredDefaults[DefaultsKey.urlCleanerEnabled] as? Bool == false,
+               "URL cleaner clipboard watching is opt-in")
+        expect(registeredDefaults[DefaultsKey.windowMaximizeEnabled] as? Bool == false,
+               "green button maximize override is opt-in")
+        expect(registeredDefaults[DefaultsKey.panelUtilityCleaning] as? Bool == true,
+               "panel cleaning utility is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelUtilityURLCleaner] as? Bool == true,
+               "panel URL cleaner utility is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelUtilityUninstaller] as? Bool == true,
+               "panel uninstaller utility is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelControlMouseScroll] as? Bool == true,
+               "panel mouse scroll control is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelControlSwitcher] as? Bool == true,
+               "panel switcher control is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelControlCutPaste] as? Bool == true,
+               "panel cut and paste control is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelControlAutoQuit] as? Bool == true,
+               "panel auto quit control is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelControlShelf] as? Bool == true,
+               "panel shelf control is visible by default")
+        expect(registeredDefaults[DefaultsKey.panelControlWindowMaximize] as? Bool == true,
+               "panel window maximize control is visible by default")
         expect(registeredDefaults[DefaultsKey.monitorInterval] as? Int == 2,
                "monitor default interval stays at 2 seconds")
         expect(registeredDefaults[DefaultsKey.temperatureUnit] as? String == TemperatureUnit.celsius.rawValue,
                "temperature defaults to Celsius")
+        expect(registeredDefaults[DefaultsKey.menuBarLabelStyle] as? String == "compact",
+               "menu bar label style defaults to compact")
         expect(registeredDefaults[DefaultsKey.menuBarMemoryStyle] as? String == "percent",
                "memory menu bar style defaults to percent")
         expect((registeredDefaults[DefaultsKey.autoQuitExceptions] as? [String]) == ["com.apple.finder"],
@@ -103,6 +127,8 @@ struct MetricsTests {
         expect(Defaults.sanitizedBatteryLimit(100) == 10, "invalid battery limit falls back to default")
         expect(Defaults.sanitizedMonitorInterval(5) == 5, "valid monitor interval is preserved")
         expect(Defaults.sanitizedMonitorInterval(7) == 2, "invalid monitor interval falls back to default")
+        expect(Defaults.sanitizedMenuBarLabelStyle("classic") == "classic", "valid label style is preserved")
+        expect(Defaults.sanitizedMenuBarLabelStyle("bad") == "compact", "invalid label style falls back to compact")
         expect(Defaults.sanitizedMenuBarMemoryStyle("dot") == "dot", "valid memory style is preserved")
         expect(Defaults.sanitizedMenuBarMemoryStyle("bad") == "percent", "invalid memory style falls back to percent")
         expect(Defaults.sanitizedBundleIdentifierList([" com.example.One ", "", "com.example.One", "com.example.Two"])
@@ -149,6 +175,20 @@ struct MetricsTests {
                "release notes stop before the next version")
         expect(!notes.sections.contains(where: { $0.title == "Website" }),
                "release notes hide website sections from the feature list")
+
+        // MARK: URL cleaning
+
+        expectEqual(URLCleaning.cleanedString(from: "https://example.com/path?utm_source=news&id=42&fbclid=abc") ?? "",
+                    "https://example.com/path?id=42",
+                    "URL cleaner removes tracking and preserves useful query")
+        expectEqual(URLCleaning.cleanedString(from: " https://example.com/?GCLID=one&utm_campaign=x#section ") ?? "",
+                    "https://example.com/#section",
+                    "URL cleaner is case-insensitive and preserves fragments")
+        expectEqual(URLCleaning.cleanedString(from: "https://example.com/?id=42") ?? "",
+                    "https://example.com/?id=42",
+                    "URL cleaner leaves clean URLs alone")
+        expect(URLCleaning.cleanedString(from: "not a url") == nil,
+               "URL cleaner rejects plain text")
 
         // MARK: Localization format contracts
 

@@ -9,31 +9,22 @@ import SwiftUI
 /// status verification and the final summary.
 enum OnboardingMode {
     case full
-    case update
 
     var steps: [OnboardingStep] {
-        switch self {
-        case .full:
-            return [.welcome, .accessibility, .screenRecording, .monitor, .menuBarSetup,
-                    .panelSetup, .panelNavigation, .optionalFeatures, .cutPaste, .autoQuit, .uninstaller, .shelf,
-                    .status, .donate, .done]
-        case .update:
-            return [.whatsNew]
-        }
+        [.welcome, .accessibility, .screenRecording, .monitor, .menuBarSetup,
+         .panelSetup, .panelNavigation, .optionalFeatures, .cutPaste, .autoQuit, .uninstaller, .shelf,
+         .status, .done]
     }
 
     func title(_ strings: Strings) -> String {
-        switch self {
-        case .full: return strings.obStepWelcomeTitle
-        case .update: return strings.obWhatsNewTitle
-        }
+        strings.obStepWelcomeTitle
     }
 }
 
 enum OnboardingStep {
     case welcome, accessibility, screenRecording, monitor, menuBarSetup, panelSetup, optionalFeatures
     case panelNavigation, cutPaste, autoQuit, uninstaller, shelf
-    case status, donate, done, whatsNew
+    case status, done
 }
 
 struct OnboardingView: View {
@@ -59,12 +50,7 @@ struct OnboardingView: View {
         }
         .frame(width: 540, height: 600)
         .onAppear {
-            switch mode {
-            case .full:
-                if !steps.indices.contains(index) { index = 0 }
-            case .update:
-                index = 0
-            }
+            if !steps.indices.contains(index) { index = 0 }
         }
     }
 
@@ -92,9 +78,7 @@ struct OnboardingView: View {
         case .uninstaller: UninstallerShowcaseStep()
         case .shelf: ShelfShowcaseStep()
         case .status: StatusStep()
-        case .donate: DonateStep()
         case .done: DoneStep()
-        case .whatsNew: WhatsNewStep()
         }
     }
 
@@ -315,7 +299,7 @@ private struct MenuBarSetupStep: View {
                        title: l10n.s.obStepMenuBarTitle,
                        subtitle: l10n.s.obStepMenuBarBody)
 
-            MenuBarPreview()
+            MenuBarMetricsPreview()
                 .padding(.horizontal, 28)
 
             VStack(spacing: 0) {
@@ -357,81 +341,6 @@ private struct MenuBarSetupStep: View {
             .toggleStyle(.switch)
             .controlSize(.small)
             .padding(.vertical, 6)
-    }
-}
-
-/// A faithful, live miniature of the menu bar corner: the same fixed-width,
-/// monospaced text the real status item renders, updating as toggles change.
-private struct MenuBarPreview: View {
-    @ObservedObject private var monitor = SystemMonitor.shared
-    @AppStorage(DefaultsKey.menuBarCPU) private var cpu = false
-    @AppStorage(DefaultsKey.menuBarGPU) private var gpu = false
-    @AppStorage(DefaultsKey.menuBarMemory) private var memory = false
-    @AppStorage(DefaultsKey.menuBarNetwork) private var network = false
-    @AppStorage(DefaultsKey.menuBarBattery) private var battery = false
-    @AppStorage(DefaultsKey.menuBarPower) private var power = false
-    @AppStorage(DefaultsKey.menuBarMemoryStyle) private var memoryStyle = "percent"
-
-    var body: some View {
-        let segments = MenuBarRenderer.segments(for: monitor.snapshot,
-                                                metrics: MenuBarMetric.enabled(in: .standard))
-        HStack(spacing: 12) {
-            Spacer()
-            Image(systemName: "wifi").foregroundStyle(.white.opacity(0.5))
-            Image(systemName: "battery.75").foregroundStyle(.white.opacity(0.5))
-            HStack(spacing: 5) {
-                glyph
-                if !segments.isEmpty {
-                    HStack(spacing: 0) {
-                        ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
-                            segmentView(segment)
-                        }
-                    }
-                }
-            }
-        }
-        .font(.system(size: 12))
-        .padding(.horizontal, 14)
-        .frame(height: 32)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.black.opacity(0.82))
-        )
-    }
-
-    @ViewBuilder
-    private func segmentView(_ segment: MenuBarSegment) -> some View {
-        switch segment {
-        case let .text(string):
-            Text(string)
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundStyle(.white)
-        case let .dot(pressure):
-            Circle()
-                .fill(dotColor(pressure))
-                .frame(width: 8, height: 8)
-        }
-    }
-
-    private func dotColor(_ pressure: MemoryPressure) -> Color {
-        switch pressure {
-        case .normal: return .green
-        case .warning: return .yellow
-        case .critical: return .red
-        case .unknown: return .gray
-        }
-    }
-
-    private var glyph: some View {
-        Group {
-            if let image = BlackHoleGlyph.image(active: true) {
-                Image(nsImage: image).renderingMode(.template)
-            } else {
-                Image(systemName: "circle.fill")
-            }
-        }
-        .foregroundStyle(.white)
     }
 }
 
@@ -513,9 +422,6 @@ private struct OptionalFeaturesStep: View {
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @AppStorage(DefaultsKey.scrollInverterEnabled) private var inverterEnabled = false
     @AppStorage(DefaultsKey.switcherEnabled) private var switcherEnabled = true
-    @State private var passwordless = false
-    @State private var passwordlessBusy = false
-    @State private var passwordlessError = false
 
     var body: some View {
         VStack(spacing: 18) {
@@ -560,22 +466,6 @@ private struct OptionalFeaturesStep: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Toggle(passwordlessBusy ? l10n.s.configuring : l10n.s.obPasswordlessToggle,
-                           isOn: passwordlessBinding)
-                        .disabled(passwordlessBusy)
-                    Text(l10n.s.obPasswordlessCaption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if passwordlessError {
-                        Text(l10n.s.sudoersFailed)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                    }
-                }
             }
             .padding(16)
             .background(
@@ -586,38 +476,6 @@ private struct OptionalFeaturesStep: View {
 
             Spacer()
         }
-        .onAppear {
-            DispatchQueue.global(qos: .utility).async {
-                let configured = Sudoers.isConfigured()
-                DispatchQueue.main.async { passwordless = configured }
-            }
-        }
-    }
-
-    private var passwordlessBinding: Binding<Bool> {
-        Binding(
-            get: { passwordless },
-            set: { enable in
-                passwordlessBusy = true
-                passwordlessError = false
-                let finish: (Bool) -> Void = { ok in
-                    DispatchQueue.global(qos: .utility).async {
-                        let configured = Sudoers.isConfigured()
-                        DispatchQueue.main.async {
-                            passwordlessBusy = false
-                            passwordlessError = !ok
-                            passwordless = configured
-                            KeepAwakeManager.shared.refreshPasswordlessStatus()
-                        }
-                    }
-                }
-                if enable {
-                    Sudoers.install(completion: finish)
-                } else {
-                    Sudoers.remove(completion: finish)
-                }
-            }
-        )
     }
 }
 
@@ -674,158 +532,6 @@ private struct StatusStep: View {
             Text(granted ? l10n.s.permissionGranted : l10n.s.permissionMissing)
                 .font(.caption)
                 .foregroundStyle(granted ? .green : (needed ? .orange : .secondary))
-        }
-    }
-}
-
-// MARK: - Update notes
-
-private struct WhatsNewStep: View {
-    @ObservedObject private var l10n = L10n.shared
-    private let notes = ReleaseNotes.current
-
-    var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
-                Theme.spaceGradient
-                VStack(spacing: 10) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 42, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Text(l10n.s.obWhatsNewTitle)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text(versionLine)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.white.opacity(0.82))
-                }
-                .padding(.horizontal, 30)
-            }
-            .frame(height: 170)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    if notes.sections.isEmpty {
-                        fallbackNote
-                    } else {
-                        ForEach(Array(notes.sections.enumerated()), id: \.offset) { _, section in
-                            releaseSection(section)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(24)
-            }
-
-            Divider()
-            Link(destination: AppInfo.websiteURL) {
-                HStack(spacing: 7) {
-                    Image(systemName: "globe")
-                    Text("vorssaint.com")
-                }
-                .font(.system(size: 12.5, weight: .medium))
-                .foregroundStyle(.secondary)
-                .padding(.vertical, 10)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    private var versionLine: String {
-        if let date = notes.date {
-            return "v\(notes.version) · \(date)"
-        }
-        return "v\(notes.version)"
-    }
-
-    private var fallbackNote: some View {
-        HStack(alignment: .top, spacing: 9) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.accentColor)
-                .frame(width: 18, alignment: .center)
-            Text(l10n.s.obWhatsNewFallback)
-                .font(.system(size: 12.5))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    private func releaseSection(_ section: ReleaseNoteSection) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
-            if !section.title.isEmpty {
-                Text(section.title.uppercased())
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .tracking(1.2)
-            }
-            ForEach(Array(section.items.enumerated()), id: \.offset) { _, item in
-                HStack(alignment: .top, spacing: 9) {
-                    Image(systemName: iconName(for: section.title))
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                        .frame(width: 18, alignment: .center)
-                    Text(item)
-                        .font(.system(size: 12.5))
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-    }
-
-    private func iconName(for title: String) -> String {
-        switch title.lowercased() {
-        case "added": return "plus.circle.fill"
-        case "changed": return "slider.horizontal.3"
-        case "fixed": return "checkmark.circle.fill"
-        default: return "circle.fill"
-        }
-    }
-}
-
-// MARK: - Donate announcement
-
-/// Gentle support page shown near the end of the first-run flow. Never gated or
-/// pushy: the message, a coffee button, and a thank-you.
-
-private struct DonateStep: View {
-    @ObservedObject private var l10n = L10n.shared
-
-    var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
-                Theme.spaceGradient
-                VStack(spacing: 14) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 44))
-                        .foregroundStyle(.white)
-                    Text(l10n.s.obStepDonateTitle)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 30)
-                }
-            }
-            .frame(height: 240)
-
-            VStack(spacing: 16) {
-                Text(l10n.s.donateMessage)
-                    .font(.system(size: 12.5))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 42)
-
-                CoffeeButton()
-
-                Text(l10n.s.donateThanks)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(.top, 26)
-
-            Spacer()
         }
     }
 }
