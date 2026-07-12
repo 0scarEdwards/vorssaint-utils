@@ -25,6 +25,16 @@ enum DockClickRepeatDecision: Equatable {
 }
 
 enum DockClickSupport {
+    /// The Option-Command-M chord is not unique to Minimize All. Only the
+    /// standard menu action identifier proves that pressing it is safe.
+    static func isVerifiedMinimizeAll(commandCharacter: String?,
+                                      modifiers: Int?,
+                                      identifier: String?) -> Bool {
+        commandCharacter?.uppercased() == "M"
+            && modifiers == 2
+            && identifier == "miniaturizeAll:"
+    }
+
     /// Clicks closer together than this count as one intent.
     static let repeatClickGap: TimeInterval = 0.25
 

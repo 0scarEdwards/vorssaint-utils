@@ -2825,6 +2825,19 @@ struct MetricsTests {
         expect(DockClickSupport.repeatDecision(lastAction: .minimize, elapsed: 2.0) == .deriveFromState,
                "dock click trusts settled window state once the intent window passes")
 
+        expect(DockClickSupport.isVerifiedMinimizeAll(commandCharacter: "M",
+                                                       modifiers: 2,
+                                                       identifier: "miniaturizeAll:"),
+               "dock click recognizes the standard Minimize All menu action")
+        expect(!DockClickSupport.isVerifiedMinimizeAll(commandCharacter: "M",
+                                                        modifiers: 2,
+                                                        identifier: "toggleCompactWindow:"),
+               "dock click rejects an unrelated action that shares the Minimize All shortcut")
+        expect(!DockClickSupport.isVerifiedMinimizeAll(commandCharacter: "M",
+                                                        modifiers: 2,
+                                                        identifier: nil),
+               "dock click never guesses when an Option-Command-M action has no identifier")
+
         // Bottom Dock reserving ~70 pt: only the reserved strip counts, so a
         // click on a preview panel floating just above the Dock passes through.
         let dockScreen = CGRect(x: 0, y: 0, width: 1512, height: 982)

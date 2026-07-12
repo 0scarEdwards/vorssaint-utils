@@ -337,7 +337,7 @@ final class DockClickService {
             // ⌥⌘M: it targets the right app even if focus shifts, skips every
             // event tap in between, and is layout-independent (kVK_ANSI_M is a
             // physical key — on AZERTY it doesn't type an M at all).
-            guard !pressMinimizeAllMenuItem(pid: pid) else { return }
+            guard !handleMinimizeMenu(pid: pid) else { return }
             DispatchQueue.main.async {
                 Self.postMinimizeAllShortcut()
             }
@@ -353,7 +353,10 @@ final class DockClickService {
     /// Minimize item (⌘M): one window per click, but the click works. This
     /// runs off the tap, so it can afford a longer leash than the tap-side
     /// window enumeration — busy JVMs routinely need it.
-    private static func pressMinimizeAllMenuItem(pid: pid_t) -> Bool {
+    /// Returns true when a menu action ran or when a conflicting Option-Command-M
+    /// item makes the synthetic shortcut unsafe. False means the shortcut is a
+    /// safe last resort because the menu hierarchy did not expose a usable action.
+    private static func handleMinimizeMenu(pid: pid_t) -> Bool {
         let app = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(app, 1.0)
         guard let menuBar = elementAttribute(app, kAXMenuBarAttribute as String),
@@ -361,29 +364,46 @@ final class DockClickService {
         else { return false }
 
         var plainMinimize: AXUIElement?
+        var minimizeAll: AXUIElement?
+        var hasConflictingOptionM = false
         // The Window menu sits near the end of the menu bar.
         for barItem in topLevel.reversed() {
             guard let menus = elementArray(barItem, kAXChildrenAttribute as String) else { continue }
             for menu in menus {
                 guard let items = elementArray(menu, kAXChildrenAttribute as String) else { continue }
                 for item in items {
-                    guard stringAttribute(item, "AXMenuItemCmdChar")?.uppercased() == "M" else { continue }
+                    let commandCharacter = stringAttribute(item, "AXMenuItemCmdChar")
                     let modifiers = intAttribute(item, "AXMenuItemCmdModifiers")
-                    if modifiers == 2 { // ⌥⌘: Minimize All
-                        guard boolAttribute(item, kAXEnabledAttribute as String) != false else { return false }
-                        return AXUIElementPerformAction(item, kAXPressAction as CFString) == .success
+                    let isVerifiedMinimizeAll = DockClickSupport.isVerifiedMinimizeAll(
+                        commandCharacter: commandCharacter,
+                        modifiers: modifiers,
+                        identifier: stringAttribute(item, kAXIdentifierAttribute as String)
+                    )
+                    if isVerifiedMinimizeAll, minimizeAll == nil {
+                        minimizeAll = item
+                    } else if commandCharacter?.uppercased() == "M", modifiers == 2 {
+                        hasConflictingOptionM = true
                     }
-                    if modifiers == 0, plainMinimize == nil { // ⌘M: plain Minimize
+                    if commandCharacter?.uppercased() == "M",
+                       modifiers == 0, plainMinimize == nil { // ⌘M: plain Minimize
                         plainMinimize = item
                     }
                 }
             }
         }
+        if let minimizeAll {
+            guard boolAttribute(minimizeAll, kAXEnabledAttribute as String) != false else { return true }
+            if AXUIElementPerformAction(minimizeAll, kAXPressAction as CFString) == .success {
+                return true
+            }
+        }
         if let plainMinimize,
            boolAttribute(plainMinimize, kAXEnabledAttribute as String) != false {
-            return AXUIElementPerformAction(plainMinimize, kAXPressAction as CFString) == .success
+            if AXUIElementPerformAction(plainMinimize, kAXPressAction as CFString) == .success {
+                return true
+            }
         }
-        return false
+        return hasConflictingOptionM
     }
 
     private static func postMinimizeAllShortcut() {

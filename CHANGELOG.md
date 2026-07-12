@@ -20,8 +20,8 @@ or leaves fullscreen.
   Thanks to hyo.c (@pshyomin) for the translation.
 
 ### Fixed
-- Dock click to minimize now reacts immediately when an app ignores its
-  Minimize All action.
+- Dock click to minimize now reacts immediately in more apps and no longer
+  opens unrelated windows.
 - Extra Brightness no longer flashes when video enters or leaves fullscreen.
 - App Switcher now includes apps that draw their windows separately, with
   working previews.
