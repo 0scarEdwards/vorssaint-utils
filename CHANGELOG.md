@@ -8,7 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Summary
 Vorssaint 3.1.13 adds brightness control for all your displays, external
-monitors included.
+monitors included. It also keeps Extra Brightness steady when video enters
+or leaves fullscreen.
 
 ### Added
 - Brightness sliders for the Mac screen and external monitors, in the menu
@@ -19,6 +20,7 @@ monitors included.
 ### Fixed
 - Dock click to minimize now reacts immediately when an app ignores its
   Minimize All action.
+- Extra Brightness no longer flashes when video enters or leaves fullscreen.
 
 ## [3.1.12] - 2026-07-11
 
