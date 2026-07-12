@@ -16,6 +16,10 @@ monitors included.
   pointer, changing whichever display it is on. Turn it on in Settings
   under Energy.
 
+### Fixed
+- Dock click to minimize now reacts immediately when an app ignores its
+  Minimize All action.
+
 ## [3.1.12] - 2026-07-11
 
 ### Highlight
