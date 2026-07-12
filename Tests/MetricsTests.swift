@@ -163,6 +163,7 @@ struct MetricsTests {
             (.fr, "Presse-papiers", "Disposition des fenêtres", "Utilitaires", "Alertes"),
             (.it, "Appunti", "Layout finestre", "Utilità", "Avvisi"),
             (.ja, "クリップボード", "ウインドウ配置", "ユーティリティ", "アラート"),
+            (.ko, "클립보드", "윈도우 정렬", "유틸리티", "알림"),
             (.ru, "Буфер обмена", "Раскладка окон", "Утилиты", "Оповещения"),
             (.zhHans, "剪贴板", "窗口布局", "实用工具", "提醒"),
             (.zhTW, "剪貼簿", "視窗排列", "工具程式", "提醒"),
@@ -1870,6 +1871,8 @@ struct MetricsTests {
                "Media OCR language defaults include the app language and English")
         expect(MediaSupport.recognitionLanguages(for: "tr") == ["tr-TR", "en-US"],
                "Media OCR language defaults include Turkish and English")
+        expect(MediaSupport.recognitionLanguages(for: "ko") == ["ko-KR", "en-US"],
+               "Media OCR language defaults include Korean and English")
         expectClose(Defaults.sanitizedAppVolume(1.5), 1.5, "valid app volume is preserved")
         expectClose(Defaults.sanitizedAppVolume(3), 2, "high app volume clamps to boost maximum")
         expectClose(Defaults.sanitizedAppVolume(-1), 0, "negative app volume clamps to mute")
@@ -3756,6 +3759,7 @@ struct MetricsTests {
             (.fr, .fr),
             (.it, .it),
             (.ja, .ja),
+            (.ko, .ko),
             (.zhHans, .zhHans),
             (.zhTW, .zhTW),
             (.zhHK, .zhHK)
@@ -3828,6 +3832,7 @@ struct MetricsTests {
         let infoPlist = NSDictionary(contentsOfFile: "Resources/Info.plist") as? [String: Any]
         let bundleLocalizations = infoPlist?["CFBundleLocalizations"] as? [String] ?? []
         expect(bundleLocalizations.contains("tr"), "Info.plist declares Turkish as a bundle localization")
+        expect(bundleLocalizations.contains("ko"), "Info.plist declares Korean as a bundle localization")
         let baseAudioPrompt = infoPlist?["NSAudioCaptureUsageDescription"] as? String ?? ""
         expect(baseAudioPrompt.contains("Vorssaint taps individual app audio"),
                "base audio permission prompt is an English fallback")
@@ -3836,6 +3841,11 @@ struct MetricsTests {
         expect(turkishInfoPlistStrings.contains("NSAudioCaptureUsageDescription")
                && turkishInfoPlistStrings.contains("Hiçbir şey kaydedilmez"),
                "Turkish InfoPlist.strings localizes the audio permission prompt")
+        let koreanInfoPlistStrings = (try? String(contentsOfFile: "Resources/ko.lproj/InfoPlist.strings",
+                                                  encoding: .utf8)) ?? ""
+        expect(koreanInfoPlistStrings.contains("NSAudioCaptureUsageDescription")
+               && koreanInfoPlistStrings.contains("어떤 오디오도 녹음되거나"),
+               "Korean InfoPlist.strings localizes the audio permission prompt")
 
         // MARK: Network speed math
 
@@ -4241,6 +4251,7 @@ struct MetricsTests {
                 case .fr: return .fr
                 case .it: return .it
                 case .ja: return .ja
+                case .ko: return .ko
                 case .zhHans: return .zhHans
                 case .zhTW: return .zhTW
                 case .zhHK: return .zhHK
