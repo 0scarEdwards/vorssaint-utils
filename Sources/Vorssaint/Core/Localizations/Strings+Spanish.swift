@@ -525,6 +525,7 @@ extension Strings {
         mixerInputFallback: "Usando el predeterminado hasta que vuelva este micrófono.",
         mixerInputTooltip: "Elegir micrófono",
         mixerInputErrorFormat: "No se pudo cambiar: %@",
+        mixerShowFinder: "Mostrar Finder",
 
         updatesSection: "Actualizaciones",
         autoCheckToggle: "Buscar actualizaciones automáticamente",

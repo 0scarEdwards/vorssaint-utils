@@ -525,6 +525,7 @@ extension Strings {
         mixerInputFallback: "このマイクが戻るまでデフォルトを使用します。",
         mixerInputTooltip: "マイクを選択",
         mixerInputErrorFormat: "変更できませんでした: %@",
+        mixerShowFinder: "Finder を表示",
 
         updatesSection: "アップデート",
         autoCheckToggle: "アップデートを自動的に確認",

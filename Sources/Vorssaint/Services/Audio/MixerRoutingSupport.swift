@@ -16,6 +16,7 @@ struct MixerOutputPreferences: Equatable {
 
 enum MixerRoutingSupport {
     static let systemDefaultSelectionID = "__system_default__"
+    static let finderBundleIdentifier = "com.apple.finder"
 
     private static let forbiddenScalars = CharacterSet.controlCharacters.union(.newlines)
 
@@ -104,10 +105,12 @@ enum MixerRoutingSupport {
         return directTerms.contains { normalized.contains($0) }
     }
 
-    static func requiresEngine(volume: Double,
+    static func requiresEngine(hasAudioObjects: Bool = true,
+                               volume: Double,
                                selectedOutputDeviceUID: String?,
                                targetOutputDeviceUID: String?,
                                defaultOutputDeviceUID: String?) -> Bool {
+        guard hasAudioObjects else { return false }
         guard let targetOutputDeviceUID else { return false }
         if !isUnity(volume) { return true }
         guard let selectedOutputDeviceUID else { return false }
@@ -136,11 +139,12 @@ enum MixerRoutingSupport {
         "com.motu.",             // Digital Performer
     ]
 
-    /// Apps that never belong in the mixer at all. Finder holds an audio
-    /// connection for interface sounds, but it has no volume of its own, so a
-    /// row for it only confuses (owner request).
-    static func isHiddenFromMixer(bundleIdentifier: String?) -> Bool {
-        bundleIdentifier == "com.apple.finder"
+    static func isHiddenFromMixer(bundleIdentifier: String?, showFinder: Bool) -> Bool {
+        bundleIdentifier == finderBundleIdentifier && !showFinder
+    }
+
+    static func needsPersistentFinderRow(showFinder: Bool, hasFinderRow: Bool) -> Bool {
+        showFinder && !hasFinderRow
     }
 
     static func bypassesProcessTap(bundleIdentifier: String?, name: String) -> Bool {

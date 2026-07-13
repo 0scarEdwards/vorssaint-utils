@@ -526,6 +526,7 @@ extension Strings {
         mixerInputFallback: "此咪高峰恢復前，使用預設輸入。",
         mixerInputTooltip: "選取咪高峰",
         mixerInputErrorFormat: "無法切換：%@",
+        mixerShowFinder: "顯示 Finder",
 
         updatesSection: "更新",
         autoCheckToggle: "自動檢查更新",

@@ -525,6 +525,7 @@ extension Strings {
         mixerInputFallback: "Bu mikrofon geri dönene kadar varsayılan kullanılıyor.",
         mixerInputTooltip: "Mikrofon seç",
         mixerInputErrorFormat: "Geçiş yapılamadı: %@",
+        mixerShowFinder: "Finder'ı göster",
 
         updatesSection: "Güncellemeler",
         autoCheckToggle: "Güncellemeleri otomatik denetle",

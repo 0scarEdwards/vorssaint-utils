@@ -650,6 +650,7 @@ struct Strings {
     let mixerInputFallback: String
     let mixerInputTooltip: String
     let mixerInputErrorFormat: String
+    let mixerShowFinder: String
 
     // MARK: Settings — updates
     let updatesSection: String
@@ -1519,6 +1520,7 @@ extension Strings {
         mixerInputFallback: "Usando o padrão até esse microfone voltar.",
         mixerInputTooltip: "Escolher microfone",
         mixerInputErrorFormat: "Não foi possível trocar: %@",
+        mixerShowFinder: "Mostrar Finder",
 
         updatesSection: "Atualizações",
         autoCheckToggle: "Procurar atualizações automaticamente",
@@ -2370,6 +2372,7 @@ extension Strings {
         mixerInputFallback: "Using default until this microphone returns.",
         mixerInputTooltip: "Choose microphone",
         mixerInputErrorFormat: "Could not switch: %@",
+        mixerShowFinder: "Show Finder",
 
         updatesSection: "Updates",
         autoCheckToggle: "Check for updates automatically",

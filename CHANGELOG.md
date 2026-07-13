@@ -9,7 +9,8 @@ All notable changes to this project are documented here. The format follows
 ### Summary
 Vorssaint 3.1.13 adds brightness control for all your displays and shows the
 battery's estimated time remaining in the menu bar and Power panel. It also
-keeps Extra Brightness steady when video enters or leaves fullscreen.
+keeps Extra Brightness steady when video enters or leaves fullscreen and
+returns Finder to the Volume Mixer.
 
 ### Added
 - Brightness sliders for the Mac screen and external monitors, in the menu
@@ -29,6 +30,8 @@ keeps Extra Brightness steady when video enters or leaves fullscreen.
 - Extra Brightness no longer flashes when video enters or leaves fullscreen.
 - App Switcher now includes apps that draw their windows separately, with
   working previews.
+- Finder stays available in the Volume Mixer for Quick Look audio. A switch
+  at the bottom can hide it.
 
 ## [3.1.12] - 2026-07-11
 

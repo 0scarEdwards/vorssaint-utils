@@ -526,6 +526,7 @@ extension Strings {
         mixerInputFallback: "此麥克風重新可用前，使用預設輸入。",
         mixerInputTooltip: "選擇麥克風",
         mixerInputErrorFormat: "無法切換：%@",
+        mixerShowFinder: "顯示 Finder",
 
         updatesSection: "更新",
         autoCheckToggle: "自動檢查更新",

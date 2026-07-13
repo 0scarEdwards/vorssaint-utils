@@ -884,6 +884,8 @@ struct MetricsTests {
                "headphone disconnect volume lowering is opt-in")
         expect(registeredDefaults[DefaultsKey.mixerHeadphonesDisconnectVolumePercent] as? Int == 0,
                "headphone disconnect volume keeps the existing mute behavior by default")
+        expect(registeredDefaults[DefaultsKey.mixerShowFinder] as? Bool == true,
+               "Finder returns to the mixer by default")
         expect(registeredDefaults[DefaultsKey.soundOutputSwitcherEnabled] as? Bool == false,
                "sound output switcher is opt-in")
         expect(registeredDefaults[DefaultsKey.soundOutputSwitcherShortcut] as? String
@@ -2043,12 +2045,31 @@ struct MetricsTests {
                                                   targetOutputDeviceUID: "ExternalDisplay",
                                                   defaultOutputDeviceUID: "BuiltInSpeakerDevice"),
                "specific non-default output at 100 percent uses an engine")
-        expect(MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: "com.apple.finder"),
-               "Finder never shows in the mixer, it has no volume of its own")
-        expect(!MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: "com.apple.Safari"),
-               "every other app still shows in the mixer")
-        expect(!MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: nil),
+        expect(!MixerRoutingSupport.requiresEngine(hasAudioObjects: false,
+                                                   volume: 0.5,
+                                                   selectedOutputDeviceUID: nil,
+                                                   targetOutputDeviceUID: "BuiltInSpeakerDevice",
+                                                   defaultOutputDeviceUID: "BuiltInSpeakerDevice"),
+               "a persistent mixer row waits for an audio connection before building a tap")
+        expect(!MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: "com.apple.finder",
+                                                      showFinder: true),
+               "Finder shows in the mixer when enabled")
+        expect(MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: "com.apple.finder",
+                                                     showFinder: false),
+               "Finder can be hidden from the mixer")
+        expect(!MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: "com.example.Player",
+                                                      showFinder: false),
+               "hiding Finder leaves every other app visible")
+        expect(!MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: nil, showFinder: false),
                "apps without a bundle id still show in the mixer")
+        expect(MixerRoutingSupport.needsPersistentFinderRow(showFinder: true,
+                                                            hasFinderRow: false),
+               "Finder gets a persistent row before Quick Look opens")
+        expect(!MixerRoutingSupport.needsPersistentFinderRow(showFinder: true,
+                                                             hasFinderRow: true)
+                && !MixerRoutingSupport.needsPersistentFinderRow(showFinder: false,
+                                                                 hasFinderRow: false),
+               "Finder is never duplicated and stays absent when hidden")
         expect(MixerRoutingSupport.bypassesProcessTap(bundleIdentifier: "us.zoom.xos", name: "zoom.us"),
                "Zoom is kept out of process-tap audio routing")
         expect(MixerRoutingSupport.bypassesProcessTap(bundleIdentifier: "us.zoom.ZoomAutoUpdater", name: "Zoom"),
@@ -4618,6 +4639,7 @@ struct MetricsTests {
                 && backupKeys.contains(DefaultsKey.menuBarCPU)
                 && backupKeys.contains(DefaultsKey.language)
                 && backupKeys.contains(DefaultsKey.appVolumes)
+                && backupKeys.contains(DefaultsKey.mixerShowFinder)
                 && backupKeys.contains(AppFeature.dockPreview.availabilityKey),
                "backup carries preferences, menu bar pins, language and hub availability")
         expect(backupKeys.contains(DefaultsKey.textSnippets)

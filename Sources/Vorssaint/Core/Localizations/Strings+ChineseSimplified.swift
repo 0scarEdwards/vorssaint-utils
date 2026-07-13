@@ -525,6 +525,7 @@ extension Strings {
         mixerInputFallback: "在此麦克风恢复前使用默认输入。",
         mixerInputTooltip: "选择麦克风",
         mixerInputErrorFormat: "无法切换：%@",
+        mixerShowFinder: "显示访达",
 
         updatesSection: "更新",
         autoCheckToggle: "自动检查更新",

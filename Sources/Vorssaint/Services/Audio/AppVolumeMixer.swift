@@ -415,7 +415,8 @@ final class AppVolumeMixer: ObservableObject {
     }
 
     private func appNeedsEngine(_ app: MixerApp) -> Bool {
-        MixerRoutingSupport.requiresEngine(volume: app.volume,
+        MixerRoutingSupport.requiresEngine(hasAudioObjects: !app.audioObjects.isEmpty,
+                                           volume: app.volume,
                                            selectedOutputDeviceUID: app.selectedOutputDeviceUID,
                                            targetOutputDeviceUID: app.effectiveOutputDeviceUID,
                                            defaultOutputDeviceUID: currentOutputDeviceUID)
@@ -478,6 +479,7 @@ final class AppVolumeMixer: ObservableObject {
         let ownPid = ProcessInfo.processInfo.processIdentifier
         let saved = savedVolumes()
         let savedOutputs = savedOutputDeviceUIDs()
+        let showFinder = UserDefaults.standard.bool(forKey: DefaultsKey.mixerShowFinder)
         var groups: [pid_t: [AudioObjectID]] = [:]
         var playing: Set<pid_t> = []
         var bypassed: Set<pid_t> = []
@@ -498,7 +500,8 @@ final class AppVolumeMixer: ObservableObject {
             let owner = ResponsibleProcess.owner(of: pid)
             guard let app = NSRunningApplication(processIdentifier: owner),
                   app.activationPolicy == .regular,
-                  !MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: app.bundleIdentifier)
+                  !MixerRoutingSupport.isHiddenFromMixer(bundleIdentifier: app.bundleIdentifier,
+                                                         showFinder: showFinder)
             else { continue }
             let name = ResponsibleProcess.displayName(pid: owner, fallback: app.localizedName ?? "pid \(owner)")
             // Bypassed apps (Zoom, DAWs) still get a row — hiding them read
@@ -540,6 +543,28 @@ final class AppVolumeMixer: ObservableObject {
                                     selectedUID: savedOutputs[id],
                                     availableUIDs: availableUIDs),
                                  volume: isBypassed ? 1 : (saved[id] ?? 1)))
+        }
+        if MixerRoutingSupport.needsPersistentFinderRow(
+            showFinder: showFinder,
+            hasFinderRow: next.contains { $0.id == MixerRoutingSupport.finderBundleIdentifier }
+        ), let finder = NSRunningApplication.runningApplications(
+            withBundleIdentifier: MixerRoutingSupport.finderBundleIdentifier
+        ).first {
+            let id = MixerRoutingSupport.finderBundleIdentifier
+            next.append(MixerApp(id: id,
+                                 ownerPid: finder.processIdentifier,
+                                 name: finder.localizedName ?? "Finder",
+                                 audioObjects: [],
+                                 isPlaying: false,
+                                 selectedOutputDeviceUID: savedOutputs[id],
+                                 effectiveOutputDeviceUID: MixerRoutingSupport.effectiveDeviceUID(
+                                    selectedUID: savedOutputs[id],
+                                    availableUIDs: availableUIDs,
+                                    defaultUID: defaultUID),
+                                 outputDeviceUnavailable: MixerRoutingSupport.selectedDeviceUnavailable(
+                                    selectedUID: savedOutputs[id],
+                                    availableUIDs: availableUIDs),
+                                 volume: saved[id] ?? 1))
         }
         next.sort {
             MixerRoutingSupport.displayOrderedBefore(name: $0.name, id: $0.id,
