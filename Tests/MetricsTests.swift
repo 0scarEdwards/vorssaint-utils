@@ -954,6 +954,16 @@ struct MetricsTests {
                "mic mute menu bar indicator ships on by default (badge only shows while muted)")
         expect(registeredDefaults[DefaultsKey.menuBarMetricSpacing] as? String == "compact",
                "menu bar metric spacing defaults to the compact look")
+        expect(registeredDefaults[DefaultsKey.menuBarMetricAppearance] as? String == "values",
+               "menu bar usage metrics keep numeric values by default")
+        expect(registeredDefaults[DefaultsKey.menuBarUsageBarNormalColor] as? String == "#64D2FF",
+               "menu bar bars use a bright normal color by default")
+        expect(registeredDefaults[DefaultsKey.menuBarUsageBarElevatedColor] as? String == "#FFD60A"
+               && registeredDefaults[DefaultsKey.menuBarUsageBarCriticalColor] as? String == "#FF453A",
+               "menu bar bars keep visible elevated and critical defaults")
+        expect(registeredDefaults[DefaultsKey.menuBarUsageBarMediumThreshold] as? Int == 70
+               && registeredDefaults[DefaultsKey.menuBarUsageBarHighThreshold] as? Int == 90,
+               "menu bar bar thresholds default to seventy and ninety percent")
         expect(Defaults.sanitizedMonitorAlertCooldown(2) == 2,
                "the two minute alert cooldown is a valid stored choice")
         expect(Defaults.sanitizedMonitorAlertCooldown(7) == 15,
@@ -962,6 +972,53 @@ struct MetricsTests {
                "standard menu bar spacing is a valid stored choice")
         expect(Defaults.sanitizedMenuBarMetricSpacing("banana") == "compact",
                "unknown menu bar spacing values fall back to the compact default")
+        expect(Defaults.sanitizedMenuBarMetricAppearance("bars") == "bars",
+               "bar appearance is a valid stored choice")
+        expect(Defaults.sanitizedMenuBarMetricAppearance("banana") == "values",
+               "unknown menu bar appearances fall back to numeric values")
+        expect(MenuBarMetricAppearance.values.allowsCombinedTemperatures,
+               "numeric menu bar values may combine usage and temperature")
+        expect(!MenuBarMetricAppearance.bars.allowsCombinedTemperatures,
+               "menu bar bars keep usage and temperature separate")
+        expectClose(MenuBarUsageBarSupport.memoryFraction(used: 3, total: 4) ?? -1, 0.75,
+                    "menu bar memory bars use the current used fraction")
+        expect(MenuBarUsageBarSupport.memoryFraction(used: 3, total: 0) == nil,
+               "menu bar memory bars keep missing totals unavailable")
+        expectClose(MenuBarUsageBarSupport.clampedFraction(-0.2), 0,
+                    "menu bar bars clamp negative readings")
+        expectClose(MenuBarUsageBarSupport.clampedFraction(1.4), 1,
+                    "menu bar bars clamp readings above full")
+        expect(MenuBarUsageBarSupport.fillLevel(for: 0.5, steps: 16) == 8,
+               "menu bar bars quantize fractions to visible fill steps")
+        expect(MenuBarUsageBarSupport.level(for: 0.69) == .normal,
+               "menu bar usage stays blue below seventy percent")
+        expect(MenuBarUsageBarSupport.level(for: 0.70) == .elevated,
+               "menu bar usage turns yellow at seventy percent")
+        expect(MenuBarUsageBarSupport.level(for: 0.89) == .elevated,
+               "menu bar usage stays yellow below ninety percent")
+        expect(MenuBarUsageBarSupport.level(for: 0.90) == .critical,
+               "menu bar usage turns red at ninety percent")
+        expect(MenuBarUsageBarSupport.level(for: 0.50,
+                                            mediumPercent: 40,
+                                            highPercent: 80) == .elevated,
+               "custom menu bar medium thresholds change the bar level")
+        expect(MenuBarUsageBarSupport.level(for: 0.80,
+                                            mediumPercent: 40,
+                                            highPercent: 80) == .critical,
+               "custom menu bar high thresholds change the bar level")
+        let repairedBarThresholds = MenuBarUsageBarSupport.thresholds(medium: 100, high: 20)
+        expect(repairedBarThresholds.medium == 99 && repairedBarThresholds.high == 100,
+               "invalid menu bar thresholds keep medium below high")
+        expect(MenuBarUsageBarSupport.sanitizedColorHex(" 64d2ff ", fallback: "#000000") == "#64D2FF",
+               "menu bar colors normalize stored hex values")
+        expect(MenuBarUsageBarSupport.sanitizedColorHex("bad", fallback: "#FFD60A") == "#FFD60A",
+               "invalid menu bar colors use their visible fallback")
+        let customBarRGB = MenuBarUsageBarSupport.rgb(for: "#804020", fallback: "#000000")
+        expectClose(customBarRGB.red, 128.0 / 255.0, "menu bar color parses red")
+        expectClose(customBarRGB.green, 64.0 / 255.0, "menu bar color parses green")
+        expectClose(customBarRGB.blue, 32.0 / 255.0, "menu bar color parses blue")
+        expect(MenuBarUsageBarSupport.hex(red: 1, green: 0.5, blue: 0) == "#FF8000",
+               "menu bar color picker writes stable hex values")
         expect(MenuBarSpacingSupport.digitMatchedReserve(for: "14%") == "88%",
                "compact spacing reserves the current digit count for percentages")
         expect(MenuBarSpacingSupport.digitMatchedReserve(for: "999°") == "888°",
@@ -4338,6 +4395,12 @@ struct MetricsTests {
                    "every battery time string is set for \(language.rawValue)")
             expect(batteryTimeValues.allSatisfy { !$0.contains("—") },
                    "no em-dash in visible battery time strings (\(language.rawValue))")
+            let menuBarAppearanceValues = Mirror(reflecting: FeatureStrings.menuBarAppearance(language)).children
+                .compactMap { $0.value as? String }
+            expect(!menuBarAppearanceValues.isEmpty && menuBarAppearanceValues.allSatisfy { !$0.isEmpty },
+                   "every menu bar appearance string is set for \(language.rawValue)")
+            expect(menuBarAppearanceValues.allSatisfy { !$0.contains("—") },
+                   "no em-dash in visible menu bar appearance strings (\(language.rawValue))")
             let strings: Strings = {
                 switch language {
                 case .enUS: return .enUS

@@ -96,6 +96,7 @@ if (( TEST )); then
         Sources/Vorssaint/Core/BackupStrings.swift \
         Sources/Vorssaint/Core/SnippetStrings.swift \
         Sources/Vorssaint/Core/BrightnessStrings.swift \
+        Sources/Vorssaint/Core/MenuBarAppearanceStrings.swift \
         Sources/Vorssaint/Core/BatteryTimeStrings.swift \
         Sources/Vorssaint/Core/PermissionGuideStrings.swift \
         Sources/Vorssaint/Services/Snippets/TextSnippetSupport.swift \

@@ -7,10 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [3.1.13]
 
 ### Summary
-Vorssaint 3.1.13 adds brightness control for all your displays and shows the
-battery's estimated time remaining in the menu bar and Power panel. It also
-keeps Extra Brightness steady when video enters or leaves fullscreen and
-returns Finder to the Volume Mixer.
+Vorssaint 3.1.13 adds brightness control for all your displays, battery time
+remaining and compact usage bars in the menu bar. It also keeps Extra
+Brightness steady around fullscreen video and returns Finder to the Volume
+Mixer.
 
 ### Added
 - Brightness sliders for the Mac screen and external monitors, in the menu
@@ -20,6 +20,9 @@ returns Finder to the Volume Mixer.
 - The battery's estimated time remaining can appear in the menu bar and the
   Power panel. The menu bar reading is off by default and can be enabled in
   Settings.
+- CPU, GPU, memory and disk use can appear as compact bars in the menu bar.
+  Choose Values or Bars and adjust their colors and medium and high limits in
+  Monitor settings.
 - Cleaning Mode now blacks out every display while the keyboard is locked.
 - Korean is now available throughout the app and can be selected in Settings.
   Thanks to hyo.c (@pshyomin) for the translation.

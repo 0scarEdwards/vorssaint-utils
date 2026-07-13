@@ -137,6 +137,12 @@ enum DefaultsKey {
     static let menuBarPower = "menuBarPower"
     static let menuBarPreset = "menuBarPreset"           // dense
     static let menuBarMetricSpacing = "menuBarMetricSpacing" // standard | compact
+    static let menuBarMetricAppearance = "menuBarMetricAppearance" // values | bars
+    static let menuBarUsageBarNormalColor = "menuBarUsageBarNormalColor" // #RRGGBB
+    static let menuBarUsageBarElevatedColor = "menuBarUsageBarElevatedColor" // #RRGGBB
+    static let menuBarUsageBarCriticalColor = "menuBarUsageBarCriticalColor" // #RRGGBB
+    static let menuBarUsageBarMediumThreshold = "menuBarUsageBarMediumThreshold" // percent
+    static let menuBarUsageBarHighThreshold = "menuBarUsageBarHighThreshold" // percent
     static let menuBarHideIconWithMetrics = "menuBarHideIconWithMetrics" // glyph hides while metrics render in the main item
     static let menuBarMetricOrder = "menuBarMetricOrder" // comma-separated MenuBarMetric raw values
     static let menuBarCombineTemperatures = "menuBarCombineTemperatures" // usage/charge + temperature in one block when possible
@@ -374,6 +380,7 @@ enum Defaults {
     static let allowedKeyboardDebounceWindowRange = 0...500
     static let allowedMenuBarPresets = ["dense"]
     static let allowedMenuBarMetricSpacings = ["standard", "compact"]
+    static let allowedMenuBarMetricAppearances = ["values", "bars"]
     static let defaultMenuBarMetricOrder = [
         "cpu", "cpuTemperature",
         "gpu", "gpuTemperature",
@@ -502,6 +509,12 @@ enum Defaults {
         DefaultsKey.menuBarPeripheralBattery: false,
         DefaultsKey.menuBarPreset: "dense",
         DefaultsKey.menuBarMetricSpacing: "compact",  // owner's call: compact by default in 3.1.8
+        DefaultsKey.menuBarMetricAppearance: "values",
+        DefaultsKey.menuBarUsageBarNormalColor: "#64D2FF",
+        DefaultsKey.menuBarUsageBarElevatedColor: "#FFD60A",
+        DefaultsKey.menuBarUsageBarCriticalColor: "#FF453A",
+        DefaultsKey.menuBarUsageBarMediumThreshold: 70,
+        DefaultsKey.menuBarUsageBarHighThreshold: 90,
         DefaultsKey.menuBarHideIconWithMetrics: false,
         DefaultsKey.windowLayoutHiddenActions: "",
         DefaultsKey.menuBarMetricOrder: defaultMenuBarMetricOrder.joined(separator: ","),
@@ -699,6 +712,10 @@ enum Defaults {
     static func sanitizedMenuBarMetricSpacing(_ spacing: String) -> String {
         // Corrupt values fall back to the registered default (compact).
         allowedMenuBarMetricSpacings.contains(spacing) ? spacing : "compact"
+    }
+
+    static func sanitizedMenuBarMetricAppearance(_ appearance: String) -> String {
+        allowedMenuBarMetricAppearances.contains(appearance) ? appearance : "values"
     }
 
     static func sanitizedMenuBarMetricOrder(_ raw: String) -> [String] {
