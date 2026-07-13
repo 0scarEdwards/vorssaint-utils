@@ -54,6 +54,9 @@ struct SettingsView: View {
                 SidebarItem(page: .energy, title: l10n.s.tabEnergy, icon: "bolt.fill",
                             keywords: [l10n.s.keepAwakeTitle, l10n.s.clamshellTitle,
                                        l10n.s.defaultDurationLabel, l10n.s.extraBrightnessName,
+                                       l10n.s.keepAwakeActiveIconLabel,
+                                       l10n.s.keepAwakeActiveIconCoffee,
+                                       l10n.s.keepAwakeActiveIconEye,
                                        FeatureStrings.brightness(l10n.language).pageTitle,
                                        FeatureStrings.keepAwakeAutomation(l10n.language)
                                            .externalDisplayToggle,
@@ -422,6 +425,7 @@ struct EnergySettings: View {
     @AppStorage(DefaultsKey.batteryLimit) private var batteryLimit = 10
     @AppStorage(DefaultsKey.keepAwakeAutoStart) private var keepAwakeAutoStart = false
     @AppStorage(DefaultsKey.keepAwakeIconTint) private var keepAwakeIconTint = KeepAwakeIconTint.orange.rawValue
+    @AppStorage(DefaultsKey.keepAwakeActiveIcon) private var keepAwakeActiveIcon = KeepAwakeActiveIcon.vorssaint.rawValue
     @AppStorage(DefaultsKey.keepAwakeMouseJiggleEnabled) private var keepAwakeMouseJiggle = false
     @AppStorage(DefaultsKey.keepAwakeMouseJiggleInterval) private var keepAwakeMouseJiggleInterval = 5
 
@@ -457,12 +461,8 @@ struct EnergySettings: View {
                     SettingsCaptionText(l10n.s.batteryProtectionCaption)
                 }
                 Section(l10n.s.keepAwakeTitle) {
-                    Picker(l10n.s.keepAwakeIconTintLabel, selection: $keepAwakeIconTint) {
-                        ForEach(KeepAwakeIconTint.allCases) { tint in
-                            Text(tint.title(l10n.s)).tag(tint.rawValue)
-                        }
-                    }
-                    .pickerStyle(.menu)
+                    KeepAwakeIconPicker(iconValue: $keepAwakeActiveIcon,
+                                        tintValue: $keepAwakeIconTint)
                     SettingsToggleWithCaption(title: l10n.s.keepAwakeMouseJiggle,
                                               caption: l10n.s.keepAwakeMouseJiggleCaption,
                                               isOn: $keepAwakeMouseJiggle)
@@ -556,6 +556,7 @@ struct EnergySettings: View {
             defaultDuration = Defaults.sanitizedDefaultDuration(defaultDuration)
             batteryLimit = Defaults.sanitizedBatteryLimit(batteryLimit)
             keepAwakeIconTint = Defaults.sanitizedKeepAwakeIconTint(keepAwakeIconTint).rawValue
+            keepAwakeActiveIcon = Defaults.sanitizedKeepAwakeActiveIcon(keepAwakeActiveIcon).rawValue
             keepAwakeMouseJiggleInterval = Defaults.sanitizedKeepAwakeMouseJiggleInterval(keepAwakeMouseJiggleInterval)
             awake.refreshPasswordlessStatus()
             // Displays may have changed since launch (docked, clamshell);

@@ -2001,6 +2001,7 @@ struct KeepAwakeCard: View {
     @AppStorage(DefaultsKey.keepAwakeExternalDisplay) private var keepAwakeExternalDisplay = false
     @AppStorage(DefaultsKey.keepAwakeConnectedToPower) private var keepAwakeConnectedToPower = false
     @AppStorage(DefaultsKey.keepAwakeIconTint) private var keepAwakeIconTint = KeepAwakeIconTint.orange.rawValue
+    @AppStorage(DefaultsKey.keepAwakeActiveIcon) private var keepAwakeActiveIcon = KeepAwakeActiveIcon.vorssaint.rawValue
     @AppStorage(DefaultsKey.keepAwakeMouseJiggleEnabled) private var keepAwakeMouseJiggle = false
     @AppStorage(DefaultsKey.keepAwakeMouseJiggleInterval) private var keepAwakeMouseJiggleInterval = 5
     @State private var optionsExpanded = false
@@ -2054,6 +2055,7 @@ struct KeepAwakeCard: View {
         .onAppear {
             defaultDuration = Defaults.sanitizedDefaultDuration(defaultDuration)
             keepAwakeIconTint = Defaults.sanitizedKeepAwakeIconTint(keepAwakeIconTint).rawValue
+            keepAwakeActiveIcon = Defaults.sanitizedKeepAwakeActiveIcon(keepAwakeActiveIcon).rawValue
             keepAwakeMouseJiggleInterval = Defaults.sanitizedKeepAwakeMouseJiggleInterval(keepAwakeMouseJiggleInterval)
         }
     }
@@ -2079,7 +2081,9 @@ struct KeepAwakeCard: View {
 
             if optionsExpanded {
                 VStack(alignment: .leading, spacing: 8) {
-                    iconTintRow
+                    KeepAwakeIconPicker(iconValue: $keepAwakeActiveIcon,
+                                        tintValue: $keepAwakeIconTint,
+                                        compact: true)
                     compactOptionToggle(
                         icon: "play.circle",
                         title: l10n.s.keepAwakeAutoStart,
@@ -2213,45 +2217,6 @@ struct KeepAwakeCard: View {
         mouseJiggleNeedsAccessibility
             ? "\(l10n.s.permissionRequired): \(l10n.s.permissionAccessibility)"
             : l10n.s.keepAwakeMouseJiggleCaption
-    }
-
-    private var iconTintRow: some View {
-        let tint = Defaults.sanitizedKeepAwakeIconTint(keepAwakeIconTint)
-        return HStack(spacing: 8) {
-            if let color = iconTintColor(tint) {
-                Circle()
-                    .fill(color)
-                    .frame(width: 10, height: 10)
-            } else {
-                Circle()
-                    .strokeBorder(Color.secondary.opacity(0.8), lineWidth: 1.2)
-                    .frame(width: 10, height: 10)
-            }
-            Text(l10n.s.keepAwakeIconTintLabel)
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 0)
-            Picker("", selection: $keepAwakeIconTint) {
-                ForEach(KeepAwakeIconTint.allCases) { option in
-                    Text(option.title(l10n.s)).tag(option.rawValue)
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-            .controlSize(.small)
-            .frame(maxWidth: 138)
-        }
-    }
-
-    private func iconTintColor(_ tint: KeepAwakeIconTint) -> Color? {
-        switch tint {
-        case .orange: return .orange
-        case .green: return .green
-        case .blue: return .blue
-        case .purple: return .purple
-        case .pink: return .pink
-        case .none: return nil
-        }
     }
 
     private var statusLine: some View {

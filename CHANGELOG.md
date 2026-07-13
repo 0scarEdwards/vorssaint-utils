@@ -26,6 +26,8 @@ Finder to the Volume Mixer.
   Settings.
 - Keep Awake can start with an external display or while connected to power.
   Combine both conditions in Options or Energy settings.
+- Keep Awake can use the Vorssaint, coffee, eye, moon or lightbulb icon while
+  active. Choose the icon and its color in Options or Energy settings.
 - CPU, GPU, memory and disk use can appear as compact bars in the menu bar.
   Choose Values or Bars and adjust their colors and medium and high limits in
   Monitor settings.

@@ -155,6 +155,12 @@ struct Strings {
     let keepAwakeMouseJiggle: String
     let keepAwakeMouseJiggleCaption: String
     let keepAwakeMouseJiggleInterval: String
+    let keepAwakeActiveIconLabel: String
+    let keepAwakeActiveIconVorssaint: String
+    let keepAwakeActiveIconCoffee: String
+    let keepAwakeActiveIconEye: String
+    let keepAwakeActiveIconMoon: String
+    let keepAwakeActiveIconLight: String
     let keepAwakeIconTintLabel: String
     let keepAwakeIconTintOrange: String
     let keepAwakeIconTintGreen: String
@@ -1046,6 +1052,12 @@ extension Strings {
         keepAwakeMouseJiggle: "Mover cursor levemente",
         keepAwakeMouseJiggleCaption: "Durante uma sessão, move o cursor um pouco no intervalo escolhido.",
         keepAwakeMouseJiggleInterval: "Intervalo",
+        keepAwakeActiveIconLabel: "Ícone ativo",
+        keepAwakeActiveIconVorssaint: "Vorssaint",
+        keepAwakeActiveIconCoffee: "Café",
+        keepAwakeActiveIconEye: "Olho",
+        keepAwakeActiveIconMoon: "Lua",
+        keepAwakeActiveIconLight: "Lâmpada",
         keepAwakeIconTintLabel: "Cor do ícone ativo",
         keepAwakeIconTintOrange: "Laranja",
         keepAwakeIconTintGreen: "Verde",
@@ -1899,6 +1911,12 @@ extension Strings {
         keepAwakeMouseJiggle: "Move pointer slightly",
         keepAwakeMouseJiggleCaption: "During a session, moves the pointer a little at the chosen interval.",
         keepAwakeMouseJiggleInterval: "Interval",
+        keepAwakeActiveIconLabel: "Active icon",
+        keepAwakeActiveIconVorssaint: "Vorssaint",
+        keepAwakeActiveIconCoffee: "Coffee",
+        keepAwakeActiveIconEye: "Eye",
+        keepAwakeActiveIconMoon: "Moon",
+        keepAwakeActiveIconLight: "Lightbulb",
         keepAwakeIconTintLabel: "Active icon color",
         keepAwakeIconTintOrange: "Orange",
         keepAwakeIconTintGreen: "Green",

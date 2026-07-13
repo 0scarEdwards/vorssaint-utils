@@ -26,6 +26,7 @@ enum DefaultsKey {
     static let hotkeyEnabled = "hotkeyEnabled"
     static let keepAwakeShortcut = "keepAwakeShortcut"    // GlobalShortcut storage value
     static let keepAwakeIconTint = "keepAwakeIconTint"    // KeepAwakeIconTint.rawValue
+    static let keepAwakeActiveIcon = "keepAwakeActiveIcon" // KeepAwakeActiveIcon.rawValue
     static let showCountdown = "showCountdownInMenuBar"
     static let statusItemPlacementGeneration = "statusItemPlacementGeneration"
     static let hasOnboarded = "hasOnboarded"
@@ -364,6 +365,38 @@ enum KeepAwakeIconTint: String, CaseIterable, Identifiable {
     }
 }
 
+enum KeepAwakeActiveIcon: String, CaseIterable, Identifiable {
+    case vorssaint, coffee, eye, moon, light
+
+    var id: String { rawValue }
+
+    static var current: KeepAwakeActiveIcon {
+        Defaults.sanitizedKeepAwakeActiveIcon(
+            UserDefaults.standard.string(forKey: DefaultsKey.keepAwakeActiveIcon)
+        )
+    }
+
+    var systemSymbolName: String? {
+        switch self {
+        case .vorssaint: return nil
+        case .coffee: return "cup.and.saucer.fill"
+        case .eye: return "eye.fill"
+        case .moon: return "moon.fill"
+        case .light: return "lightbulb.fill"
+        }
+    }
+
+    func title(_ strings: Strings) -> String {
+        switch self {
+        case .vorssaint: return strings.keepAwakeActiveIconVorssaint
+        case .coffee: return strings.keepAwakeActiveIconCoffee
+        case .eye: return strings.keepAwakeActiveIconEye
+        case .moon: return strings.keepAwakeActiveIconMoon
+        case .light: return strings.keepAwakeActiveIconLight
+        }
+    }
+}
+
 /// Thumbnail size for the app switcher and Dock preview, scaled from one user
 /// preference so both grow together. Captures scale by the same factor, so
 /// larger previews stay sharp.
@@ -419,6 +452,7 @@ enum Defaults {
         DefaultsKey.hotkeyEnabled: true,
         DefaultsKey.keepAwakeShortcut: "control+option+command:40",
         DefaultsKey.keepAwakeIconTint: KeepAwakeIconTint.orange.rawValue,
+        DefaultsKey.keepAwakeActiveIcon: KeepAwakeActiveIcon.vorssaint.rawValue,
         DefaultsKey.showCountdown: false,
         DefaultsKey.scrollInverterEnabled: false,
         DefaultsKey.smoothScrollEnabled: false,
@@ -711,6 +745,14 @@ enum Defaults {
             return .orange
         }
         return tint
+    }
+
+    static func sanitizedKeepAwakeActiveIcon(_ rawValue: String?) -> KeepAwakeActiveIcon {
+        guard let rawValue,
+              let icon = KeepAwakeActiveIcon(rawValue: rawValue) else {
+            return .vorssaint
+        }
+        return icon
     }
 
     static func sanitizedMonitorInterval(_ seconds: Int) -> Int {

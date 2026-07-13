@@ -772,6 +772,8 @@ struct MetricsTests {
                "keep awake shortcut defaults to Ctrl+Opt+Cmd+K")
         expect(registeredDefaults[DefaultsKey.keepAwakeIconTint] as? String == KeepAwakeIconTint.orange.rawValue,
                "keep-awake active icon tint defaults to orange")
+        expect(registeredDefaults[DefaultsKey.keepAwakeActiveIcon] as? String == KeepAwakeActiveIcon.vorssaint.rawValue,
+               "keep-awake active icon defaults to the Vorssaint glyph")
         expect(registeredDefaults[DefaultsKey.keepAwakeMouseJiggleEnabled] as? Bool == false,
                "Keep Awake mouse movement is opt-in")
         expect(registeredDefaults[DefaultsKey.keepAwakeMouseJiggleInterval] as? Int == 5,
@@ -784,6 +786,12 @@ struct MetricsTests {
                "valid keep-awake active icon tint is preserved")
         expect(Defaults.sanitizedKeepAwakeIconTint("bad") == .orange,
                "invalid keep-awake active icon tint falls back to orange")
+        expect(Defaults.sanitizedKeepAwakeActiveIcon("coffee") == .coffee,
+               "valid keep-awake active icon is preserved")
+        expect(Defaults.sanitizedKeepAwakeActiveIcon("bad") == .vorssaint,
+               "invalid keep-awake active icon falls back to the Vorssaint glyph")
+        expect(KeepAwakeActiveIcon.eye.systemSymbolName == "eye.fill",
+               "keep-awake eye option maps to its menu bar symbol")
         expect(!KeepAwakeAutomationSupport.hasExternalDisplay(builtInFlags: []),
                "no online display does not count as an external display")
         expect(!KeepAwakeAutomationSupport.hasExternalDisplay(builtInFlags: [true]),
@@ -4869,8 +4877,9 @@ struct MetricsTests {
                 && backupKeys.contains(DefaultsKey.language)
                 && backupKeys.contains(DefaultsKey.appVolumes)
                 && backupKeys.contains(DefaultsKey.mixerShowFinder)
+                && backupKeys.contains(DefaultsKey.keepAwakeActiveIcon)
                 && backupKeys.contains(AppFeature.dockPreview.availabilityKey),
-               "backup carries preferences, menu bar pins, language and hub availability")
+               "backup carries preferences, menu bar pins, Keep Awake appearance, language and hub availability")
         expect(backupKeys.contains(DefaultsKey.textSnippets)
                 && backupKeys.contains(DefaultsKey.textSnippetsEnabled),
                "snippets travel with the settings backup")
