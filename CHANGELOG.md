@@ -52,6 +52,8 @@ Finder to the Volume Mixer.
   working previews.
 - Finder stays available in the Volume Mixer for Quick Look audio. A switch
   at the bottom can hide it.
+- Clipboard History no longer crashes when automatic URL cleaning inspects the
+  same copy.
 
 ## [3.1.12] - 2026-07-11
 

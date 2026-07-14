@@ -328,6 +328,38 @@ struct MetricsTests {
         expect(ClipboardHistorySensitiveText.looksSensitive("abc1234567890-xyz-abc"),
                "clipboard history still skips compact secret-looking text")
 
+        let pasteboardAccess = GeneralPasteboardAccess(label: "Vorssaint.Tests.PasteboardAccess")
+        let pasteboardGroup = DispatchGroup()
+        let pasteboardStateLock = NSLock()
+        var activePasteboardOperations = 0
+        var maximumPasteboardOperations = 0
+        for _ in 0..<16 {
+            pasteboardGroup.enter()
+            DispatchQueue.global(qos: .userInitiated).async {
+                pasteboardAccess.sync {
+                    pasteboardStateLock.lock()
+                    activePasteboardOperations += 1
+                    maximumPasteboardOperations = max(maximumPasteboardOperations,
+                                                       activePasteboardOperations)
+                    pasteboardStateLock.unlock()
+                    usleep(1_000)
+                    pasteboardStateLock.lock()
+                    activePasteboardOperations -= 1
+                    pasteboardStateLock.unlock()
+                }
+                pasteboardGroup.leave()
+            }
+        }
+        expect(pasteboardGroup.wait(timeout: .now() + 2) == .success,
+               "pasteboard access operations finish without deadlock")
+        expect(maximumPasteboardOperations == 1,
+               "pasteboard access serializes concurrent service work")
+        let nestedPasteboardValue = pasteboardAccess.sync {
+            pasteboardAccess.sync { 230 }
+        }
+        expect(nestedPasteboardValue == 230,
+               "pasteboard access permits nested work without deadlock")
+
         let maxCapacityStringJSON = Data(#"{"SPPowerDataType":[{"sppower_battery_health_info":{"sppower_battery_health_maximum_capacity":"93%"}}]}"#.utf8)
         expect(MaxCapacityProbe.percent(fromSystemProfilerJSON: maxCapacityStringJSON) == 93,
                "battery maximum capacity parses percentage strings")
