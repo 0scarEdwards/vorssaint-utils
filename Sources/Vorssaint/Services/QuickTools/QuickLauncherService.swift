@@ -12,7 +12,7 @@ enum QuickLauncherItem: String, PanelOrderItem, Identifiable {
     // after Keep awake, by the owner's decision. Saved orders are untouched
     // (a case added later joins a saved order at the end).
     case keepAwake, cleaner, toggles, micMute, screenOCR, colorPicker, clipboard, windowLayout,
-         cleaning, homebrew, media, urlCleaner, uninstaller
+         cleaning, homebrew, media, urlCleaner, uninstaller, screenshot
 
     var id: String { rawValue }
 
@@ -33,6 +33,7 @@ enum QuickLauncherItem: String, PanelOrderItem, Identifiable {
         case .media: return .mediaTools
         case .urlCleaner: return .urlCleaner
         case .uninstaller: return .uninstaller
+        case .screenshot: return .screenshot
         }
     }
 }
@@ -245,6 +246,11 @@ final class QuickLauncherService: ObservableObject {
             hide()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 ScreenTextService.shared.capture()
+            }
+        case .screenshot:
+            hide()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                ScreenshotService.shared.capture()
             }
         case .colorPicker:
             hide()

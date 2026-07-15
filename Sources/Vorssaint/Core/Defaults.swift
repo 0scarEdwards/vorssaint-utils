@@ -282,6 +282,24 @@ enum DefaultsKey {
     static let panelUtilityMicMute = "panelUtilityMicMute"
     static let clipboardHistoryShortcutEnabled = "clipboardHistoryShortcutEnabled"
     static let clipboardHistoryShortcut = "clipboardHistoryShortcut"
+    // Screenshot capture and editor.
+    static let screenshotShortcutEnabled = "screenshotShortcutEnabled"
+    static let screenshotShortcut = "screenshotShortcut"
+    static let screenshotFreeze = "screenshotFreeze"
+    static let screenshotSaveFolder = "screenshotSaveFolder"
+    static let screenshotIncludePointer = "screenshotIncludePointer"
+    static let screenshotDownscale = "screenshotDownscale"
+    static let screenshotDelay = "screenshotDelay"
+    static let screenshotLastTool = "screenshotLastTool"
+    static let screenshotLastColor = "screenshotLastColor"
+    static let screenshotLastStroke = "screenshotLastStroke"
+    static let screenshotLastSticker = "screenshotLastSticker"
+    static let screenshotAnnotationShadows = "screenshotAnnotationShadows"
+    static let screenshotToolOrder = "screenshotToolOrder"
+    static let screenshotToolShortcutsEnabled = "screenshotToolShortcutsEnabled"
+    static let screenshotBackdropStyle = "screenshotBackdropStyle"
+    static let screenshotBackdropPresets = "screenshotBackdropPresets"
+    static let panelUtilityScreenshot = "panelUtilityScreenshot"
 
     // Window Layout — snapping, global shortcuts and optional pointer gestures.
     static let windowLayoutShortcutsEnabled = "windowLayoutShortcutsEnabled"
@@ -676,6 +694,23 @@ enum Defaults {
         DefaultsKey.panelUtilityMicMute: true,
         DefaultsKey.clipboardHistoryShortcutEnabled: true,
         DefaultsKey.clipboardHistoryShortcut: GlobalShortcut.clipboardDefault.storageValue,
+        DefaultsKey.screenshotShortcutEnabled: false,
+        DefaultsKey.screenshotShortcut: GlobalShortcut.screenshotDefault.storageValue,
+        DefaultsKey.screenshotFreeze: true,
+        DefaultsKey.screenshotSaveFolder: "",
+        DefaultsKey.screenshotIncludePointer: false,
+        DefaultsKey.screenshotDownscale: false,
+        DefaultsKey.screenshotDelay: 0,
+        DefaultsKey.screenshotLastTool: "arrow",
+        DefaultsKey.screenshotLastColor: "red",
+        DefaultsKey.screenshotLastStroke: "medium",
+        DefaultsKey.screenshotLastSticker: "check",
+        DefaultsKey.screenshotAnnotationShadows: false,
+        DefaultsKey.screenshotToolOrder: ScreenshotSupport.Tool.defaultOrderStorage,
+        DefaultsKey.screenshotToolShortcutsEnabled: true,
+        DefaultsKey.screenshotBackdropStyle: "",
+        DefaultsKey.screenshotBackdropPresets: "[]",
+        DefaultsKey.panelUtilityScreenshot: true,
         DefaultsKey.windowLayoutShortcutsEnabled: false,
         DefaultsKey.windowGestureEnabled: false,
         DefaultsKey.windowGestureModifiers: WindowGestureSupport.defaultModifierStorageValue,

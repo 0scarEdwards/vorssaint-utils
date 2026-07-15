@@ -171,6 +171,9 @@ struct GlobalShortcut: Equatable, Hashable {
     // V for Vorssaint: the quick launcher's own combination.
     static let quickLauncherDefault = GlobalShortcut(keyCode: Int64(kVK_ANSI_V),
                                                      modifiers: [.control, .command])
+    // Default screenshot shortcut on the available control-option-command layer.
+    static let screenshotDefault = GlobalShortcut(keyCode: Int64(kVK_ANSI_4),
+                                                  modifiers: [.control, .option, .command])
 
     static func saved(for key: String, fallback: GlobalShortcut) -> GlobalShortcut {
         if let raw = UserDefaults.standard.string(forKey: key),
@@ -394,6 +397,7 @@ enum GlobalShortcutRole: CaseIterable, Identifiable {
     case screenOCR
     case micMute
     case quickLauncher
+    case screenshot
 
     var id: String { storageKey }
 
@@ -410,6 +414,7 @@ enum GlobalShortcutRole: CaseIterable, Identifiable {
         case .screenOCR: return DefaultsKey.screenOCRShortcut
         case .micMute: return DefaultsKey.micMuteShortcut
         case .quickLauncher: return DefaultsKey.quickLauncherShortcut
+        case .screenshot: return DefaultsKey.screenshotShortcut
         }
     }
 
@@ -426,6 +431,7 @@ enum GlobalShortcutRole: CaseIterable, Identifiable {
         case .screenOCR: return .screenOCRDefault
         case .micMute: return .micMuteDefault
         case .quickLauncher: return .quickLauncherDefault
+        case .screenshot: return .screenshotDefault
         }
     }
 
@@ -446,6 +452,7 @@ enum GlobalShortcutRole: CaseIterable, Identifiable {
         case .screenOCR: return strings.ocrName
         case .micMute: return strings.micMuteName
         case .quickLauncher: return strings.launcherName
+        case .screenshot: return FeatureStrings.screenshot(L10n.shared.language).pageTitle
         }
     }
 
@@ -472,6 +479,7 @@ enum GlobalShortcutRole: CaseIterable, Identifiable {
         case .screenOCR: return [DefaultsKey.screenOCRShortcutEnabled]
         case .micMute: return [DefaultsKey.micMuteShortcutEnabled]
         case .quickLauncher: return [DefaultsKey.quickLauncherShortcutEnabled]
+        case .screenshot: return [DefaultsKey.screenshotShortcutEnabled]
         }
     }
 
@@ -490,6 +498,7 @@ enum GlobalShortcutRole: CaseIterable, Identifiable {
         case .screenOCR: return .screenOCR
         case .micMute: return .micMute
         case .quickLauncher: return .quickLauncher
+        case .screenshot: return .screenshot
         }
     }
 

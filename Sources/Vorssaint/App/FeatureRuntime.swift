@@ -155,6 +155,7 @@ final class FeatureRuntime: ObservableObject {
         .quickLauncher: { QuickLauncherService.shared.syncWithPreferences() },
         .colorPicker: { ColorSamplerService.shared.syncWithPreferences() },
         .screenOCR: { ScreenTextService.shared.syncWithPreferences() },
+        .screenshot: { ScreenshotService.shared.syncWithPreferences() },
         .cleaner: { CleanerScheduler.shared.syncWithPreferences() },
         .monitorCPU: { FeatureRuntime.syncMonitor() },
         .monitorGPU: { FeatureRuntime.syncMonitor() },

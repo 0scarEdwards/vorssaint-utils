@@ -469,7 +469,7 @@ private enum UtilityPanelItem: String, PanelOrderItem, Identifiable {
     // every other tool, and the cleaner comes right below it (owner's call).
     // Saved orders are untouched.
     case quickLauncher, cleaner, homebrew, media, clipboard, windowLayout, uninstaller, cleanURL,
-         cleaning, screenOCR, colorPicker, micMute
+         cleaning, screenOCR, colorPicker, micMute, screenshot
 
     var id: String { rawValue }
 
@@ -489,6 +489,7 @@ private enum UtilityPanelItem: String, PanelOrderItem, Identifiable {
         case .screenOCR: return .screenOCR
         case .colorPicker: return .colorPicker
         case .micMute: return .micMute
+        case .screenshot: return .screenshot
         }
     }
 }
@@ -514,6 +515,7 @@ struct UtilitiesSection: View {
     @AppStorage(DefaultsKey.panelUtilityClipboard) private var showClipboard = true
     @AppStorage(DefaultsKey.panelUtilityWindowLayout) private var showWindowLayout = true
     @AppStorage(DefaultsKey.panelUtilityScreenOCR) private var showScreenOCR = true
+    @AppStorage(DefaultsKey.panelUtilityScreenshot) private var showScreenshot = true
     @AppStorage(DefaultsKey.panelUtilityQuickLauncher) private var showQuickLauncher = true
     @AppStorage(DefaultsKey.panelUtilityColorPicker) private var showColorPicker = true
     @AppStorage(DefaultsKey.panelUtilityMicMute) private var showMicMute = true
@@ -662,6 +664,7 @@ struct UtilitiesSection: View {
         case .colorPicker: return showColorPicker
         case .micMute: return showMicMute
         case .quickLauncher: return showQuickLauncher
+        case .screenshot: return showScreenshot
         }
     }
 
@@ -777,6 +780,23 @@ struct UtilitiesSection: View {
                                         ScreenTextService.shared.capture()
                                     }
                                 })
+        case .screenshot:
+            UtilityActionButton(title: FeatureStrings.screenshot(l10n.language).pageTitle,
+                                caption: screenshotCaption,
+                                systemImage: "camera.viewfinder",
+                                isEditing: editing,
+                                showsDragHandle: true,
+                                visibility: $showScreenshot,
+                                needsAttention: !permissions.screenRecording,
+                                permissionButtonTitle: l10n.s.permissionRequest,
+                                permissionAction: permissions.screenRecording ? nil : grantScreenRecordingPermission,
+                                shortcutHint: shortcutHint(.screenshot),
+                                action: {
+                                    appDelegate()?.closePopover()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                        ScreenshotService.shared.capture()
+                                    }
+                                })
         case .colorPicker:
             UtilityActionButton(title: l10n.s.colorPickerName,
                                 caption: l10n.s.colorPickerCaption,
@@ -835,6 +855,12 @@ struct UtilitiesSection: View {
             : "\(l10n.s.permissionRequired): \(l10n.s.permissionScreenRecording)"
     }
 
+    private var screenshotCaption: String {
+        permissions.screenRecording
+            ? FeatureStrings.screenshot(l10n.language).panelCaption
+            : "\(l10n.s.permissionRequired): \(l10n.s.permissionScreenRecording)"
+    }
+
     private func grantScreenRecordingPermission() {
         Permissions.shared.requestScreenRecording()
     }
@@ -851,6 +877,7 @@ struct UtilitiesSection: View {
         showCleanURL = true
         showCleaning = true
         showScreenOCR = true
+        showScreenshot = true
         showColorPicker = true
         showMicMute = true
         showQuickLauncher = true

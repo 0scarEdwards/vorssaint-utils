@@ -25,7 +25,7 @@ enum AppFeature: String, CaseIterable {
     case keepAwake, brightness, extraBrightness
     // Tools
     case quickLauncher, quickToggles, colorPicker, screenOCR, cleaningMode, mediaTools,
-         cleaner, uninstaller, homebrew
+         cleaner, uninstaller, homebrew, screenshot
     // System monitor, one entry per metric family (temperatures live with
     // their parent metric: CPU temp with CPU, battery temp with power).
     case monitorCPU, monitorGPU, monitorMemory, monitorNetwork, monitorDisk, monitorPower
@@ -57,7 +57,7 @@ extension AppFeature {
         case .keepAwake, .brightness, .extraBrightness:
             return .energyDisplay
         case .quickLauncher, .quickToggles, .colorPicker, .screenOCR, .cleaningMode, .mediaTools,
-             .cleaner, .uninstaller, .homebrew:
+             .cleaner, .uninstaller, .homebrew, .screenshot:
             return .tools
         case .monitorCPU, .monitorGPU, .monitorMemory, .monitorNetwork, .monitorDisk, .monitorPower:
             return .monitor
@@ -99,6 +99,7 @@ extension AppFeature {
         case .cleaner: return "sparkles"
         case .uninstaller: return "trash"
         case .homebrew: return "shippingbox"
+        case .screenshot: return "camera.viewfinder"
         case .monitorCPU: return "cpu"
         case .monitorGPU: return "rectangle.connected.to.line.below"
         case .monitorMemory: return "memorychip"
@@ -144,7 +145,7 @@ extension AppFeature {
         case .extraBrightness: return [DefaultsKey.extraBrightnessEnabled]
         case .windowLayout, .mixer, .micMute, .keepAwake,
              .quickLauncher, .quickToggles, .colorPicker, .screenOCR, .cleaningMode, .mediaTools,
-             .cleaner, .uninstaller, .homebrew,
+             .cleaner, .uninstaller, .homebrew, .screenshot,
              .monitorCPU, .monitorGPU, .monitorMemory, .monitorNetwork, .monitorDisk, .monitorPower:
             return []
         }
@@ -167,6 +168,7 @@ extension AppFeature {
         case .switcher: return [.accessibility, .screenRecording]
         case .dockPreview: return [.accessibility, .screenRecording]
         case .screenOCR: return [.screenRecording]
+        case .screenshot: return [.screenRecording]
         case .keepAwake: return [.accessibility]
         case .brightness: return [.accessibility]
         case .cleaner: return [.fullDiskAccess, .notifications]

@@ -97,6 +97,7 @@ if (( TEST )); then
         Sources/Vorssaint/Core/SnippetStrings.swift \
         Sources/Vorssaint/Core/BrightnessStrings.swift \
         Sources/Vorssaint/Core/QuickToggleStrings.swift \
+        Sources/Vorssaint/Core/ScreenshotStrings.swift \
         Sources/Vorssaint/Core/MenuBarAppearanceStrings.swift \
         Sources/Vorssaint/Core/BatteryTimeStrings.swift \
         Sources/Vorssaint/Core/KeepAwakeStrings.swift \
@@ -127,6 +128,7 @@ if (( TEST )); then
         Sources/Vorssaint/Services/MouseNavigation/MouseNavigationSupport.swift \
         Sources/Vorssaint/Services/QuickTools/QuickToolsSupport.swift \
         Sources/Vorssaint/Services/QuickTools/QuickTogglesSupport.swift \
+        Sources/Vorssaint/Services/QuickTools/ScreenshotSupport.swift \
         Sources/Vorssaint/Services/KeyboardDebounce/KeyboardDebounceSupport.swift \
         Sources/Vorssaint/Services/ScrollInverterSupport.swift \
         Sources/Vorssaint/Services/SmoothScrollSupport.swift \

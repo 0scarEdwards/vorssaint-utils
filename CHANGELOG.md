@@ -7,13 +7,16 @@ All notable changes to this project are documented here. The format follows
 ## [3.1.13]
 
 ### Summary
-Vorssaint 3.1.13 adds brightness and power controls for all your displays, a
-Quick toggles tab with one-click actions like dark mode and Trash, automatic Keep
-Awake rules, battery time remaining and compact usage bars in the menu bar.
-It also keeps Extra Brightness steady around fullscreen video and returns
-Finder to the Volume Mixer.
+Vorssaint 3.1.13 adds a screenshot tool with a quick preview and optional
+editor, brightness and power controls for
+all your displays, a Quick toggles tab, automatic Keep Awake rules and compact
+usage bars in the menu bar. It also keeps Extra Brightness steady around
+fullscreen video and returns Finder to the Volume Mixer.
 
 ### Added
+- Screenshot captures an area, window or screen. A compact
+  preview offers copy, save, delete and editing, with stickers, annotations,
+  precise crop, optional shadows and backgrounds in the editor.
 - Display controls for the Mac screen and external monitors in the menu bar
   panel and Settings. Adjust brightness, turn a display on or off and
   optionally let the keyboard brightness keys follow the pointer. Enable

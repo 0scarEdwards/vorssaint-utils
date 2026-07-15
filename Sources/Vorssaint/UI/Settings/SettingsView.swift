@@ -98,6 +98,13 @@ struct SettingsView: View {
                                        FeatureStrings.quickToggles(l10n.language).pageTitle,
                                        FeatureStrings.quickToggles(l10n.language).darkModeToDark,
                                        FeatureStrings.quickToggles(l10n.language).emptyTrashTitle]),
+                SidebarItem(page: .screenshot,
+                            title: FeatureStrings.screenshot(l10n.language).pageTitle,
+                            icon: "camera.viewfinder",
+                            keywords: [FeatureStrings.screenshot(l10n.language).freezeToggle,
+                                       FeatureStrings.screenshot(l10n.language).pinButton,
+                                       FeatureStrings.screenshot(l10n.language).toolPixelate,
+                                       FeatureStrings.screenshot(l10n.language).toolArrow]),
                 SidebarItem(page: .urlCleaner, title: l10n.s.urlCleanerName, icon: "link"),
                 SidebarItem(page: .homebrew, title: l10n.s.homebrewName, icon: "shippingbox"),
                 SidebarItem(page: .uninstaller, title: l10n.s.uninstallerName, icon: "trash"),
@@ -181,6 +188,7 @@ struct SettingsView: View {
         case .media: MediaSettings()
         case .clipboard: ClipboardSettings()
         case .quickTools: QuickToolsSettings()
+        case .screenshot: ScreenshotSettings()
         case .windowLayout: WindowLayoutSettings()
         case .shelf: ShelfSettings()
         case .shortcuts: ShortcutsSettings()

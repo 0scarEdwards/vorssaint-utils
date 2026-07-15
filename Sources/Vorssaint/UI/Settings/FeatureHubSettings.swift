@@ -530,6 +530,7 @@ extension AppFeature {
         case .quickToggles: return FeatureStrings.quickToggles(L10n.shared.language).pageTitle
         case .colorPicker: return s.colorPickerName
         case .screenOCR: return s.ocrName
+        case .screenshot: return FeatureStrings.screenshot(L10n.shared.language).pageTitle
         case .cleaningMode: return s.cleaningMenuItem
         case .mediaTools: return s.mediaName
         case .cleaner: return s.cleanerName
@@ -574,6 +575,7 @@ extension AppFeature {
         case .quickToggles: return FeatureStrings.quickToggles(L10n.shared.language).hubDescription
         case .colorPicker: return hub.descColorPicker
         case .screenOCR: return hub.descScreenOCR
+        case .screenshot: return FeatureStrings.screenshot(L10n.shared.language).hubDescription
         case .cleaningMode: return hub.descCleaningMode
         case .mediaTools: return hub.descMediaTools
         case .cleaner: return hub.descCleaner

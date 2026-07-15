@@ -4485,7 +4485,7 @@ struct MetricsTests {
 
         // MARK: Features hub catalog
 
-        expect(AppFeature.allCases.count == 39, "feature catalog has 39 features")
+        expect(AppFeature.allCases.count == 40, "feature catalog has 40 features")
         expect(Set(AppFeature.allCases.map(\.rawValue)).count == AppFeature.allCases.count,
                "feature ids are unique")
         expect(AppFeature.allCases.map(\.rawValue) == [
@@ -4496,7 +4496,7 @@ struct MetricsTests {
             "mixer", "soundOutputSwitcher", "micMute", "musicBlock",
             "keepAwake", "brightness", "extraBrightness",
             "quickLauncher", "quickToggles", "colorPicker", "screenOCR", "cleaningMode", "mediaTools",
-            "cleaner", "uninstaller", "homebrew",
+            "cleaner", "uninstaller", "homebrew", "screenshot",
             "monitorCPU", "monitorGPU", "monitorMemory", "monitorNetwork", "monitorDisk", "monitorPower",
         ], "feature ids are stable (they persist inside availability keys)")
         expect(AppFeature.switcher.availabilityKey == "featureAvailable.switcher",
@@ -4538,10 +4538,12 @@ struct MetricsTests {
                 .contains(.brightness),
                "brightness sliders alone never use accessibility")
 
-        expect(activeSet(.screenRecording, on: [DefaultsKey.switcherEnabled]) == [.switcher, .screenOCR],
-               "switcher with previews uses screen recording; OCR is on demand")
+        expect(activeSet(.screenRecording, on: [DefaultsKey.switcherEnabled])
+                == [.switcher, .screenOCR, .screenshot],
+               "switcher with previews uses screen recording; OCR and screenshots are on demand")
         expect(activeSet(.screenRecording,
-                         on: [DefaultsKey.switcherEnabled, DefaultsKey.switcherSimpleMode]) == [.screenOCR],
+                         on: [DefaultsKey.switcherEnabled, DefaultsKey.switcherSimpleMode])
+                == [.screenOCR, .screenshot],
                "simple-mode switcher stops using screen recording")
         expect(activeSet(.screenRecording,
                          on: [DefaultsKey.switcherSimpleMode, DefaultsKey.dockPreviewEnabled])
@@ -4660,6 +4662,16 @@ struct MetricsTests {
                    "every menu bar appearance string is set for \(language.rawValue)")
             expect(menuBarAppearanceValues.allSatisfy { !$0.contains("—") },
                    "no em-dash in visible menu bar appearance strings (\(language.rawValue))")
+            let screenshotValues = Mirror(reflecting: FeatureStrings.screenshot(language)).children
+                .compactMap { $0.value as? String }
+            expect(!screenshotValues.isEmpty && screenshotValues.allSatisfy { !$0.isEmpty },
+                   "every screenshot string is set for \(language.rawValue)")
+            expect(screenshotValues.allSatisfy { !$0.contains("—") },
+                   "no em-dash in visible screenshot strings (\(language.rawValue))")
+            expect(FeatureStrings.screenshot(language).delaySecondsFormat.contains("%d"),
+                   "screenshot delay format keeps its specifier (\(language.rawValue))")
+            expect(FeatureStrings.screenshot(language).savedHUDFormat.contains("%@"),
+                   "screenshot saved format keeps its specifier (\(language.rawValue))")
             let strings: Strings = {
                 switch language {
                 case .enUS: return .enUS
@@ -5018,6 +5030,368 @@ struct MetricsTests {
                                                      isEjectable: false, isLocal: true),
                "a fixed external volume without eject support is left alone")
 
+        // MARK: Screenshot tool
+
+        expect(ScreenshotSupport.sanitizedDelay(5) == 5
+                && ScreenshotSupport.sanitizedDelay(7) == 0
+                && ScreenshotSupport.sanitizedDelay(-3) == 0,
+               "capture delay only accepts the offered steps")
+
+        let dragRect = ScreenshotSupport.selectionRect(from: CGPoint(x: 100, y: 80),
+                                                       to: CGPoint(x: 40, y: 200))
+        expect(dragRect == CGRect(x: 40, y: 80, width: 60, height: 120),
+               "a drag in any direction normalizes to a positive rect")
+        let squareRect = ScreenshotSupport.selectionRect(from: CGPoint(x: 10, y: 10),
+                                                         to: CGPoint(x: 40, y: 90),
+                                                         square: true)
+        expect(squareRect.width == squareRect.height && squareRect.width == 80,
+               "shift constrains the selection to a square")
+        let centered = ScreenshotSupport.selectionRect(from: CGPoint(x: 50, y: 50),
+                                                       to: CGPoint(x: 70, y: 60),
+                                                       fromCenter: true)
+        expect(centered == CGRect(x: 30, y: 40, width: 40, height: 20),
+               "option grows the selection from the center")
+        expect(ScreenshotSupport.isClick(from: CGPoint(x: 5, y: 5), to: CGPoint(x: 7, y: 8))
+                && !ScreenshotSupport.isClick(from: .zero, to: CGPoint(x: 12, y: 0)),
+               "a tiny drag is a click, a real drag is not")
+
+        let cocoa = ScreenshotSupport.cocoaRect(fromWindowServer: CGRect(x: 10, y: 30, width: 200, height: 100),
+                                                mainScreenHeight: 900)
+        expect(cocoa == CGRect(x: 10, y: 770, width: 200, height: 100),
+               "window server rects convert to Cocoa coordinates")
+        let viewRect = ScreenshotSupport.flippedViewRect(fromCocoa: cocoa,
+                                                         screenFrame: CGRect(x: 0, y: 0, width: 1600, height: 900))
+        expect(viewRect == CGRect(x: 10, y: 30, width: 200, height: 100),
+               "the round trip back to a flipped view restores the window server rect")
+        expect(ScreenshotSupport.cocoaRect(fromFlippedView: viewRect,
+                                           screenFrame: CGRect(x: 0, y: 0,
+                                                               width: 1600, height: 900)) == cocoa,
+               "a flipped overlay rect maps back to its Cocoa screen position")
+        let pixels = ScreenshotSupport.imagePixelRect(fromView: CGRect(x: 10, y: 20, width: 30, height: 40),
+                                                      viewSize: CGSize(width: 100, height: 100),
+                                                      imageSize: CGSize(width: 200, height: 200))
+        expect(pixels == CGRect(x: 20, y: 40, width: 60, height: 80),
+               "view points scale to image pixels")
+        expect(ScreenshotSupport.imagePixelRect(fromView: CGRect(x: -20, y: -20, width: 500, height: 500),
+                                                viewSize: CGSize(width: 100, height: 100),
+                                                imageSize: CGSize(width: 200, height: 200))
+                == CGRect(x: 0, y: 0, width: 200, height: 200),
+               "pixel rects clamp to the image")
+        expect(ScreenshotSupport.imagePixelPoint(fromView: CGPoint(x: 50, y: 25),
+                                                 viewSize: CGSize(width: 100, height: 50),
+                                                 imageSize: CGSize(width: 200, height: 100))
+                == CGPoint(x: 100, y: 50),
+               "the capture loupe maps its pointer to the matching source pixel")
+        expect(ScreenshotSupport.imagePixelPoint(fromView: CGPoint(x: -10, y: 90),
+                                                 viewSize: CGSize(width: 100, height: 50),
+                                                 imageSize: CGSize(width: 200, height: 100))
+                == CGPoint(x: 0, y: 100),
+               "the capture loupe clamps source points at display edges")
+        let editorMinimum = ScreenshotSupport.editorMinimumContentSize(
+            visibleSize: CGSize(width: 1470, height: 956))
+        expect(editorMinimum == CGSize(width: 980, height: 680),
+               "the screenshot editor opens on a comfortable canvas")
+        let editorSmallDisplay = ScreenshotSupport.editorMinimumContentSize(
+            visibleSize: CGSize(width: 700, height: 500))
+        expect(editorSmallDisplay == CGSize(width: 700, height: 500),
+               "the editor minimum never exceeds a compact display")
+        let smallCaptureWindow = ScreenshotSupport.editorContentSize(
+            imagePointSize: CGSize(width: 180, height: 100),
+            visibleSize: CGSize(width: 1470, height: 956))
+        expect(smallCaptureWindow == editorMinimum,
+               "a small screenshot still receives the full editing canvas")
+        let largeCaptureWindow = ScreenshotSupport.editorContentSize(
+            imagePointSize: CGSize(width: 2200, height: 1400),
+            visibleSize: CGSize(width: 1470, height: 956))
+        expect(largeCaptureWindow.width <= 1470 * 0.90
+                && largeCaptureWindow.height <= 956 * 0.88,
+               "a large screenshot editor stays inside the visible display")
+        let previewFrame = ScreenshotSupport.quickPreviewFrame(
+            size: CGSize(width: 286, height: 210),
+            anchor: CGRect(x: 1100, y: 100, width: 300, height: 300),
+            pointer: CGPoint(x: 1300, y: 220),
+            visibleFrame: CGRect(x: 0, y: 0, width: 1470, height: 956))
+        expect(CGRect(x: 10, y: 10, width: 1450, height: 936).contains(previewFrame),
+               "the quick capture preview stays fully inside the visible display")
+
+        let pickable = [ScreenshotSupport.PickableWindow(windowID: 1, frame: CGRect(x: 0, y: 0, width: 50, height: 50)),
+                        ScreenshotSupport.PickableWindow(windowID: 2, frame: CGRect(x: 0, y: 0, width: 400, height: 400))]
+        expect(ScreenshotSupport.window(at: CGPoint(x: 10, y: 10), in: pickable)?.windowID == 1,
+               "the frontmost window wins a click")
+        expect(ScreenshotSupport.window(at: CGPoint(x: 300, y: 300), in: pickable)?.windowID == 2
+                && ScreenshotSupport.window(at: CGPoint(x: 900, y: 900), in: pickable) == nil,
+               "clicks outside every window pick nothing")
+
+        let fileDate = Date(timeIntervalSince1970: 1_752_486_065) // 2025-07-14 09:41:05 UTC
+        let fileName = ScreenshotSupport.fileName(prefix: "Screenshot", date: fileDate)
+        expect(fileName.hasPrefix("Screenshot 20") && fileName.hasSuffix(".png")
+                && !fileName.contains(":") && fileName.contains(" at "),
+               "file names are dated, colon free and png")
+        expect(ScreenshotSupport.uniqueFileName("a.png", exists: { _ in false }) == "a.png",
+               "a free name stays untouched")
+        expect(ScreenshotSupport.uniqueFileName("a.png", exists: { $0 == "a.png" }) == "a 2.png",
+               "a taken name gets the next numbered variant")
+        expect(ScreenshotSupport.uniqueFileName("a.png",
+                                                exists: { $0 == "a.png" || $0 == "a 2.png" }) == "a 3.png",
+               "numbering keeps walking until a free name")
+
+        var counterList = [
+            ScreenshotSupport.Annotation(tool: .counter, number: 1),
+            ScreenshotSupport.Annotation(tool: .arrow),
+            ScreenshotSupport.Annotation(tool: .counter, number: 2),
+            ScreenshotSupport.Annotation(tool: .counter, number: 3),
+        ]
+        counterList.remove(at: 0)
+        let renumbered = ScreenshotSupport.renumberingCounters(counterList)
+        expect(renumbered.filter { $0.tool == .counter }.map(\.number) == [1, 2],
+               "deleting a counter renumbers the rest without holes")
+        expect(renumbered[0].tool == .arrow || renumbered.count == 3,
+               "renumbering never drops annotations")
+
+        let resized = ScreenshotSupport.resizedRect(CGRect(x: 10, y: 10, width: 100, height: 100),
+                                                    dragging: .bottomRight,
+                                                    to: CGPoint(x: 50, y: 60))
+        expect(resized == CGRect(x: 10, y: 10, width: 40, height: 50),
+               "dragging a handle resizes the rect")
+        let crossed = ScreenshotSupport.resizedRect(CGRect(x: 10, y: 10, width: 100, height: 100),
+                                                    dragging: .right,
+                                                    to: CGPoint(x: 0, y: 0))
+        expect(crossed.width == 10 && crossed.minX == 0,
+               "dragging a handle across the opposite edge flips instead of going negative")
+        let movedCrop = ScreenshotSupport.movedRect(
+            CGRect(x: 20, y: 30, width: 80, height: 60),
+            by: CGPoint(x: 50, y: -100),
+            within: CGRect(x: 0, y: 0, width: 120, height: 100))
+        expect(movedCrop == CGRect(x: 40, y: 0, width: 80, height: 60),
+               "dragging inside a crop moves it without resizing past the image edges")
+        expect(ScreenshotSupport.handle(at: CGPoint(x: 10, y: 10),
+                                        rect: CGRect(x: 10, y: 10, width: 100, height: 100),
+                                        tolerance: 6) == .topLeft,
+               "handle hit testing finds the corner")
+
+        let head = ScreenshotSupport.arrowHead(from: CGPoint(x: 0, y: 0),
+                                               to: CGPoint(x: 100, y: 0),
+                                               strokeWidth: 4)
+        expect(head.left.x < 100 && head.right.x < 100 && head.left.y != head.right.y,
+               "arrow heads open behind the tip")
+        let shortHead = ScreenshotSupport.arrowHead(from: .zero,
+                                                    to: CGPoint(x: 10, y: 0),
+                                                    strokeWidth: 14)
+        expect(shortHead.left.x >= 0 && shortHead.right.x >= 0,
+               "a short arrow head never extends behind its tail")
+        let arrowPath = ScreenshotSupport.arrowSilhouette(from: CGPoint(x: 100, y: 20),
+                                                          to: CGPoint(x: 100, y: 300),
+                                                          strokeWidth: 40)
+        expect(arrowPath.contains(CGPoint(x: 100, y: 30),
+                                  using: .winding,
+                                  transform: .identity),
+               "the arrow tail stays filled where its cap meets the shaft")
+        expect(arrowPath.contains(CGPoint(x: 100, y: 190),
+                                  using: .winding,
+                                  transform: .identity),
+               "the arrow stays filled where its shaft meets the head")
+        expect(abs(ScreenshotSupport.distance(from: CGPoint(x: 50, y: 10),
+                                              toSegment: CGPoint(x: 0, y: 0),
+                                              CGPoint(x: 100, y: 0)) - 10) < 0.001,
+               "segment distance measures perpendicular offset")
+        expect(ScreenshotSupport.distance(from: CGPoint(x: -30, y: 0),
+                                          toSegment: CGPoint(x: 0, y: 0),
+                                          CGPoint(x: 100, y: 0)) == 30,
+               "segment distance clamps to the endpoints")
+
+        expect(ScreenshotSupport.pixelBlockSize(for: CGSize(width: 5500, height: 3600)) == 65
+                && ScreenshotSupport.pixelBlockSize(for: CGSize(width: 200, height: 120)) == 10,
+               "pixelation blocks scale with the capture and never get too fine")
+        expect(ScreenshotSupport.downscaledSize(pixelSize: CGSize(width: 800, height: 600), scale: 2)
+                == CGSize(width: 400, height: 300),
+               "the 1x option halves a Retina capture")
+        expect(ScreenshotSupport.downscaledSize(pixelSize: CGSize(width: 800, height: 600), scale: 1)
+                == CGSize(width: 800, height: 600),
+               "a 1x capture never downscales")
+        expect(ScreenshotSupport.backdropPadding(for: CGSize(width: 100, height: 100), factor: 0.5) == 24,
+               "backdrop padding keeps a floor for tiny captures")
+        expect(ScreenshotSupport.backdropPadding(for: CGSize(width: 4000, height: 4000), factor: 1)
+                == (4000 * 0.175).rounded(),
+               "the margin slider grows the backdrop padding")
+        expect(ScreenshotSupport.backdropPadding(for: CGSize(width: 4000, height: 4000), factor: 0)
+                == 140,
+               "margin zero still keeps a small frame")
+        expect(ScreenshotSupport.BackdropID.allCases.filter { $0 != .none }
+                .allSatisfy { $0.stops.count == 2 },
+               "every backdrop gradient has its two stops")
+        expect(ScreenshotSupport.ColorID.sanitized("bogus") == .red
+                && ScreenshotSupport.StrokeID.sanitized(nil) == .medium,
+               "style choices sanitize to safe defaults")
+        expect(ScreenshotSupport.StickerID.sanitized("bogus") == .check
+                && ScreenshotSupport.StickerID.allCases.count == 12,
+               "stickers keep a safe default and a compact built-in set")
+        let stickerRect = ScreenshotSupport.stickerRect(
+            centeredAt: CGPoint(x: 5, y: 5),
+            side: 40,
+            within: CGRect(x: 0, y: 0, width: 100, height: 80))
+        expect(stickerRect == CGRect(x: 0, y: 0, width: 40, height: 40),
+               "a sticker placed at an edge stays fully inside the image")
+
+        expect(ScreenshotSupport.cardCornerRadius(for: CGSize(width: 1600, height: 900), factor: 0) == 0
+                && ScreenshotSupport.cardCornerRadius(for: CGSize(width: 1600, height: 900), factor: 1) == 180
+                && ScreenshotSupport.cardCornerRadius(for: CGSize(width: 1600, height: 900), factor: 2) == 180,
+               "card corner radius clamps and scales with the short side")
+
+        let solidStyle = ScreenshotSupport.BackdropStyle(kind: .solid, colors: [[0.2, 0.4, 0.9]],
+                                                         padding: 0.3, cornerRadius: 0.2)
+        let solidRoundTrip = ScreenshotSupport.BackdropStyle.decoded(solidStyle.encoded())
+        expect(solidRoundTrip == solidStyle, "a backdrop style round-trips through JSON")
+        expect(ScreenshotSupport.BackdropStyle.decoded(nil).kind == .none
+                && ScreenshotSupport.BackdropStyle.decoded("").kind == .none
+                && ScreenshotSupport.BackdropStyle.decoded("not json").kind == .none,
+               "a missing or broken backdrop style falls back to none")
+        expect(ScreenshotSupport.BackdropStyle().cornerRadius == 0,
+               "the default backdrop leaves capture corners unchanged")
+        let brokenSolid = ScreenshotSupport.BackdropStyle(kind: .solid, colors: nil)
+        expect(brokenSolid.sanitized().kind == .none,
+               "a solid style without colors demotes to none")
+        let wildSliders = ScreenshotSupport.BackdropStyle(kind: .preset, presetID: "ocean",
+                                                          padding: 9, cornerRadius: -3)
+        expect(wildSliders.sanitized().padding == 1 && wildSliders.sanitized().cornerRadius == 0,
+               "backdrop sliders clamp to their range")
+        expect(ScreenshotSupport.BackdropStyle(kind: .preset, presetID: "bogus").sanitized().kind == .none
+                && ScreenshotSupport.BackdropStyle(kind: .image, imagePath: nil).sanitized().kind == .none,
+               "unknown presets and missing image paths demote to none")
+        expect(ScreenshotSupport.BackdropStyle(kind: .gradient,
+                                               colors: [[0, 2, -1], [0.5, 0.5, 0.5]])
+                .sanitized().colors?.first == [0, 1, 0],
+               "gradient colors clamp component by component")
+
+        let presetList = [solidStyle,
+                          ScreenshotSupport.BackdropStyle(kind: .gradient,
+                                                          colors: [[1, 0, 0], [0, 0, 1]])]
+        let decodedPresets = ScreenshotSupport.decodedBackdropPresets(
+            ScreenshotSupport.encodedBackdropPresets(presetList))
+        expect(decodedPresets == presetList, "saved backdrops round-trip through JSON")
+        expect(ScreenshotSupport.decodedBackdropPresets("junk").isEmpty
+                && ScreenshotSupport.decodedBackdropPresets(nil).isEmpty,
+               "broken preset lists decode to empty")
+        let overflow = Array(repeating: solidStyle, count: 40)
+        expect(ScreenshotSupport.decodedBackdropPresets(
+                ScreenshotSupport.encodedBackdropPresets(overflow)).count
+                == ScreenshotSupport.backdropPresetLimit,
+               "saved backdrops cap at the presets limit")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotBackdropStyle] as? String == ""
+                && Defaults.registeredDefaults[DefaultsKey.screenshotBackdropPresets] as? String == "[]",
+               "backdrop style and presets register empty")
+
+        let wordBoxes = [CGRect(x: 0, y: 0, width: 40, height: 10),
+                         CGRect(x: 50, y: 0, width: 40, height: 10),
+                         CGRect(x: 0, y: 20, width: 40, height: 10)]
+        expect(ScreenshotSupport.wordSelection(anchor: CGPoint(x: 5, y: 5),
+                                               current: CGPoint(x: 60, y: 5),
+                                               boxes: wordBoxes) == [0, 1],
+               "a drag across a line selects the words it crosses")
+        expect(ScreenshotSupport.wordSelection(anchor: CGPoint(x: 5, y: 5),
+                                               current: CGPoint(x: 10, y: 25),
+                                               boxes: wordBoxes) == [0, 2],
+               "a drag across lines selects into the next line")
+        let recognizedWords = [
+            ScreenshotSupport.RecognizedWord(text: "ola", rect: wordBoxes[0], line: 0),
+            ScreenshotSupport.RecognizedWord(text: "mundo", rect: wordBoxes[1], line: 0),
+            ScreenshotSupport.RecognizedWord(text: "linha", rect: wordBoxes[2], line: 1),
+        ]
+        expect(ScreenshotSupport.joinedWords(recognizedWords, selected: [1, 0]) == "ola mundo",
+               "selected words join in reading order with spaces")
+        expect(ScreenshotSupport.joinedWords(recognizedWords, selected: [2, 0]) == "ola\nlinha",
+               "line changes become newlines")
+        expect(ScreenshotSupport.joinedWords(recognizedWords, selected: [9]).isEmpty
+                && ScreenshotSupport.joinedWords(recognizedWords, selected: []).isEmpty,
+               "out of range or empty selections copy nothing")
+        let defaultScreenshotTools = ScreenshotSupport.Tool.allCases
+        expect(defaultScreenshotTools.count == 13
+                && Array(defaultScreenshotTools.prefix(9))
+                    == [.select, .arrow, .pixelate, .crop, .text, .sticker,
+                        .rect, .highlight, .freehand],
+               "the screenshot rail leads with the nine most useful numbered tools")
+        let customScreenshotTools = ScreenshotSupport.Tool.ordered(
+            from: "crop,arrow,arrow,invalid")
+        expect(Array(customScreenshotTools.prefix(2)) == [.crop, .arrow]
+                && customScreenshotTools.count == 13
+                && Set(customScreenshotTools).count == 13,
+               "a saved screenshot tool order drops invalid duplicates and appends missing tools")
+        expect(ScreenshotSupport.Tool.shortcutTool(number: 1,
+                                                   orderRaw: nil,
+                                                   enabled: true) == .select
+                && ScreenshotSupport.Tool.shortcutTool(number: 3,
+                                                       orderRaw: nil,
+                                                       enabled: true) == .pixelate
+                && ScreenshotSupport.Tool.shortcutTool(number: 9,
+                                                       orderRaw: nil,
+                                                       enabled: true) == .freehand
+                && ScreenshotSupport.Tool.shortcutTool(number: 1,
+                                                       orderRaw: nil,
+                                                       enabled: false) == nil
+                && ScreenshotSupport.Tool.shortcutTool(number: 10,
+                                                       orderRaw: nil,
+                                                       enabled: true) == nil,
+               "number keys 1 through 9 follow tool order and can be disabled together")
+        expect(ScreenshotSupport.Tool.shortcutNumber(for: .crop,
+                                                     orderRaw: "arrow,crop",
+                                                     enabled: true) == 2
+                && ScreenshotSupport.Tool.shortcutNumber(for: .redact,
+                                                         orderRaw: nil,
+                                                         enabled: true) == nil,
+               "the rail exposes only the first nine configured shortcut numbers")
+        let cropAssignedFirst = ScreenshotSupport.Tool.assigningShortcut(
+            1, to: .crop, orderRaw: nil)
+        let selectWithoutShortcut = ScreenshotSupport.Tool.assigningShortcut(
+            nil, to: .select, orderRaw: nil)
+        expect(cropAssignedFirst.first == .crop
+                && ScreenshotSupport.Tool.shortcutNumber(
+                    for: .crop,
+                    orderRaw: cropAssignedFirst.map(\.rawValue).joined(separator: ","),
+                    enabled: true) == 1
+                && selectWithoutShortcut.firstIndex(of: .select) == 9
+                && ScreenshotSupport.Tool.shortcutNumber(
+                    for: .select,
+                    orderRaw: selectWithoutShortcut.map(\.rawValue).joined(separator: ","),
+                    enabled: true) == nil,
+               "the visible shortcut menu assigns a numbered slot or removes a tool from 1 through 9")
+
+        expect(ScreenshotSupport.cropLoupeSampleRect(
+            around: CGPoint(x: 50, y: 40),
+            imageSize: CGSize(width: 100, height: 80))
+            == CGRect(x: 43, y: 33, width: 14, height: 14),
+               "the crop loupe centers its source pixels around an inner grip")
+        expect(ScreenshotSupport.cropLoupeSampleRect(
+            around: CGPoint(x: 100, y: 80),
+            imageSize: CGSize(width: 100, height: 80))
+            == CGRect(x: 86, y: 66, width: 14, height: 14),
+               "the crop loupe keeps a full sample at the bottom right edge")
+        expect(ScreenshotSupport.cropLoupeSampleRect(
+            around: .zero,
+            imageSize: CGSize(width: 8, height: 5))
+            == CGRect(x: 0, y: 0, width: 8, height: 5),
+               "the crop loupe safely shrinks only for images smaller than its sample")
+
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotFreeze] as? Bool == true,
+               "the screen freezes during selection by default")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotShortcutEnabled] as? Bool == false,
+               "the screenshot shortcut ships off like the other quick tools")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotAnnotationShadows] as? Bool == false,
+               "screenshot annotation shadows ship off")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotToolShortcutsEnabled] as? Bool == true,
+               "screenshot number shortcuts ship enabled")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotToolOrder] as? String
+                == ScreenshotSupport.Tool.defaultOrderStorage,
+               "the screenshot rail ships in its useful numbered order")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotLastSticker] as? String == "check",
+               "the sticker tool starts with a safe built-in choice")
+        expect(Defaults.registeredDefaults[DefaultsKey.screenshotShortcut] as? String
+                == "control+option+command:21",
+               "the default screenshot shortcut is control option command 4")
+        expect(Defaults.registeredDefaults[DefaultsKey.panelUtilityScreenshot] as? Bool == true,
+               "the panel row ships visible like its siblings")
+        expect(GlobalShortcutRole.screenshot.requiredEnableKeys == [DefaultsKey.screenshotShortcutEnabled]
+                && GlobalShortcutRole.screenshot.feature == .screenshot,
+               "the screenshot shortcut role gates on its toggle and feature")
+
         // MARK: Settings backup
 
         let backupKeys = SettingsBackupSupport.exportKeys()
@@ -5036,6 +5410,12 @@ struct MetricsTests {
                 && backupKeys.contains(DefaultsKey.windowGestureModifiers)
                 && backupKeys.contains(DefaultsKey.windowGestureRaiseWindow),
                "window gesture choices travel with the settings backup")
+        expect(backupKeys.contains(DefaultsKey.screenshotFreeze)
+                && backupKeys.contains(DefaultsKey.screenshotSaveFolder)
+                && backupKeys.contains(DefaultsKey.screenshotToolOrder)
+                && backupKeys.contains(DefaultsKey.screenshotToolShortcutsEnabled)
+                && backupKeys.contains(DefaultsKey.panelUtilityScreenshot),
+               "screenshot preferences travel with the settings backup")
         expect(backupKeys.contains(DefaultsKey.panelShowToggles)
                 && backupKeys.contains(DefaultsKey.panelToggleOrder)
                 && backupKeys.contains(DefaultsKey.panelToggleDarkMode),
