@@ -986,6 +986,48 @@ struct MetricsTests {
                "App Switcher keeps regular app identity separate from the window owner")
         expect(embeddedWindow.withMinimized(true).windowOwnerPID == 202,
                "App Switcher preserves the real window owner across state updates")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 101,
+                                                 focusedWindowID: nil,
+                                                 items: [embeddedWindow])?.id == embeddedWindow.id,
+               "App Switcher can start when the foreground app is represented")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 202,
+                                                 focusedWindowID: nil,
+                                                 items: [embeddedWindow])?.id == embeddedWindow.id,
+               "App Switcher can start when an embedded helper owns the foreground window")
+        let offscreenWindow = SwitcherItem.window(id: 78,
+                                                  title: "Archive",
+                                                  appName: "Primary",
+                                                  pid: 101,
+                                                  isOnScreen: false,
+                                                  frame: CGRect(x: 20, y: 20, width: 900, height: 600))
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 101,
+                                                 focusedWindowID: nil,
+                                                 items: [offscreenWindow]) == nil,
+               "App Switcher does not treat an old off-screen window as the foreground surface")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 101,
+                                                 focusedWindowID: 78,
+                                                 items: [offscreenWindow])?.id == offscreenWindow.id,
+               "App Switcher accepts an Accessibility-focused window from outside the CG list")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 101,
+                                                 focusedWindowID: nil,
+                                                 items: [offscreenWindow, embeddedWindow])?.id == embeddedWindow.id,
+               "App Switcher chooses the on-screen source over an older window from the same app")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 101,
+                                                 focusedWindowID: 78,
+                                                 items: [offscreenWindow, embeddedWindow])?.id == offscreenWindow.id,
+               "App Switcher gives the exact focused source priority over CG ordering")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 404,
+                                                 focusedWindowID: nil,
+                                                 items: [.appOnly(appName: "Desktop", pid: 404)])?.id == "a:404",
+               "App Switcher accepts its intentional app-only desktop entry")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: 303,
+                                                 focusedWindowID: nil,
+                                                 items: [embeddedWindow]) == nil,
+               "App Switcher leaves the system shortcut alone when the foreground app is missing")
+        expect(SwitcherSupport.sessionSourceItem(frontmostPID: nil,
+                                                 focusedWindowID: nil,
+                                                 items: [embeddedWindow]) == nil,
+               "App Switcher leaves the system shortcut alone without a foreground app")
         expect(registeredDefaults[DefaultsKey.switcherShowWindowlessFinder] as? Bool == true,
                "Finder without windows stays visible in the switcher by default")
         expect(registeredDefaults[DefaultsKey.dockPreviewEnabled] as? Bool == false,
@@ -3727,6 +3769,36 @@ struct MetricsTests {
                                                          targetIsMinimized: false,
                                                          ownPID: 99),
                "App Switcher focus retries do not steal focus after the user moves to another app")
+        expect(SwitcherSupport.shouldContinueAppActivationRetry(targetPID: 10,
+                                                                sourcePID: 20,
+                                                                frontmostPID: 20,
+                                                                targetWasObservedFrontmost: false,
+                                                                ownPID: 99),
+               "App Switcher can retry an app-only target during a fullscreen handoff")
+        expect(SwitcherSupport.shouldContinueAppActivationRetry(targetPID: 10,
+                                                                sourcePID: 20,
+                                                                frontmostPID: 10,
+                                                                targetWasObservedFrontmost: true,
+                                                                ownPID: 99),
+               "App Switcher can settle repeated activation on the app-only target")
+        expect(!SwitcherSupport.shouldContinueAppActivationRetry(targetPID: 10,
+                                                                 sourcePID: 20,
+                                                                 frontmostPID: 20,
+                                                                 targetWasObservedFrontmost: true,
+                                                                 ownPID: 99),
+               "App Switcher cancels app-only retries when the user returns to the fullscreen source")
+        expect(!SwitcherSupport.shouldContinueAppActivationRetry(targetPID: 10,
+                                                                 sourcePID: 20,
+                                                                 frontmostPID: 30,
+                                                                 targetWasObservedFrontmost: false,
+                                                                 ownPID: 99),
+               "App Switcher app-only retries do not steal focus from another app")
+        expect(!SwitcherSupport.shouldContinueAppActivationRetry(targetPID: 10,
+                                                                 sourcePID: nil,
+                                                                 frontmostPID: 30,
+                                                                 targetWasObservedFrontmost: false,
+                                                                 ownPID: 99),
+               "App Switcher app-only retries fail closed without a known source app")
         expect(SwitcherSupport.shouldKeepMinimizeRestoreObserver(targetPID: 10,
                                                                  sourcePID: 20,
                                                                  activatedPID: 10,

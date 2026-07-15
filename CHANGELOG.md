@@ -48,6 +48,8 @@ fullscreen video and returns Finder to the Volume Mixer.
   spikes are ignored and that the time setting only delays repeated alerts.
 
 ### Fixed
+- ⌘Tab now falls back to the system switcher when a fullscreen app does not
+  expose a switchable window.
 - Smooth Scrolling now moves horizontally while Shift is held.
 - Dock click to minimize now reacts immediately in more apps and no longer
   opens unrelated windows.

@@ -139,6 +139,25 @@ enum SwitcherSupport {
         dockPreviewEnabled || (switcherEnabled && capturesPreviews(simpleMode: simpleMode))
     }
 
+    /// Resolves the foreground surface before the custom switcher takes over
+    /// ⌘Tab. Fullscreen and custom-rendered apps can expose no Accessibility
+    /// window; failing open keeps the system switcher available instead of
+    /// mistaking an older off-screen window for the source.
+    static func sessionSourceItem(frontmostPID: pid_t?,
+                                  focusedWindowID: CGWindowID?,
+                                  items: [SwitcherItem]) -> SwitcherItem? {
+        guard let frontmostPID else { return nil }
+        let appPID = items.first(where: { $0.windowOwnerPID == frontmostPID })?.pid
+            ?? frontmostPID
+        let candidates = items.filter { $0.pid == appPID }
+        if let focusedWindowID,
+           let focused = candidates.first(where: { $0.windowID == focusedWindowID }) {
+            return focused
+        }
+        return candidates.first(where: { $0.isOnScreen && !$0.isMinimized })
+            ?? candidates.first(where: { $0.windowID == nil })
+    }
+
     /// Finds the regular app that contains an accessory helper bundle.
     static func embeddedHostPID(helperBundlePath: String,
                                 regularBundlePaths: [pid_t: String]) -> pid_t? {
@@ -455,6 +474,17 @@ enum SwitcherSupport {
         guard let sourcePID,
               let frontmostPID else { return true }
         return frontmostPID == targetPID || frontmostPID == sourcePID || frontmostPID == ownPID
+    }
+
+    static func shouldContinueAppActivationRetry(targetPID: pid_t,
+                                                 sourcePID: pid_t?,
+                                                 frontmostPID: pid_t?,
+                                                 targetWasObservedFrontmost: Bool,
+                                                 ownPID: pid_t = ProcessInfo.processInfo.processIdentifier) -> Bool {
+        if frontmostPID == targetPID { return true }
+        guard !targetWasObservedFrontmost else { return false }
+        guard let frontmostPID else { return true }
+        return frontmostPID == sourcePID || frontmostPID == ownPID
     }
 
     static func shouldKeepMinimizeRestoreObserver(targetPID: pid_t,

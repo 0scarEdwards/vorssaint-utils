@@ -150,6 +150,7 @@ final class AppSwitcher: ObservableObject {
 
     private func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if sessionActive { cancelSession() }
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             return Unmanaged.passUnretained(event)
         }
@@ -264,16 +265,27 @@ final class AppSwitcher: ObservableObject {
     // MARK: - Session lifecycle
 
     private func beginSession(reversed: Bool, shortcut: GlobalShortcut) -> Bool {
+        guard let reportedFrontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
+        else { return false }
         let windows = WindowEnumerator.listWindows()
         guard !windows.isEmpty else { return false }
+        let focusedSourceWindowID = focusedWindowID(for: reportedFrontPID)
+        guard let source = SwitcherSupport.sessionSourceItem(frontmostPID: reportedFrontPID,
+                                                             focusedWindowID: focusedSourceWindowID,
+                                                             items: windows)
+        else { return false }
 
-        let list = orderedForSession(windows)
+        let list = orderedForSession(windows, currentID: source.id)
         sessionItems = list
         totalWindowCount = list.count
         searchQuery = ""
         self.windows = list
-        sessionSourceContext = sourceContext(in: list)
-        sessionStartItemID = sessionSourceContext?.itemID ?? currentItemID(in: list)
+        sessionSourceContext = SwitcherSourceContext(itemID: source.id,
+                                                     pid: source.pid,
+                                                     windowID: source.windowID,
+                                                     windowOwnerPID: source.windowOwnerPID,
+                                                     isFullscreen: source.isFullscreen)
+        sessionStartItemID = source.id
         recomputeLayouts(for: list)
         if !capturesPreviews {
             previews = [:]
@@ -321,8 +333,7 @@ final class AppSwitcher: ObservableObject {
     /// follow most-recently-used order, falling back to the app-activation
     /// order the enumerator already applied. This is what lets ⌘Tab toggle
     /// between two windows of the same app, not just two apps.
-    private func orderedForSession(_ items: [SwitcherItem]) -> [SwitcherItem] {
-        let currentID = currentItemID(in: items)
+    private func orderedForSession(_ items: [SwitcherItem], currentID: String) -> [SwitcherItem] {
         return items.enumerated()
             .sorted { lhs, rhs in
                 sortKey(lhs.element, currentID: currentID, original: lhs.offset)
@@ -349,43 +360,6 @@ final class AppSwitcher: ObservableObject {
         guard !groups.isEmpty else { return 0 }
         let groupIndex = reversed ? max(0, groups.count - 1) : (groups.count > 1 ? 1 : 0)
         return groups[groupIndex].representativeIndex
-    }
-
-    /// The id of the window on screen right now. Prefer the Accessibility
-    /// focused window so the first ⌘Tab never targets the window the user is
-    /// already in when the frontmost app has more than one window.
-    private func currentItemID(in items: [SwitcherItem]) -> String? {
-        let reportedFrontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
-            ?? AppActivationTracker.shared.frontmostPid
-        let frontPID = reportedFrontPID.flatMap { reportedPID in
-            items.first(where: { $0.windowOwnerPID == reportedPID })?.pid ?? reportedPID
-        }
-        if let reportedFrontPID,
-           let focusedID = focusedWindowID(for: reportedFrontPID),
-           items.contains(where: { $0.windowID == focusedID }) {
-            return "w:\(focusedID)"
-        }
-        let current = items.first { frontPID == nil || $0.pid == frontPID }
-        return current?.id ?? items.first?.id
-    }
-
-    private func sourceContext(in items: [SwitcherItem]) -> SwitcherSourceContext? {
-        guard let reportedFrontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
-                ?? AppActivationTracker.shared.frontmostPid else { return nil }
-        let frontPID = items.first(where: { $0.windowOwnerPID == reportedFrontPID })?.pid
-            ?? reportedFrontPID
-
-        let focusedID = focusedWindowID(for: reportedFrontPID)
-        let focusedSource = focusedID.flatMap { focusedID in
-            items.first { $0.pid == frontPID && $0.windowID == focusedID }
-        }
-        let source = focusedSource ?? items.first { $0.pid == frontPID }
-
-        return SwitcherSourceContext(itemID: source?.id,
-                                     pid: frontPID,
-                                     windowID: source?.windowID,
-                                     windowOwnerPID: source?.windowOwnerPID,
-                                     isFullscreen: source?.isFullscreen ?? false)
     }
 
     private func focusedWindowID(for pid: pid_t) -> CGWindowID? {
