@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [3.1.13]
+## [3.1.13] - 2026-07-15
 
 ### Summary
 Vorssaint 3.1.13 adds a screenshot tool with a quick preview and optional
