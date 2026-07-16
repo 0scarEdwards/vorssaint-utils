@@ -366,6 +366,27 @@ enum SwitcherSupport {
         return groups
     }
 
+    /// Moves between rows without wrapping. When the row below is shorter,
+    /// Down lands on that row's last item instead of leaving the selection in
+    /// place because the same column is missing.
+    static func gridSelectionIndex(after selectedIndex: Int,
+                                   itemCount: Int,
+                                   columns: Int,
+                                   movingDown: Bool) -> Int {
+        guard itemCount > 0 else { return 0 }
+        let current = min(max(0, selectedIndex), itemCount - 1)
+        let safeColumns = max(1, columns)
+
+        guard movingDown else {
+            let target = current - safeColumns
+            return target >= 0 ? target : current
+        }
+
+        let nextRowStart = (current / safeColumns + 1) * safeColumns
+        guard nextRowStart < itemCount else { return current }
+        return min(current + safeColumns, itemCount - 1)
+    }
+
     /// With wrapping off (key held on autorepeat, like the system switcher)
     /// the selection stops at either end instead of cycling around.
     static func nextAppSelectionIndex(items: [SwitcherItem],

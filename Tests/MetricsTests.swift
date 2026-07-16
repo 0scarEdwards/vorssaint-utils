@@ -3001,6 +3001,26 @@ struct MetricsTests {
                == max(iconRowLayout.appRowSurfaceWidth, SwitcherIconRowLayout.hintBarWidth)
                + SwitcherIconRowLayout.padding * 2,
                "App Switcher simple mode fits the app row and shortcut hints")
+        expect(SwitcherSupport.gridSelectionIndex(after: 1,
+                                                   itemCount: 8,
+                                                   columns: 5,
+                                                   movingDown: true) == 6,
+               "App Switcher down navigation keeps the same column when it exists")
+        expect(SwitcherSupport.gridSelectionIndex(after: 4,
+                                                   itemCount: 8,
+                                                   columns: 5,
+                                                   movingDown: true) == 7,
+               "App Switcher down navigation lands on the last item of a shorter row")
+        expect(SwitcherSupport.gridSelectionIndex(after: 7,
+                                                   itemCount: 8,
+                                                   columns: 5,
+                                                   movingDown: true) == 7,
+               "App Switcher down navigation stays put on the final row")
+        expect(SwitcherSupport.gridSelectionIndex(after: 6,
+                                                   itemCount: 8,
+                                                   columns: 5,
+                                                   movingDown: false) == 1,
+               "App Switcher up navigation keeps its existing column behavior")
         let previousPreviewSize = UserDefaults.standard.object(forKey: DefaultsKey.previewSize)
         UserDefaults.standard.set("xlarge", forKey: DefaultsKey.previewSize)
         let xlargeIconRowLayout = SwitcherIconRowLayout.compute(appCount: 6,

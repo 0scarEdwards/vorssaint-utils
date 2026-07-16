@@ -11,6 +11,10 @@ Vorssaint 3.1.14 keeps the mouse side buttons working in apps that handle
 Back and Forward on their own, such as Firefox, and stops the Shelf from
 opening while you move a window.
 
+### Changed
+- Window Switcher now moves to the last item in a shorter next row when the
+  down arrow has no item directly below.
+
 ### Fixed
 - Back/Forward mouse buttons now reach apps that handle them natively, such
   as Firefox, virtual machines and remote screens, instead of being captured.

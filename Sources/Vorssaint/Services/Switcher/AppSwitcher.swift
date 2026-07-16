@@ -593,8 +593,12 @@ final class AppSwitcher: ObservableObject {
             advanceWindowInSelectedApp(by: delta < 0 ? -1 : 1)
             return
         }
-        let target = selectedIndex + delta
-        guard windows.indices.contains(target) else { return }
+        guard delta != 0 else { return }
+        let target = SwitcherSupport.gridSelectionIndex(after: selectedIndex,
+                                                        itemCount: windows.count,
+                                                        columns: grid.columns,
+                                                        movingDown: delta > 0)
+        guard target != selectedIndex else { return }
         userNavigated = true
         selectedIndex = target
     }
