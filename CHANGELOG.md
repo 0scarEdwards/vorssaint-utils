@@ -9,10 +9,11 @@ All notable changes to this project are documented here. The format follows
 ### Summary
 Vorssaint 3.1.14 lets Dock Preview work with Dock magnification turned on,
 can show the brightness percentage while you adjust each display and turns
-the screenshot black bar into a solid block in any color. It also improves
-mouse navigation, prevents the Shelf from opening while you move a window,
-fixes a crash that could close the app right after launch and cleans up menu
-bar and Settings visuals on macOS 26 (Tahoe).
+the screenshot black bar into a solid block in any color. It also returns
+Firefox to the Volume Mixer, improves mouse navigation, prevents the Shelf
+from opening while you move a window, fixes a crash that could close the app
+right after launch and cleans up menu bar and Settings visuals on macOS 26
+(Tahoe).
 
 ### Added
 - The optional brightness overlay shows the percentage after brightness
@@ -29,6 +30,9 @@ bar and Settings visuals on macOS 26 (Tahoe).
 ### Fixed
 - Vorssaint no longer crashes right after launch when macOS returns no power
   source data for the battery readings.
+- Firefox now shows up in the Volume Mixer. Its sound comes from helper
+  processes that macOS does not credit to the browser, so the mixer traces
+  them back on its own.
 - Back/Forward mouse buttons now reach apps that handle them natively, such
   as Firefox, virtual machines and remote screens, instead of being captured.
   Finder and other apps keep the converted navigation.

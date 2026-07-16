@@ -2414,6 +2414,31 @@ struct MetricsTests {
                                                               uid: "",
                                                               dataSourceName: nil),
                "Bluetooth speakers are not treated as headphones")
+        // Issue #256: Firefox's audio helpers answer for themselves, so the
+        // mixer walks the parent chain to the nearest regular app.
+        let helperParents: [pid_t: pid_t] = [500: 100, 100: 1, 700: 1,
+                                             900: 901, 901: 902, 902: 903, 903: 904,
+                                             904: 905, 905: 906, 906: 907, 907: 100]
+        func owningApp(of responsible: pid_t, regularApps: Set<pid_t> = [100]) -> pid_t? {
+            MixerRoutingSupport.owningRegularAppPid(
+                responsiblePid: responsible,
+                isRegularApp: { regularApps.contains($0) },
+                parentPid: { helperParents[$0] ?? 0 })
+        }
+        expect(owningApp(of: 100) == 100,
+               "a responsible regular app is billed directly")
+        expect(owningApp(of: 500) == 100,
+               "a helper answering for itself is billed to the app that spawned it")
+        expect(owningApp(of: 700) == nil,
+               "daemons whose parent chain ends at launchd stay unlisted")
+        expect(owningApp(of: 42) == nil,
+               "a failed parent lookup stops the walk")
+        expect(owningApp(of: 900) == nil,
+               "the parent walk gives up beyond the depth cap")
+        expect(owningApp(of: 902) == 100,
+               "a regular app within the depth cap is still found")
+        expect(owningApp(of: 0) == nil,
+               "a missing responsible pid maps to no app")
         expect(!MixerRoutingSupport.requiresEngine(volume: 1,
                                                    selectedOutputDeviceUID: nil,
                                                    targetOutputDeviceUID: "BuiltInSpeakerDevice",
