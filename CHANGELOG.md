@@ -8,8 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Summary
 Vorssaint 3.1.14 can show the brightness percentage while you adjust each
-display. It also improves mouse navigation
-and prevents the Shelf from opening while you move a window.
+display. It also improves mouse navigation, prevents the Shelf from opening
+while you move a window and fixes a crash that could close the app right
+after launch.
 
 ### Added
 - The optional brightness overlay shows the percentage after brightness
@@ -20,6 +21,8 @@ and prevents the Shelf from opening while you move a window.
   down arrow has no item directly below.
 
 ### Fixed
+- Vorssaint no longer crashes right after launch when macOS returns no power
+  source data for the battery readings.
 - Back/Forward mouse buttons now reach apps that handle them natively, such
   as Firefox, virtual machines and remote screens, instead of being captured.
   Finder and other apps keep the converted navigation.
