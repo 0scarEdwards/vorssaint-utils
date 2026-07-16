@@ -714,7 +714,7 @@ struct ScreenshotEditorView: View {
 
     private var showsColorControls: Bool {
         switch model.tool {
-        case .arrow, .line, .rect, .ellipse, .freehand, .highlight, .text, .counter:
+        case .arrow, .line, .rect, .ellipse, .freehand, .highlight, .text, .counter, .redact:
             return true
         case .select:
             guard let selectedID = model.selectedID,
@@ -722,8 +722,7 @@ struct ScreenshotEditorView: View {
             else { return false }
             return selected.tool != .sticker
                 && selected.tool != .pixelate
-                && selected.tool != .redact
-        case .sticker, .pixelate, .redact, .crop:
+        case .sticker, .pixelate, .crop:
             return false
         }
     }

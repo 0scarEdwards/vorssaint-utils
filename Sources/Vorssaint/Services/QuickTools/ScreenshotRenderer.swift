@@ -57,7 +57,7 @@ enum ScreenshotRenderer {
             case .pixelate:
                 drawPixelate(annotation, in: context, pixelated: pixelated, imageSize: imageSize)
             case .redact:
-                context.setFillColor(CGColor(gray: 0.02, alpha: 1))
+                context.setFillColor(color(annotation.color))
                 context.fill(annotation.rect)
             case .highlight:
                 context.saveGState()
