@@ -1337,6 +1337,8 @@ struct MetricsTests {
                "brightness control arrives switched off")
         expect(registeredDefaults[DefaultsKey.brightnessKeysEnabled] as? Bool == false,
                "pointer-following brightness keys arrive switched off")
+        expect(registeredDefaults[DefaultsKey.brightnessOSDEnabled] as? Bool == false,
+               "brightness adjustment overlay arrives switched off")
         expect(registeredDefaults[DefaultsKey.panelShowUtilities] as? Bool == true,
                "Utilities panel section is shown by default")
         expect(registeredDefaults[DefaultsKey.panelShowControls] as? Bool == true,
@@ -4733,6 +4735,9 @@ struct MetricsTests {
         expect(activeSet(.accessibility, on: [DefaultsKey.brightnessControlEnabled,
                                               DefaultsKey.brightnessKeysEnabled]).contains(.brightness),
                "brightness uses accessibility only for the key option")
+        expect(activeSet(.accessibility, on: [DefaultsKey.brightnessControlEnabled,
+                                              DefaultsKey.brightnessOSDEnabled]).contains(.brightness),
+               "brightness uses accessibility for the adjustment overlay")
         expect(!activeSet(.accessibility, on: [DefaultsKey.brightnessControlEnabled])
                 .contains(.brightness),
                "brightness sliders alone never use accessibility")
@@ -5094,6 +5099,17 @@ struct MetricsTests {
         expect(BrightnessSupport.steppedBrightness(0.97, delta: BrightnessSupport.brightnessKeyStep) == 1.0
                 && BrightnessSupport.steppedBrightness(0.03, delta: -BrightnessSupport.brightnessKeyStep) == 0.0,
                "key steps clamp at both ends of the range")
+        expect(BrightnessSupport.filledBrightnessSegments(0) == 0
+                && BrightnessSupport.filledBrightnessSegments(0.01) == 1
+                && BrightnessSupport.filledBrightnessSegments(0.5) == 8
+                && BrightnessSupport.filledBrightnessSegments(1.2) == 16,
+               "brightness overlay segments clamp and preserve non-zero levels")
+        expect(BrightnessSupport.wholePercent(-0.2) == 0
+                && BrightnessSupport.wholePercent(0.634) == 63
+                && BrightnessSupport.wholePercent(0.999) == 100
+                && BrightnessSupport.wholePercent(1.2) == 100
+                && BrightnessSupport.wholePercent(.infinity) == 0,
+               "brightness overlay percentage rounds and clamps safely")
 
         // MARK: Text snippets engine (issue #201)
 

@@ -58,6 +58,7 @@ struct SettingsView: View {
                                        l10n.s.keepAwakeActiveIconCoffee,
                                        l10n.s.keepAwakeActiveIconEye,
                                        FeatureStrings.brightness(l10n.language).pageTitle,
+                                       FeatureStrings.brightness(l10n.language).osdToggle,
                                        FeatureStrings.keepAwakeAutomation(l10n.language)
                                            .externalDisplayToggle,
                                        FeatureStrings.keepAwakeAutomation(l10n.language).powerToggle]),
@@ -429,6 +430,7 @@ struct EnergySettings: View {
     @ObservedObject private var brightness = BrightnessService.shared
     @AppStorage(DefaultsKey.brightnessControlEnabled) private var brightnessEnabled = false
     @AppStorage(DefaultsKey.brightnessKeysEnabled) private var brightnessKeysEnabled = false
+    @AppStorage(DefaultsKey.brightnessOSDEnabled) private var brightnessOSDEnabled = false
     @AppStorage(DefaultsKey.extraBrightnessEnabled) private var extraBrightnessEnabled = false
     @AppStorage(DefaultsKey.extraBrightnessLevel) private var extraBrightnessLevel = 100
     @AppStorage(DefaultsKey.defaultDuration) private var defaultDuration = 0
@@ -530,7 +532,17 @@ struct EnergySettings: View {
                                 if isOn { Permissions.shared.requestAccessibility() }
                                 BrightnessService.shared.syncWithPreferences()
                             }
-                        if brightnessKeysEnabled, !permissions.accessibility {
+                        if brightness.brightnessOSDSupported {
+                            SettingsToggleWithCaption(title: strings.osdToggle,
+                                                      caption: strings.osdCaption,
+                                                      isOn: $brightnessOSDEnabled)
+                                .onChange(of: brightnessOSDEnabled) { _, isOn in
+                                    if isOn { Permissions.shared.requestAccessibility() }
+                                    BrightnessService.shared.syncWithPreferences()
+                                }
+                        }
+                        if (brightnessKeysEnabled || brightnessOSDEnabled),
+                           !permissions.accessibility {
                             PermissionRow(kind: .accessibility)
                         }
                         SettingsCaptionText(strings.externalCaption)
@@ -586,8 +598,9 @@ struct EnergySettings: View {
                 .truncationMode(.middle)
             if display.isActive, display.method != nil {
                 Slider(value: Binding(get: { display.brightness },
-                                      set: { BrightnessService.shared.setBrightness($0,
-                                                                                    for: display.id) }),
+                                      set: { BrightnessService.shared.setBrightness(
+                                          $0, for: display.id,
+                                          showOSD: brightnessOSDEnabled) }),
                        in: 0...1)
                     .disabled(brightness.isDisplayPending(display.id))
                     .accessibilityLabel(display.name)

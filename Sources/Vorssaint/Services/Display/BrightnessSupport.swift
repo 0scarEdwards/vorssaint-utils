@@ -145,6 +145,20 @@ enum BrightnessSupport {
         min(max(current + delta, 0), 1)
     }
 
+    /// Sixteen segments match the system brightness steps. A non-zero value
+    /// keeps at least one segment visible while exact zero stays empty.
+    static func filledBrightnessSegments(_ brightness: Double) -> Int {
+        let clamped = min(max(brightness, 0), 1)
+        guard clamped > 0 else { return 0 }
+        return min(Int((clamped * 16).rounded(.up)), 16)
+    }
+
+    /// Whole percentage used by the brightness overlay.
+    static func wholePercent(_ brightness: Double) -> Int {
+        guard brightness.isFinite else { return 0 }
+        return Int((min(max(brightness, 0), 1) * 100).rounded())
+    }
+
     /// DDC value to the 0...1 slider scale.
     static func normalized(current: UInt16, maximum: UInt16) -> Double {
         let ceiling = sanitizedMaximum(maximum)

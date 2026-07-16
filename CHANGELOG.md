@@ -7,9 +7,13 @@ All notable changes to this project are documented here. The format follows
 ## [3.1.14]
 
 ### Summary
-Vorssaint 3.1.14 keeps the mouse side buttons working in apps that handle
-Back and Forward on their own, such as Firefox, and stops the Shelf from
-opening while you move a window.
+Vorssaint 3.1.14 can show the brightness percentage while you adjust each
+display. It also improves mouse navigation
+and prevents the Shelf from opening while you move a window.
+
+### Added
+- The optional brightness overlay shows the percentage after brightness
+  changes on the Mac screen and external monitors.
 
 ### Changed
 - Window Switcher now moves to the last item in a shorter next row when the
