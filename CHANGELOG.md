@@ -19,7 +19,8 @@ browsers to the Volume Mixer, improves mouse navigation, makes smooth
 scrolling work with more mice, keeps the Shelf from opening while you move a
 window, fixes a crash right after launch, stops closed lid mode from asking
 for the password on every toggle, makes brightness keys follow the pointer
-to external monitors, shows apps from compatibility layers in the Window
+to external monitors, stops the App Switcher from slowing down typing in
+demanding apps, shows apps from compatibility layers in the Window
 Switcher and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
 
 ### Added
@@ -48,6 +49,9 @@ Switcher and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
   down arrow has no item directly below.
 
 ### Fixed
+- Typing no longer lags in demanding apps while the App Switcher is on.
+  Under heavy load, key presses could arrive late and then land all at
+  once.
 - Brightness keys now really follow the pointer on external monitors that
   macOS drives natively, including with the lid closed. Presses used to
   land only on the built-in display.
