@@ -1058,6 +1058,36 @@ struct MetricsTests {
                                                  focusedWindowID: nil,
                                                  items: [embeddedWindow]) == nil,
                "App Switcher leaves the system shortcut alone when the foreground app is missing")
+        expect(SwitcherSupport.isCompatibilityLayerApp(
+            bundleIdentifier: nil,
+            executablePath: "/usr/local/bin/wine64-preloader",
+            localizedName: "wine64-preloader"),
+               "App Switcher recognizes a bare compatibility-layer loader process")
+        expect(SwitcherSupport.isCompatibilityLayerApp(
+            bundleIdentifier: nil,
+            executablePath: "/Users/u/Library/Bottles/games/winetemp-8f3a21/Launcher",
+            localizedName: "Launcher"),
+               "App Switcher recognizes a bottle loader renamed after its hosted program")
+        expect(!SwitcherSupport.isCompatibilityLayerApp(
+            bundleIdentifier: "com.example.native",
+            executablePath: "/Applications/Native.app/Contents/MacOS/wine64-preloader",
+            localizedName: "wine64-preloader"),
+               "App Switcher never relaxes window rules for bundled apps")
+        expect(!SwitcherSupport.isCompatibilityLayerApp(
+            bundleIdentifier: nil,
+            executablePath: "/usr/bin/python3",
+            localizedName: "python3"),
+               "App Switcher leaves ordinary unbundled processes alone")
+        expect(SwitcherSupport.isCompatibilityLayerApp(
+            bundleIdentifier: nil,
+            executablePath: nil,
+            localizedName: "wine-preloader"),
+               "App Switcher falls back to the process name when the executable is unknown")
+        expect(!SwitcherSupport.isCompatibilityLayerApp(
+            bundleIdentifier: nil,
+            executablePath: nil,
+            localizedName: nil),
+               "App Switcher requires a positive signal before relaxing window rules")
         expect(SwitcherSupport.sessionSourceItem(frontmostPID: nil,
                                                  focusedWindowID: nil,
                                                  items: [embeddedWindow]) == nil,

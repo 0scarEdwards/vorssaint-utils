@@ -18,8 +18,8 @@ Firefox to the Volume Mixer, improves mouse navigation, makes smooth
 scrolling work with more mice, keeps the Shelf from opening while you move a
 window, fixes a crash right after launch, stops closed lid mode from asking
 for the password on every toggle, makes brightness keys follow the pointer
-to external monitors and cleans up menu bar and Settings visuals on macOS 26
-(Tahoe).
+to external monitors, shows CrossOver and Wine apps in the Window Switcher
+and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
 
 ### Added
 - A new radial menu puts your favorite actions on a wheel around the
@@ -56,6 +56,9 @@ to external monitors and cleans up menu bar and Settings visuals on macOS 26
 - Smooth scrolling now works with mice that report the wheel as continuous
   scrolling, such as Logitech models. Their events were mistaken for a
   trackpad and skipped.
+- Apps running in CrossOver or Wine bottles, such as Steam, now show up in
+  the Window Switcher. Focusing one no longer makes the shortcut fall back
+  to the system switcher.
 - Firefox now shows up in the Volume Mixer. Its sound comes from helper
   processes that macOS does not credit to the browser, so the mixer traces
   them back on its own.

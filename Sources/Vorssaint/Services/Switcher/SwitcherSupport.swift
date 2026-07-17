@@ -158,6 +158,27 @@ enum SwitcherSupport {
             ?? candidates.first(where: { $0.windowID == nil })
     }
 
+    /// Whether a process looks like a compatibility layer hosting a program
+    /// built for another platform. Those processes own real on-screen windows
+    /// but run from a bare loader executable with no bundle identity: either
+    /// the loader's own name, or a per-app "winetemp-" copy that bottle
+    /// managers create so the process carries the hosted program's name and
+    /// icon. They need special handling in the switcher because their windows
+    /// expose no standard Accessibility subrole (issue #274).
+    static func isCompatibilityLayerApp(bundleIdentifier: String?,
+                                        executablePath: String?,
+                                        localizedName: String?) -> Bool {
+        guard bundleIdentifier == nil else { return false }
+        if let executablePath, !executablePath.isEmpty {
+            let components = executablePath.split(separator: "/")
+            guard let leaf = components.last else { return false }
+            return leaf.hasPrefix("wine")
+                || components.contains { $0.hasPrefix("winetemp-") }
+        }
+        guard let localizedName else { return false }
+        return localizedName.hasPrefix("wine")
+    }
+
     /// Finds the regular app that contains an accessory helper bundle.
     static func embeddedHostPID(helperBundlePath: String,
                                 regularBundlePaths: [pid_t: String]) -> pid_t? {
