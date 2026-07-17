@@ -861,6 +861,7 @@ extension Strings {
         cleanerScheduleRanFormat: "Son otomatik temizlik %@.",
         cleanerScheduleNotifyToggle: "Bitince bildir",
         cleanerNotifDenied: "Vorssaint bildirimleri sistemde kapalı.",
-        cleanerNotifOpenSettings: "Bildirim ayarlarını aç…"
+        cleanerNotifOpenSettings: "Bildirim ayarlarını aç…",
+        launchAtLoginNeedsApplications: "Uygulama, oturum açılırken açılmaya izin vermeyen bir konumdan çalışıyor. Vorssaint'i Uygulamalar klasörüne sürükleyin, oradan açın ve bu seçeneği yeniden açın."
     )
 }

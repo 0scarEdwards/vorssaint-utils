@@ -861,6 +861,7 @@ extension Strings {
         cleanerScheduleRanFormat: "Letztes automatisches Aufräumen %@.",
         cleanerScheduleNotifyToggle: "Nach Abschluss benachrichtigen",
         cleanerNotifDenied: "Mitteilungen von Vorssaint sind im System deaktiviert.",
-        cleanerNotifOpenSettings: "Mitteilungseinstellungen öffnen…"
+        cleanerNotifOpenSettings: "Mitteilungseinstellungen öffnen…",
+        launchAtLoginNeedsApplications: "Die App läuft von einem Ort, der das Öffnen bei der Anmeldung nicht erlaubt. Ziehe Vorssaint in den Ordner Programme, öffne die App von dort und schalte die Option wieder ein."
     )
 }

@@ -862,6 +862,7 @@ extension Strings {
         cleanerScheduleRanFormat: "Последняя автоматическая очистка %@.",
         cleanerScheduleNotifyToggle: "Уведомлять по завершении",
         cleanerNotifDenied: "Уведомления Vorssaint отключены в системе.",
-        cleanerNotifOpenSettings: "Открыть настройки уведомлений…"
+        cleanerNotifOpenSettings: "Открыть настройки уведомлений…",
+        launchAtLoginNeedsApplications: "Приложение запущено из места, из которого нельзя открываться при входе. Перетащите Vorssaint в папку «Программы», откройте его оттуда и включите параметр снова."
     )
 }

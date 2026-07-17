@@ -862,6 +862,7 @@ extension Strings {
         cleanerScheduleRanFormat: "上次自動清理%@。",
         cleanerScheduleNotifyToggle: "完成時通知",
         cleanerNotifDenied: "Vorssaint 的通知在系統中已關閉。",
-        cleanerNotifOpenSettings: "打開通知設定…"
+        cleanerNotifOpenSettings: "打開通知設定…",
+        launchAtLoginNeedsApplications: "App 正從無法在登入時開啟的位置執行。請將 Vorssaint 拖到「應用程式」檔案夾，從那裡開啟後再重新開啟此選項。"
     )
 }

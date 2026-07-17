@@ -861,6 +861,7 @@ extension Strings {
         cleanerScheduleRanFormat: "Dernier nettoyage automatique %@.",
         cleanerScheduleNotifyToggle: "Prévenir à la fin",
         cleanerNotifDenied: "Les notifications de Vorssaint sont désactivées dans le système.",
-        cleanerNotifOpenSettings: "Ouvrir les réglages de notifications…"
+        cleanerNotifOpenSettings: "Ouvrir les réglages de notifications…",
+        launchAtLoginNeedsApplications: "L'app s'exécute depuis un emplacement qui ne permet pas l'ouverture à la connexion. Glissez Vorssaint dans le dossier Applications, ouvrez l'app depuis ce dossier et réactivez l'option."
     )
 }

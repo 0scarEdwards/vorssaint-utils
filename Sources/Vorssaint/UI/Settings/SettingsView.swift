@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Vorssaint
 
 import AppKit
-import ServiceManagement
 import SwiftUI
 
 /// One entry in the Settings sidebar. New features add a case here and a row in
@@ -243,7 +242,7 @@ struct GeneralSettings: View {
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var features = FeatureRuntime.shared
     @ObservedObject private var hotkeys = HotkeyManager.shared
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var launchAtLogin = LaunchAtLogin.isEnabled
     @State private var loginError: String?
     @AppStorage(DefaultsKey.hotkeyEnabled) private var hotkeyEnabled = true
     @AppStorage(DefaultsKey.showCountdown) private var showCountdown = false
@@ -256,17 +255,14 @@ struct GeneralSettings: View {
                 Toggle(l10n.s.launchAtLogin, isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, enabled in
                         do {
-                            if enabled {
-                                try SMAppService.mainApp.register()
-                            } else {
-                                try SMAppService.mainApp.unregister()
-                            }
+                            try LaunchAtLogin.setEnabled(enabled)
                             loginError = nil
                         } catch {
                             loginError = error.localizedDescription
-                            launchAtLogin = SMAppService.mainApp.status == .enabled
+                            launchAtLogin = LaunchAtLogin.isEnabled
                         }
                     }
+                    .onAppear { launchAtLogin = LaunchAtLogin.isEnabled }
                 if let loginError {
                     Text(loginError)
                         .font(.caption)

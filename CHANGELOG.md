@@ -13,13 +13,13 @@ mirror for video calls. It also lets Dock Preview work with Dock
 magnification, shows the brightness percentage while you adjust displays,
 turns the screenshot black bar into a solid block in any color, can open
 screenshots straight in the editor, adds a zoomable loupe to the screenshot
-selection, returns
-Firefox to the Volume Mixer, improves mouse navigation, makes smooth
+selection, keeps Launch at Login from turning itself off, returns missing
+browsers to the Volume Mixer, improves mouse navigation, makes smooth
 scrolling work with more mice, keeps the Shelf from opening while you move a
 window, fixes a crash right after launch, stops closed lid mode from asking
 for the password on every toggle, makes brightness keys follow the pointer
-to external monitors, shows CrossOver and Wine apps in the Window Switcher
-and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
+to external monitors, shows apps from compatibility layers in the Window
+Switcher and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
 
 ### Added
 - A new radial menu puts your favorite actions on a wheel around the
@@ -46,27 +46,29 @@ and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
 
 ### Fixed
 - Brightness keys now really follow the pointer on external monitors that
-  macOS drives natively, such as LG UltraFine and Apple displays, including
-  with the lid closed. Presses used to land only on the built-in display.
+  macOS drives natively, including with the lid closed. Presses used to
+  land only on the built-in display.
 - Vorssaint no longer crashes right after launch when macOS returns no power
   source data for the battery readings.
 - Closed lid mode no longer asks for the administrator password on every
   toggle. The one-time setup is now verified for real and repaired with a
   single prompt when it stops working.
 - Smooth scrolling now works with mice that report the wheel as continuous
-  scrolling, such as Logitech models. Their events were mistaken for a
-  trackpad and skipped.
-- Apps running in CrossOver or Wine bottles, such as Steam, now show up in
-  the Window Switcher. Focusing one no longer makes the shortcut fall back
-  to the system switcher.
-- Firefox now shows up in the Volume Mixer. Its sound comes from helper
-  processes that macOS does not credit to the browser, so the mixer traces
-  them back on its own.
-- Back/Forward mouse buttons now reach apps that handle them natively, such
-  as Firefox, virtual machines and remote screens, instead of being captured.
+  scrolling. Their events were mistaken for a trackpad and skipped.
+- Apps that run through a compatibility layer now show up in the Window
+  Switcher. Focusing one no longer makes the shortcut fall back to the
+  system switcher.
+- Browsers that play sound through helper processes now show up in the
+  Volume Mixer. macOS does not credit that sound to the app, so the mixer
+  traces it back on its own.
+- Back/Forward mouse buttons now reach apps that handle them natively, like
+  browsers, virtual machines and remote screens, instead of being captured.
   Finder and other apps keep the converted navigation.
 - The Shelf area under the menu bar icon no longer appears while a window is
   being moved or resized. It only opens for a real file or content drag.
+- Launch at Login no longer turns itself off after the app restarts. The app
+  restores the setting when macOS drops it and now explains when it runs from
+  a place that cannot open at login.
 - Extra Brightness no longer drops briefly as video enters or leaves fullscreen.
 - Monitor blocks in the menu bar, including the usage bars, no longer sit a
   couple of pixels above the other status icons on macOS 26 (Tahoe).

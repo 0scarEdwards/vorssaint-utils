@@ -2930,6 +2930,30 @@ struct MetricsTests {
         expect(elevated.contains("'/Applications/Vorssaint.app'"),
                "elevated installer passes the app path quoted for the shell")
 
+        // MARK: Launch at login reconciliation
+
+        expect(LaunchAtLoginSupport.startupAction(wanted: true, systemEnabled: false,
+                                                  locationIsUnstable: false) == .register,
+               "a lost registration the user wants is redone at startup")
+        expect(LaunchAtLoginSupport.startupAction(wanted: true, systemEnabled: false,
+                                                  locationIsUnstable: true) == .none,
+               "no registration is redone from an unstable location")
+        expect(LaunchAtLoginSupport.startupAction(wanted: true, systemEnabled: true,
+                                                  locationIsUnstable: false) == .none
+                && LaunchAtLoginSupport.startupAction(wanted: true, systemEnabled: true,
+                                                      locationIsUnstable: true) == .none,
+               "a healthy registration is left alone")
+        expect(LaunchAtLoginSupport.startupAction(wanted: false, systemEnabled: true,
+                                                  locationIsUnstable: false) == .adoptEnabled
+                && LaunchAtLoginSupport.startupAction(wanted: false, systemEnabled: true,
+                                                      locationIsUnstable: true) == .adoptEnabled,
+               "an enable made outside the app becomes the stored choice")
+        expect(LaunchAtLoginSupport.startupAction(wanted: false, systemEnabled: false,
+                                                  locationIsUnstable: false) == .none
+                && LaunchAtLoginSupport.startupAction(wanted: false, systemEnabled: false,
+                                                      locationIsUnstable: true) == .none,
+               "startup never turns launch at login on for a user who never asked")
+
         // MARK: Dock Preview helpers
 
         let dockPrefs = DockPreviewPreferences.sanitized(orientation: "left",
@@ -4423,6 +4447,9 @@ struct MetricsTests {
             expect(!strings.switcherShortcutHintWindows.isEmpty, "\(prefix) App Switcher window shortcut hint is present")
             expect(!strings.networkApps.isEmpty, "\(prefix) network app usage title is present")
             expect(!strings.networkAppsIdle.isEmpty, "\(prefix) network app idle text is present")
+            expect(!strings.launchAtLoginNeedsApplications.isEmpty
+                   && !strings.launchAtLoginNeedsApplications.contains("—"),
+                   "\(prefix) launch at login location note is present without em dash")
             let officialHomebrewIntroStrings = [
                 strings.homebrewOfficialIntroTitle,
                 strings.homebrewOfficialIntroMessage,
@@ -5880,6 +5907,8 @@ struct MetricsTests {
                 && backupKeys.contains(DefaultsKey.keepAwakeActiveIcon)
                 && backupKeys.contains(AppFeature.dockPreview.availabilityKey),
                "backup carries preferences, menu bar pins, Keep Awake appearance, language and hub availability")
+        expect(backupKeys.contains(DefaultsKey.launchAtLoginWanted),
+               "the launch at login choice travels with the settings backup")
         expect(backupKeys.contains(DefaultsKey.textSnippets)
                 && backupKeys.contains(DefaultsKey.textSnippetsEnabled),
                "snippets travel with the settings backup")

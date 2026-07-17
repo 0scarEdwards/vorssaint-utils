@@ -862,6 +862,7 @@ extension Strings {
         cleanerScheduleRanFormat: "지난 자동 정리: %@.",
         cleanerScheduleNotifyToggle: "완료 시 알림",
         cleanerNotifDenied: "시스템에서 Vorssaint 알림이 꺼져 있습니다.",
-        cleanerNotifOpenSettings: "알림 설정 열기…"
+        cleanerNotifOpenSettings: "알림 설정 열기…",
+        launchAtLoginNeedsApplications: "로그인 시 열 수 없는 위치에서 앱이 실행되고 있습니다. Vorssaint를 응용 프로그램 폴더로 드래그한 다음 거기에서 열고 이 옵션을 다시 켜 주세요."
     )
 }

@@ -861,6 +861,7 @@ extension Strings {
         cleanerScheduleRanFormat: "Ultima pulizia automatica %@.",
         cleanerScheduleNotifyToggle: "Avvisa al termine",
         cleanerNotifDenied: "Le notifiche di Vorssaint sono disattivate nel sistema.",
-        cleanerNotifOpenSettings: "Apri impostazioni notifiche…"
+        cleanerNotifOpenSettings: "Apri impostazioni notifiche…",
+        launchAtLoginNeedsApplications: "L'app è in esecuzione da una posizione che non consente l'apertura all'accesso. Trascina Vorssaint nella cartella Applicazioni, aprila da lì e riattiva l'opzione."
     )
 }

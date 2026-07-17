@@ -121,6 +121,7 @@ if (( TEST )); then
         Sources/Vorssaint/Services/AutoQuit/AutoQuitSupport.swift \
         Sources/Vorssaint/Services/Shelf/ShelfSupport.swift \
         Sources/Vorssaint/Services/Update/UpdateInstallerSupport.swift \
+        Sources/Vorssaint/Services/LaunchAtLoginSupport.swift \
         Sources/Vorssaint/UI/Settings/SettingsSearchSupport.swift \
         Sources/Vorssaint/UI/Settings/FeatureVisibilitySupport.swift \
         Sources/Vorssaint/App/MenuBarSpacingSupport.swift \

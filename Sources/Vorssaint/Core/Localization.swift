@@ -1006,6 +1006,7 @@ struct Strings {
     let cleanerScheduleNotifyToggle: String
     let cleanerNotifDenied: String
     let cleanerNotifOpenSettings: String
+    let launchAtLoginNeedsApplications: String
 }
 
 // MARK: - Português (Brasil)
@@ -1868,7 +1869,8 @@ extension Strings {
         cleanerScheduleRanFormat: "Última limpeza automática %@.",
         cleanerScheduleNotifyToggle: "Avisar quando terminar",
         cleanerNotifDenied: "As notificações do Vorssaint estão desativadas no sistema.",
-        cleanerNotifOpenSettings: "Abrir Ajustes de Notificações…"
+        cleanerNotifOpenSettings: "Abrir Ajustes de Notificações…",
+        launchAtLoginNeedsApplications: "O app está rodando de um lugar que não permite abrir no login. Arraste o Vorssaint para a pasta Aplicativos, abra de lá e ligue de novo."
     )
 }
 
@@ -2732,6 +2734,7 @@ extension Strings {
         cleanerScheduleRanFormat: "Last automatic cleanup %@.",
         cleanerScheduleNotifyToggle: "Notify when done",
         cleanerNotifDenied: "Vorssaint notifications are turned off in the system.",
-        cleanerNotifOpenSettings: "Open Notification Settings…"
+        cleanerNotifOpenSettings: "Open Notification Settings…",
+        launchAtLoginNeedsApplications: "The app is running from a place that cannot open at login. Drag Vorssaint to the Applications folder, open it from there and turn this on again."
     )
 }

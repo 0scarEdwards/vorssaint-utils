@@ -38,6 +38,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         // quitting to relaunch under the new name, so skip the rest of startup.
         if BundleMigration.run() { return }
 
+        // Redo a launch at login registration the system lost. The stored
+        // choice is the last thing the user expressed in the app; startup
+        // never turns the item off.
+        LaunchAtLogin.repairAtStartup()
+
         // An accessory (LSUIElement) app gets no default main menu, so the standard
         // keyboard shortcuts (Cmd+H/M/W/Q and the Edit shortcuts Cmd+C/V/X/A) have
         // no menu items to fire and do nothing in the Settings window. Install one.

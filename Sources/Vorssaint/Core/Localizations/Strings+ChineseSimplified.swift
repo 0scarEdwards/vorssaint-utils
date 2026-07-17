@@ -861,6 +861,7 @@ extension Strings {
         cleanerScheduleRanFormat: "上次自动清理%@。",
         cleanerScheduleNotifyToggle: "完成时通知",
         cleanerNotifDenied: "Vorssaint 的通知在系统中已关闭。",
-        cleanerNotifOpenSettings: "打开通知设置…"
+        cleanerNotifOpenSettings: "打开通知设置…",
+        launchAtLoginNeedsApplications: "应用正从一个无法在登录时打开的位置运行。请将 Vorssaint 拖到“应用程序”文件夹，从那里打开后再重新开启此选项。"
     )
 }
