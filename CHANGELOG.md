@@ -12,10 +12,11 @@ actions on a wheel around the pointer, plus Camera preview, a floating
 mirror for video calls. It also lets Dock Preview work with Dock
 magnification, shows the brightness percentage while you adjust displays,
 turns the screenshot black bar into a solid block in any color, returns
-Firefox to the Volume Mixer, improves mouse navigation, keeps the Shelf from
-opening while you move a window, fixes a crash right after launch, makes
-brightness keys follow the pointer to external monitors and cleans up menu
-bar and Settings visuals on macOS 26 (Tahoe).
+Firefox to the Volume Mixer, improves mouse navigation, makes smooth
+scrolling work with more mice, keeps the Shelf from opening while you move a
+window, fixes a crash right after launch, makes brightness keys follow the
+pointer to external monitors and cleans up menu bar and Settings visuals on
+macOS 26 (Tahoe).
 
 ### Added
 - A new radial menu puts your favorite actions on a wheel around the
@@ -42,6 +43,9 @@ bar and Settings visuals on macOS 26 (Tahoe).
   with the lid closed. Presses used to land only on the built-in display.
 - Vorssaint no longer crashes right after launch when macOS returns no power
   source data for the battery readings.
+- Smooth scrolling now works with mice that report the wheel as continuous
+  scrolling, such as Logitech models. Their events were mistaken for a
+  trackpad and skipped.
 - Firefox now shows up in the Volume Mixer. Its sound comes from helper
   processes that macOS does not credit to the browser, so the mixer traces
   them back on its own.

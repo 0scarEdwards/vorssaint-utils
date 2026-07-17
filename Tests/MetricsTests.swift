@@ -602,34 +602,34 @@ struct MetricsTests {
                == [37: 100, 40: 0, 99: Defaults.defaultKeyboardDebounceWindowMs],
                "debounce key windows decode and sanitize stored values")
 
-        expect(ScrollInverterSupport.shouldInvertMouseWheel(
+        expect(ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: false, momentumPhase: 0, scrollPhase: 0, scrollCount: 0),
             secondsSinceLastGesturePhase: nil
-        ), "scroll inverter flips classic mouse wheel ticks")
-        expect(ScrollInverterSupport.shouldInvertMouseWheel(
+        ), "classic mouse wheel ticks classify as a wheel")
+        expect(ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: true, momentumPhase: 0, scrollPhase: 0, scrollCount: 0),
             secondsSinceLastGesturePhase: nil
-        ), "scroll inverter flips phase-less continuous wheel events")
-        expect(!ScrollInverterSupport.shouldInvertMouseWheel(
+        ), "phase-less continuous wheel events classify as a wheel")
+        expect(!ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: true, momentumPhase: 0, scrollPhase: 2, scrollCount: 0),
             secondsSinceLastGesturePhase: nil
-        ), "scroll inverter leaves touch scrolling phases alone")
-        expect(!ScrollInverterSupport.shouldInvertMouseWheel(
+        ), "touch scrolling phases classify as touch")
+        expect(!ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: true, momentumPhase: 3, scrollPhase: 0, scrollCount: 1),
             secondsSinceLastGesturePhase: 0.1
-        ), "scroll inverter leaves momentum scrolling alone")
-        expect(!ScrollInverterSupport.shouldInvertMouseWheel(
+        ), "momentum scrolling classifies as touch")
+        expect(!ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: true, momentumPhase: 0, scrollPhase: 0, scrollCount: 2),
             secondsSinceLastGesturePhase: 0.05
-        ), "scroll inverter leaves touch transition events (phaseless, counted, right after a phased event) alone")
-        expect(ScrollInverterSupport.shouldInvertMouseWheel(
+        ), "touch transition events (phaseless, counted, right after a phased event) classify as touch")
+        expect(ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: true, momentumPhase: 0, scrollPhase: 0, scrollCount: 2),
             secondsSinceLastGesturePhase: 5.0
-        ), "scroll inverter still flips counted wheel events long after any gesture")
-        expect(ScrollInverterSupport.shouldInvertMouseWheel(
+        ), "counted wheel events long after any gesture classify as a wheel")
+        expect(ScrollWheelSupport.isMouseWheel(
             ScrollWheelEventTraits(isContinuous: true, momentumPhase: 0, scrollPhase: 0, scrollCount: 2),
             secondsSinceLastGesturePhase: nil
-        ), "scroll inverter flips counted wheel events when no gesture was ever seen")
+        ), "counted wheel events classify as a wheel when no gesture was ever seen")
 
         expect(MouseNavigationSupport.direction(
             forButtonNumber: MouseNavigationSupport.backButtonNumber) == .back,
@@ -662,6 +662,12 @@ struct MetricsTests {
 
         // MARK: Smooth scrolling
 
+        expect(SmoothScrollSupport.ticks(line: 1, fixedPoint: 1.0) == 1.0,
+               "a classic wheel tick reads the same from either delta field")
+        expect(SmoothScrollSupport.ticks(line: 0, fixedPoint: 0.25) == 0.25,
+               "high-resolution wheels keep their fractional ticks when the integer field truncates to zero")
+        expect(SmoothScrollSupport.ticks(line: -2, fixedPoint: 0) == -2,
+               "a zero fixed-point field falls back to the integer line delta")
         expect(SmoothScrollSupport.remaining(afterTicks: 1, step: 40, current: 0) == 40,
                "one wheel tick queues one step of glide")
         expect(SmoothScrollSupport.remaining(afterTicks: 2, step: 40, current: 30) == 110,
