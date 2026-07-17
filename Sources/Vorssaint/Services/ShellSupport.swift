@@ -101,16 +101,22 @@ enum Sudoers {
         return valid ? user : nil
     }
 
-    /// The verbose listing identifies the `NOPASSWD` rule as `!authenticate`.
-    /// A plain successful `sudo -l` is not enough because administrators may
-    /// run the command while still needing a password.
+    /// Proves the passwordless path by running it: re-applying the current
+    /// SleepDisabled state through `sudo -n` changes nothing on the system and
+    /// exercises the exact call the feature makes. Listing checks (`sudo -l`)
+    /// reported the rule as ready on Macs where the real call still asked for
+    /// a password, which put every toggle behind a prompt (issue #269).
     static func isConfigured() -> Bool {
-        canListDisableSleep("1") && canListDisableSleep("0")
+        let report = Shell.run("/usr/bin/pmset", ["-g"])
+        guard report.status == 0 else { return false }
+        return pmsetDisableSleep(SudoersSupport.sleepDisabled(inPmsetOutput: report.output))
     }
 
-    private static func canListDisableSleep(_ value: String) -> Bool {
-        let result = Shell.run("/usr/bin/sudo", ["-n", "-l", "-l", "/usr/bin/pmset", "disablesleep", value])
-        return SudoersSupport.allowsWithoutPassword(status: result.status, output: result.output)
+    /// Whether any rule file (current or legacy name) is visible on disk.
+    /// Uninstall offers the removal prompt from this instead of `isConfigured`,
+    /// so a rule that stopped working still gets cleaned up.
+    static var ruleFilesPresent: Bool {
+        ([rulePath] + legacyRulePaths).contains { FileManager.default.fileExists(atPath: $0) }
     }
 
     static func install(completion: @escaping (Bool) -> Void) {

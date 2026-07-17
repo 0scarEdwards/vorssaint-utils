@@ -16,9 +16,10 @@ screenshots straight in the editor, adds a zoomable loupe to the screenshot
 selection, returns
 Firefox to the Volume Mixer, improves mouse navigation, makes smooth
 scrolling work with more mice, keeps the Shelf from opening while you move a
-window, fixes a crash right after launch, makes brightness keys follow the
-pointer to external monitors and cleans up menu bar and Settings visuals on
-macOS 26 (Tahoe).
+window, fixes a crash right after launch, stops closed lid mode from asking
+for the password on every toggle, makes brightness keys follow the pointer
+to external monitors and cleans up menu bar and Settings visuals on macOS 26
+(Tahoe).
 
 ### Added
 - A new radial menu puts your favorite actions on a wheel around the
@@ -49,6 +50,9 @@ macOS 26 (Tahoe).
   with the lid closed. Presses used to land only on the built-in display.
 - Vorssaint no longer crashes right after launch when macOS returns no power
   source data for the battery readings.
+- Closed lid mode no longer asks for the administrator password on every
+  toggle. The one-time setup is now verified for real and repaired with a
+  single prompt when it stops working.
 - Smooth scrolling now works with mice that report the wheel as continuous
   scrolling, such as Logitech models. Their events were mistaken for a
   trackpad and skipped.

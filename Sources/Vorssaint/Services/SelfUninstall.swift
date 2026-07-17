@@ -96,7 +96,7 @@ enum SelfUninstall {
     }
 
     private static func removeSudoersRuleIfPresent(then: @escaping () -> Void) {
-        guard Sudoers.isConfigured() else { then(); return }
+        guard Sudoers.ruleFilesPresent || Sudoers.isConfigured() else { then(); return }
         Sudoers.remove { _ in then() }            // shows the admin password prompt
     }
 
