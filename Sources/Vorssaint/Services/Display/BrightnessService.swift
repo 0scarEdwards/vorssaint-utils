@@ -442,9 +442,19 @@ final class BrightnessService: ObservableObject {
         stateLock.unlock()
         guard let route else { return Unmanaged.passUnretained(event) }
         if route.method == .system {
-            guard wantsBrightnessOSD, brightnessOSDSupported else {
-                // Without the opt-in overlay, the system keeps its native
-                // brightness handling and animation unchanged.
+            // The system's own key handling only ever steps its native
+            // target, never the display under the pointer, so a pointer
+            // routed press on a system-routed external display (Apple
+            // pipeline monitors, or any display in clamshell mode) is
+            // stepped here instead of passed through (issue #268).
+            let isBuiltIn = displays.first(where: { $0.id == displayID })?.isBuiltIn ?? false
+            guard BrightnessSupport.stepsSystemRoutedDisplay(
+                followsPointer: followsPointer,
+                displayIsBuiltIn: isBuiltIn,
+                overlayReplacesNative: wantsBrightnessOSD && brightnessOSDSupported
+            ), BrightnessBridge.setBrightness != nil else {
+                // The built-in panel keeps the system's native brightness
+                // handling and animation unless the overlay replaces it.
                 return Unmanaged.passUnretained(event)
             }
             if press.isKeyDown, let current = currentSystemBrightness(
@@ -452,7 +462,7 @@ final class BrightnessService: ObservableObject {
                 fallback: displays.first(where: { $0.id == displayID })?.brightness
             ) {
                 setBrightness(BrightnessSupport.steppedBrightness(current, delta: press.delta),
-                              for: displayID, showOSD: true)
+                              for: displayID, showOSD: wantsBrightnessOSD)
             }
             // Both halves are replaced so the system never draws a second OSD.
             return nil

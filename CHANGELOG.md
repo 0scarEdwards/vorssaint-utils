@@ -13,8 +13,9 @@ mirror for video calls. It also lets Dock Preview work with Dock
 magnification, shows the brightness percentage while you adjust displays,
 turns the screenshot black bar into a solid block in any color, returns
 Firefox to the Volume Mixer, improves mouse navigation, keeps the Shelf from
-opening while you move a window, fixes a crash right after launch and cleans
-up menu bar and Settings visuals on macOS 26 (Tahoe).
+opening while you move a window, fixes a crash right after launch, makes
+brightness keys follow the pointer to external monitors and cleans up menu
+bar and Settings visuals on macOS 26 (Tahoe).
 
 ### Added
 - A new radial menu puts your favorite actions on a wheel around the
@@ -36,6 +37,9 @@ up menu bar and Settings visuals on macOS 26 (Tahoe).
   down arrow has no item directly below.
 
 ### Fixed
+- Brightness keys now really follow the pointer on external monitors that
+  macOS drives natively, such as LG UltraFine and Apple displays, including
+  with the lid closed. Presses used to land only on the built-in display.
 - Vorssaint no longer crashes right after launch when macOS returns no power
   source data for the battery readings.
 - Firefox now shows up in the Volume Mixer. Its sound comes from helper

@@ -5155,6 +5155,30 @@ struct MetricsTests {
         expect(BrightnessSupport.steppedBrightness(0.97, delta: BrightnessSupport.brightnessKeyStep) == 1.0
                 && BrightnessSupport.steppedBrightness(0.03, delta: -BrightnessSupport.brightnessKeyStep) == 0.0,
                "key steps clamp at both ends of the range")
+
+        // Pointer routing on system-routed displays (issue #268): the system
+        // only ever steps its native target, so any other display the
+        // pointer picks must be stepped by the app.
+        expect(BrightnessSupport.stepsSystemRoutedDisplay(followsPointer: true,
+                                                          displayIsBuiltIn: false,
+                                                          overlayReplacesNative: false),
+               "pointer on an Apple pipeline external display steps here even without the overlay")
+        expect(!BrightnessSupport.stepsSystemRoutedDisplay(followsPointer: true,
+                                                           displayIsBuiltIn: true,
+                                                           overlayReplacesNative: false),
+               "pointer on the built-in panel keeps the system's native handling")
+        expect(BrightnessSupport.stepsSystemRoutedDisplay(followsPointer: true,
+                                                          displayIsBuiltIn: true,
+                                                          overlayReplacesNative: true),
+               "the opt-in overlay replaces native handling on the built-in panel")
+        expect(!BrightnessSupport.stepsSystemRoutedDisplay(followsPointer: false,
+                                                           displayIsBuiltIn: false,
+                                                           overlayReplacesNative: false),
+               "with pointer routing off and no overlay, the press stays with the system")
+        expect(BrightnessSupport.stepsSystemRoutedDisplay(followsPointer: false,
+                                                          displayIsBuiltIn: false,
+                                                          overlayReplacesNative: true),
+               "with the overlay on, the system target is stepped here so only one OSD draws")
         expect(BrightnessSupport.filledBrightnessSegments(0) == 0
                 && BrightnessSupport.filledBrightnessSegments(0.01) == 1
                 && BrightnessSupport.filledBrightnessSegments(0.5) == 8

@@ -145,6 +145,20 @@ enum BrightnessSupport {
         min(max(current + delta, 0), 1)
     }
 
+    /// Whether a brightness key press aimed at a system-routed display is
+    /// stepped by the app instead of left to the system (issue #268). The
+    /// system's own key handling only ever moves its native target, so a
+    /// press the pointer routes to any other display (an Apple pipeline
+    /// external monitor, or any display in clamshell mode) has to be stepped
+    /// here or it lands on the wrong screen. The built-in panel keeps the
+    /// native handling and its animation unless the overlay replaces it.
+    static func stepsSystemRoutedDisplay(followsPointer: Bool,
+                                         displayIsBuiltIn: Bool,
+                                         overlayReplacesNative: Bool) -> Bool {
+        if followsPointer, !displayIsBuiltIn { return true }
+        return overlayReplacesNative
+    }
+
     /// Sixteen segments match the system brightness steps. A non-zero value
     /// keeps at least one segment visible while exact zero stays empty.
     static func filledBrightnessSegments(_ brightness: Double) -> Int {
