@@ -1195,6 +1195,7 @@ enum MenuBarRenderer {
                               bsdName: "disk3s1",
                               wholeDisk: "disk3",
                               ioCounterID: "disk3",
+                              fileSystem: "APFS",
                               totalBytes: 1_000_000_000_000,
                               freeBytes: 0,
                               usedBytes: 1_000_000_000_000,

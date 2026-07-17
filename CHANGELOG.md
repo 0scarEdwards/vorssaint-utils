@@ -13,7 +13,8 @@ mirror for video calls. It also lets Dock Preview work with Dock
 magnification, shows the brightness percentage while you adjust displays,
 turns the screenshot black bar into a solid block in any color, can open
 screenshots straight in the editor, adds a zoomable loupe to the screenshot
-selection, keeps Launch at Login from turning itself off, returns missing
+selection, shows the file system format of each drive in the Disks panel,
+keeps Launch at Login from turning itself off, returns missing
 browsers to the Volume Mixer, improves mouse navigation, makes smooth
 scrolling work with more mice, keeps the Shelf from opening while you move a
 window, fixes a crash right after launch, stops closed lid mode from asking
@@ -35,6 +36,8 @@ Switcher and cleans up menu bar and Settings visuals on macOS 26 (Tahoe).
   annotation editor. Off by default in Settings under Screenshot.
 - The screenshot selection now has a pixel loupe for precise captures.
   Press Z to show or hide it and scroll to zoom. Thanks to @ruvelro.
+- The Disks panel now shows each drive's file system format, like APFS or
+  exFAT, next to the drive name.
 
 ### Changed
 - Dock Preview now works with Dock magnification enabled, so the zoom effect

@@ -80,6 +80,38 @@ struct MetricsTests {
                "SMART health subtracts percentage used")
         expect(DiskSupport.healthPercent(fromPercentageUsed: 150) == 0,
                "SMART health clamps exhausted drives")
+        expect(DiskSupport.fileSystemLabel(type: "apfs") == "APFS",
+               "file system label maps apfs")
+        expect(DiskSupport.fileSystemLabel(type: " APFS \n") == "APFS",
+               "file system label trims and ignores case")
+        expect(DiskSupport.fileSystemLabel(type: "hfs", name: "Journaled HFS+") == "HFS+",
+               "file system label maps journaled hfs")
+        expect(DiskSupport.fileSystemLabel(type: "exfat") == "exFAT",
+               "file system label keeps exFAT capitalization")
+        expect(DiskSupport.fileSystemLabel(type: "ntfs") == "NTFS",
+               "file system label maps ntfs")
+        expect(DiskSupport.fileSystemLabel(type: "msdos", name: "Legacy FAT32") == "FAT32",
+               "file system label reads FAT width from the name")
+        expect(DiskSupport.fileSystemLabel(type: "msdos", name: "Legacy FAT16") == "FAT16",
+               "file system label reads FAT16 from the name")
+        expect(DiskSupport.fileSystemLabel(type: "msdos") == "FAT",
+               "file system label falls back to plain FAT")
+        expect(DiskSupport.fileSystemLabel(type: "cd9660") == "ISO 9660",
+               "file system label maps optical media")
+        expect(DiskSupport.fileSystemLabel(type: "udf") == "UDF",
+               "file system label uppercases short unknown tokens")
+        expect(DiskSupport.fileSystemLabel(type: "lifs") == "LIFS",
+               "file system label keeps acronym-sized tokens")
+        expect(DiskSupport.fileSystemLabel(type: "someverylongdriver") == nil,
+               "file system label drops long driver tokens")
+        expect(DiskSupport.fileSystemLabel(type: "a") == nil,
+               "file system label drops single letters")
+        expect(DiskSupport.fileSystemLabel(type: "123456") == nil,
+               "file system label needs at least one letter")
+        expect(DiskSupport.fileSystemLabel(type: "") == nil,
+               "file system label ignores empty type")
+        expect(DiskSupport.fileSystemLabel(type: nil) == nil,
+               "file system label ignores missing type")
         let diskRate = MetricFormat.diskSpeed(
             previous: DiskIOCounters(read: 1_000, written: 500),
             current: DiskIOCounters(read: 3_048, written: 1_524),
