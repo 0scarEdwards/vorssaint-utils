@@ -1160,10 +1160,14 @@ struct MetricsTests {
         // per-release decision: this check fails on every version bump so the
         // decision above is made consciously, never by omission.
         let plistVersion = (NSDictionary(contentsOfFile: "Resources/Info.plist")?["CFBundleShortVersionString"] as? String) ?? ""
-        expect(plistVersion == "3.1.14",
+        expect(plistVersion == "3.1.15",
                "bumping the app version requires re-deciding the support prompt pin above")
-        expect(UpdateHighlightsInfo.releaseVersion == plistVersion,
-               "the highlights tour belongs to the release being prepared; re-curate its rows on every version bump")
+        // 3.1.15 ships as a fix-only release with no new features to tour, so
+        // the highlights pin stays on the last feature release (3.1.14) and the
+        // tour does not re-appear. A feature release re-curates the rows and
+        // moves this pin to the shipping version.
+        expect(UpdateHighlightsInfo.releaseVersion == "3.1.14",
+               "re-decide the highlights tour on a feature release: re-curate its rows and move the pin to the shipping version")
         expect(UpdateHighlightsInfo.shouldShow(appVersion: "3.1.14", lastSeenVersion: "3.1.13")
                && UpdateHighlightsInfo.shouldShow(appVersion: "3.1.14", lastSeenVersion: nil),
                "highlights tour shows once after updating to its pinned release")

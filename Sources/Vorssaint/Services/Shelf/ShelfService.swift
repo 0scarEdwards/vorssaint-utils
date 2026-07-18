@@ -578,7 +578,8 @@ final class ShelfService: ObservableObject {
         if dockedProximate, let frame = dockedPanel?.frame {
             return frame.insetBy(dx: -72, dy: -72).contains(mouse)
         }
-        let screen = NSScreen.screens.first { $0.frame.intersects(anchor) } ?? NSScreen.withMouse
+        guard let screen = NSScreen.screens.first(where: { $0.frame.intersects(anchor) }) ?? NSScreen.withMouse
+        else { return false }
         let band = NSRect(x: anchor.midX - 150,
                           y: screen.frame.maxY - 200,
                           width: 300, height: 200)
@@ -663,10 +664,9 @@ final class ShelfService: ObservableObject {
         view.layoutSubtreeIfNeeded()
         let size = view.fittingSize
         let anchor = statusItemFrameProvider?()
-        let screen = anchor.flatMap { rect in
+        let visible = (anchor.flatMap { rect in
             NSScreen.screens.first { $0.frame.intersects(rect) }
-        } ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        } ?? NSScreen.withMouse)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         var x = anchor.map { $0.midX - size.width / 2 } ?? (visible.maxX - size.width - 12)
         x = min(max(visible.minX + 8, x), visible.maxX - size.width - 8)
         let top = visible.maxY - 4
@@ -1683,7 +1683,7 @@ final class ShelfService: ObservableObject {
         view.layoutSubtreeIfNeeded()
         let size = view.fittingSize
         let mouse = NSEvent.mouseLocation
-        let screen = NSScreen.withMouse.visibleFrame
+        let screen = NSScreen.pointerVisibleFrame
         var x = mouse.x - size.width / 2
         var y = mouse.y - size.height - 16
         x = min(max(screen.minX + 8, x), screen.maxX - size.width - 8)

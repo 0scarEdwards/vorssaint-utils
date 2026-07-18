@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [3.1.15]
+
+### Summary
+Vorssaint 3.1.15 fixes a rare failure to launch on a Mac whose display was
+still waking up, where the app would show no menu bar icon and quit.
+
+### Fixed
+- The app could fail to launch on a Mac whose display was still waking up,
+  showing no menu bar icon. It now starts reliably.
+
 ## [3.1.14] - 2026-07-18
 
 ### Summary

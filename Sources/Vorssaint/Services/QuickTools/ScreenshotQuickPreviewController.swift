@@ -74,14 +74,13 @@ final class ScreenshotQuickPreviewController {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary,
                                     .transient, .ignoresCycle]
 
-        let screen = NSScreen.screens.first(where: {
-            $0.frame.intersects(capture.anchorRect)
-        }) ?? NSScreen.withMouse
+        let visibleFrame = (NSScreen.screens.first { $0.frame.intersects(capture.anchorRect) }
+            ?? NSScreen.withMouse)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         panel.setFrame(ScreenshotSupport.quickPreviewFrame(
             size: size,
             anchor: capture.anchorRect,
             pointer: NSEvent.mouseLocation,
-            visibleFrame: screen.visibleFrame), display: false)
+            visibleFrame: visibleFrame), display: false)
         self.panel = panel
         installKeyMonitor(for: panel)
         panel.orderFrontRegardless()

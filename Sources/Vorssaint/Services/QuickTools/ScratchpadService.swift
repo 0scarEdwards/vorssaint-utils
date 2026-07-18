@@ -281,7 +281,7 @@ final class ScratchpadService: ObservableObject {
 
     private func center(_ panel: NSPanel) {
         let size = panel.frame.size
-        let screen = NSScreen.withMouse.visibleFrame
+        let screen = NSScreen.pointerVisibleFrame
         let x = screen.midX - size.width / 2
         let y = screen.minY + (screen.height - size.height) * 0.58
         panel.setFrame(NSRect(x: max(screen.minX + 16, min(x, screen.maxX - size.width - 16)),

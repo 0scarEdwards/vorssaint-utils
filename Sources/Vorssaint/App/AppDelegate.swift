@@ -914,7 +914,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             window.contentMinSize = NSSize(width: SettingsWindowSupport.minContentWidth,
                                            height: SettingsWindowSupport.minContentHeight)
-            let visible = (NSScreen.main ?? NSScreen.withMouse).visibleFrame
+            let visible = NSScreen.pointerVisibleFrame
             let size = SettingsWindowSupport.initialContentSize(
                 savedWidth: UserDefaults.standard.double(forKey: DefaultsKey.settingsWindowWidth),
                 savedHeight: UserDefaults.standard.double(forKey: DefaultsKey.settingsWindowHeight),
@@ -942,8 +942,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private func positionSettingsWindow(_ window: NSWindow, force: Bool) {
         window.contentView?.layoutSubtreeIfNeeded()
         let popoverWindow = popover.contentViewController?.view.window
-        let screen = popoverWindow?.screen ?? window.screen ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        let visible = (popoverWindow?.screen ?? window.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         let margin: CGFloat = 40
         let availableWidth = max(1, visible.width - margin)
         let availableHeight = max(1, visible.height - margin)
@@ -1302,8 +1301,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     private func centerOnboardingWindow(_ window: NSWindow) {
         window.contentView?.layoutSubtreeIfNeeded()
-        let screen = window.screen ?? popover.contentViewController?.view.window?.screen ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         let margin: CGFloat = 40
         let availableWidth = max(1, visible.width - margin)
         let availableHeight = max(1, visible.height - margin)
@@ -1318,8 +1316,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     private func centerDockPreviewIntroWindow(_ window: NSWindow) {
         window.contentView?.layoutSubtreeIfNeeded()
-        let screen = window.screen ?? popover.contentViewController?.view.window?.screen ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         let margin: CGFloat = 40
         let availableWidth = max(1, visible.width - margin)
         let availableHeight = max(1, visible.height - margin)
@@ -1334,8 +1331,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     private func centerWhatsNewWindow(_ window: NSWindow) {
         window.contentView?.layoutSubtreeIfNeeded()
-        let screen = window.screen ?? popover.contentViewController?.view.window?.screen ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         let margin: CGFloat = 40
         let availableWidth = max(1, visible.width - margin)
         let availableHeight = max(1, visible.height - margin)
@@ -1350,8 +1346,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     private func centerSupportIntroWindow(_ window: NSWindow) {
         window.contentView?.layoutSubtreeIfNeeded()
-        let screen = window.screen ?? popover.contentViewController?.view.window?.screen ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         let margin: CGFloat = 40
         let availableWidth = max(1, visible.width - margin)
         let availableHeight = max(1, visible.height - margin)
@@ -1366,8 +1361,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     private func centerUpdateShowcaseWindow(_ window: NSWindow) {
         window.contentView?.layoutSubtreeIfNeeded()
-        let screen = window.screen ?? popover.contentViewController?.view.window?.screen ?? NSScreen.withMouse
-        let visible = screen.visibleFrame
+        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
         let margin: CGFloat = 40
         let availableWidth = max(1, visible.width - margin)
         let availableHeight = max(1, visible.height - margin)
