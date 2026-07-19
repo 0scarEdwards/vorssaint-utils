@@ -1393,10 +1393,15 @@ final class ShelfService: ObservableObject {
         let data = UserDefaults.standard.data(forKey: DefaultsKey.shelfItems)
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let self else { return }
-            var restored: [Item] = []
+            // The disk work (decode, existence checks, unmounted-volume
+            // handling) belongs off the main thread. Turning each entry into an
+            // Item does not: it builds the icon with AppKit drawing,
+            // NSWorkspace and SF Symbols, which are only safe on the main
+            // thread, so that step waits for the hop below.
+            var sanitized: [ShelfPersistedItem] = []
             if let data,
                let decoded = try? JSONDecoder().decode([ShelfPersistedItem].self, from: data) {
-                let sanitized = ShelfPersistenceSupport.sanitized(decoded) { path in
+                sanitized = ShelfPersistenceSupport.sanitized(decoded) { path in
                     if FileManager.default.fileExists(atPath: path) { return true }
                     // A file on an unmounted volume is not gone: the app can
                     // launch at login before an external or network drive
@@ -1407,9 +1412,9 @@ final class ShelfService: ObservableObject {
                     }
                     return false
                 }
-                restored = sanitized.compactMap { self.restoredItem(from: $0) }
             }
             DispatchQueue.main.async {
+                let restored = sanitized.compactMap { self.restoredItem(from: $0) }
                 self.restoreCompleted = true
                 if restored.isEmpty {
                     self.schedulePersist()
