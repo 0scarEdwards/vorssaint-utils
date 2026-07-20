@@ -7,13 +7,14 @@ All notable changes to this project are documented here. The format follows
 ## [3.1.15]
 
 ### Summary
-Vorssaint 3.1.15 fixes a rare failure to launch on a Mac whose display was
-still waking up, and keeps the menu bar panel under its icon when the menu
-bar is set to hide itself.
+Vorssaint 3.1.15 fixes a start that left the app with no menu bar icon, and
+keeps the menu bar panel under its icon when the menu bar is set to hide
+itself.
 
 ### Fixed
-- The app could fail to launch on a Mac whose display was still waking up,
-  showing no menu bar icon. It now starts reliably.
+- The app could start with no menu bar icon and quit a few seconds later.
+  It now starts reliably, including on a Mac whose display was still waking
+  up.
 - The panel stays under its icon when the menu bar is set to hide itself.
   Switching tabs no longer moves it to the edge of the screen.
 

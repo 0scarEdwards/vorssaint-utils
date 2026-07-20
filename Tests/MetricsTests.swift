@@ -1453,6 +1453,26 @@ struct MetricsTests {
                                                                metricItemsShown: 2, renderedTitleLength: 0,
                                                                mustShowForSignal: false),
                "the whole-item hiding only applies to the separate-items mode")
+
+        // A pinned metric that momentarily has nothing to show keeps its item
+        // instead of being taken away and put back every tick.
+        expect(MenuBarSpacingSupport.keepsMetricStatusItem(hasRenderedTitle: true, itemExists: false),
+               "a metric with something to show gets its own item")
+        expect(MenuBarSpacingSupport.keepsMetricStatusItem(hasRenderedTitle: false, itemExists: true,
+                                                           consecutiveEmptyRenders: 1),
+               "a reading that goes missing for a tick blanks its item instead of removing it")
+        expect(!MenuBarSpacingSupport.keepsMetricStatusItem(
+            hasRenderedTitle: false, itemExists: true,
+            consecutiveEmptyRenders: MenuBarSpacingSupport.emptyMetricRendersBeforeRemoval),
+               "a reading that stops for good takes its item away instead of leaving a gap")
+        expect(MenuBarSpacingSupport.keepsMetricStatusItem(
+            hasRenderedTitle: true, itemExists: true,
+            consecutiveEmptyRenders: 99),
+               "a reading that comes back keeps its item whatever came before")
+        expect(!MenuBarSpacingSupport.keepsMetricStatusItem(hasRenderedTitle: false, itemExists: false),
+               "a metric with nothing to show yet gets no item at all")
+        expect(MenuBarSpacingSupport.keepsMetricStatusItem(hasRenderedTitle: true, itemExists: true),
+               "an item already showing a reading stays")
         expect(!MenuBarSpacingSupport.shouldHideMainStatusItem(optionEnabled: true, separateMetrics: true,
                                                                metricItemsShown: 2, renderedTitleLength: 0,
                                                                mustShowForSignal: true),
