@@ -1212,13 +1212,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.isRestorable = false
         window.isMovableByWindowBackground = true
         window.delegate = self
-        centerOnboardingWindow(window)
+        centerIntroWindow(window)
         onboardingWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { [weak self, weak window] in
             guard let self, let window, window === self.onboardingWindow else { return }
-            self.centerOnboardingWindow(window)
+            self.centerIntroWindow(window)
         }
     }
 
@@ -1270,13 +1270,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.isRestorable = false
         window.isMovableByWindowBackground = true
         window.delegate = self
-        centerUpdateShowcaseWindow(window)
+        centerIntroWindow(window)
         updateHighlightsWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { [weak self, weak window] in
             guard let self, let window, window === self.updateHighlightsWindow else { return }
-            self.centerUpdateShowcaseWindow(window)
+            self.centerIntroWindow(window)
         }
     }
 
@@ -1322,13 +1322,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.isRestorable = false
         window.isMovableByWindowBackground = true
         window.delegate = self
-        centerUpdateShowcaseWindow(window)
+        centerIntroWindow(window)
         updateShowcaseWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { [weak self, weak window] in
             guard let self, let window, window === self.updateShowcaseWindow else { return }
-            self.centerUpdateShowcaseWindow(window)
+            self.centerIntroWindow(window)
         }
     }
 
@@ -1370,13 +1370,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.isMovableByWindowBackground = true
         window.delegate = self
         supportIntroCanClose = false
-        centerSupportIntroWindow(window)
+        centerIntroWindow(window)
         supportIntroWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { [weak self, weak window] in
             guard let self, let window, window === self.supportIntroWindow else { return }
-            self.centerSupportIntroWindow(window)
+            self.centerIntroWindow(window)
         }
     }
 
@@ -1424,89 +1424,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.isRestorable = false
         window.isMovableByWindowBackground = true
         window.delegate = self
-        centerDockPreviewIntroWindow(window)
+        centerIntroWindow(window)
         dockPreviewIntroWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { [weak self, weak window] in
             guard let self, let window, window === self.dockPreviewIntroWindow else { return }
-            self.centerDockPreviewIntroWindow(window)
+            self.centerIntroWindow(window)
         }
     }
 
-    private func centerOnboardingWindow(_ window: NSWindow) {
+    /// Centers one of the windows whose content decides its own size (the
+    /// onboarding, the tour, the release notes and the two intros). The size
+    /// always comes from the view itself: asking for any other size leaves
+    /// the layout engine correcting a window that was already placed, and on
+    /// some systems that ends the app instead of settling. The origin is kept
+    /// inside the visible area, so a window taller than the screen starts at
+    /// the top instead of hanging below it.
+    private func centerIntroWindow(_ window: NSWindow) {
         window.contentView?.layoutSubtreeIfNeeded()
+        if let fitting = window.contentViewController?.view.fittingSize,
+           fitting.width > 0, fitting.height > 0 {
+            window.setContentSize(fitting)
+        }
         let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
-        let margin: CGFloat = 40
-        let availableWidth = max(1, visible.width - margin)
-        let availableHeight = max(1, visible.height - margin)
-        let width = min(max(window.frame.width, 540), availableWidth)
-        let height = min(max(window.frame.height, 600), availableHeight)
-        let frame = NSRect(x: visible.midX - width / 2,
-                           y: visible.midY - height / 2,
-                           width: width,
-                           height: height)
-        window.setFrame(frame.integral, display: false)
-    }
-
-    private func centerDockPreviewIntroWindow(_ window: NSWindow) {
-        window.contentView?.layoutSubtreeIfNeeded()
-        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
-        let margin: CGFloat = 40
-        let availableWidth = max(1, visible.width - margin)
-        let availableHeight = max(1, visible.height - margin)
-        let width = min(max(window.frame.width, 660), availableWidth)
-        let height = min(max(window.frame.height, 600), availableHeight)
-        let frame = NSRect(x: visible.midX - width / 2,
-                           y: visible.midY - height / 2,
-                           width: width,
-                           height: height)
-        window.setFrame(frame.integral, display: false)
-    }
-
-    private func centerWhatsNewWindow(_ window: NSWindow) {
-        window.contentView?.layoutSubtreeIfNeeded()
-        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
-        let margin: CGFloat = 40
-        let availableWidth = max(1, visible.width - margin)
-        let availableHeight = max(1, visible.height - margin)
-        let width = min(max(window.frame.width, 640), availableWidth)
-        let height = min(max(window.frame.height, 600), availableHeight)
-        let frame = NSRect(x: visible.midX - width / 2,
-                           y: visible.midY - height / 2,
-                           width: width,
-                           height: height)
-        window.setFrame(frame.integral, display: false)
-    }
-
-    private func centerSupportIntroWindow(_ window: NSWindow) {
-        window.contentView?.layoutSubtreeIfNeeded()
-        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
-        let margin: CGFloat = 40
-        let availableWidth = max(1, visible.width - margin)
-        let availableHeight = max(1, visible.height - margin)
-        let width = min(max(window.frame.width, 560), availableWidth)
-        let height = min(max(window.frame.height, 430), availableHeight)
-        let frame = NSRect(x: visible.midX - width / 2,
-                           y: visible.midY - height / 2,
-                           width: width,
-                           height: height)
-        window.setFrame(frame.integral, display: false)
-    }
-
-    private func centerUpdateShowcaseWindow(_ window: NSWindow) {
-        window.contentView?.layoutSubtreeIfNeeded()
-        let visible = (window.screen ?? popover.contentViewController?.view.window?.screen)?.visibleFrame ?? NSScreen.pointerVisibleFrame
-        let margin: CGFloat = 40
-        let availableWidth = max(1, visible.width - margin)
-        let availableHeight = max(1, visible.height - margin)
-        let width = min(CGFloat(680), availableWidth)
-        let height = min(CGFloat(600), availableHeight)
-        let frame = NSRect(x: visible.midX - width / 2,
-                           y: visible.midY - height / 2,
-                           width: width,
-                           height: height)
-        window.setFrame(frame.integral, display: false)
+        let size = window.frame.size
+        let x = min(max(visible.midX - size.width / 2, visible.minX), max(visible.minX, visible.maxX - size.width))
+        let y = min(max(visible.midY - size.height / 2, visible.minY), max(visible.minY, visible.maxY - size.height))
+        window.setFrameOrigin(NSPoint(x: x.rounded(), y: y.rounded()))
     }
 
     /// The pre-install update preview, shown before any download from BOTH the
@@ -1542,13 +1487,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.isRestorable = false
         window.isMovableByWindowBackground = true
         window.delegate = self
-        centerWhatsNewWindow(window)
+        centerIntroWindow(window)
         updatePreviewWindow = window
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         DispatchQueue.main.async { [weak self, weak window] in
             guard let self, let window, window === self.updatePreviewWindow else { return }
-            self.centerWhatsNewWindow(window)
+            self.centerIntroWindow(window)
         }
     }
 

@@ -7,9 +7,9 @@ All notable changes to this project are documented here. The format follows
 ## [3.1.15]
 
 ### Summary
-Vorssaint 3.1.15 repairs smooth scrolling, fixes a start that left the app
-with no menu bar icon, and keeps the menu bar panel under its icon when the
-menu bar is set to hide itself.
+Vorssaint 3.1.15 fixes starts that could leave the app with no menu bar icon
+or quit it right after an update, repairs smooth scrolling, and keeps the menu
+bar panel under its icon when the menu bar is set to hide itself.
 
 ### Fixed
 - Smooth scrolling moves the right distance on mice that report the wheel
@@ -20,6 +20,8 @@ menu bar is set to hide itself.
 - The app could start with no menu bar icon and quit a few seconds later.
   It now starts reliably, including on a Mac whose display was still waking
   up.
+- The app could quit at startup right after an update, while the tour of the
+  new features was opening. The tour now keeps the same size on every page.
 - The panel stays under its icon when the menu bar is set to hide itself.
   Switching tabs no longer moves it to the edge of the screen.
 
