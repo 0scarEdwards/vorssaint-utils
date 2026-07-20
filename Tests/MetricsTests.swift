@@ -708,20 +708,21 @@ struct MetricsTests {
                "reversing direction abandons the leftover instead of fighting it")
         expect(SmoothScrollSupport.remaining(afterTicks: 0, step: 40, current: 25) == 25,
                "a tickless event leaves the glide untouched")
+        // Measured against a scroll view: a one-line tick with Shift moves the
+        // content the same way a horizontal delta of the SAME sign does, so
+        // the redirect must not flip the tick.
         expect(SmoothScrollSupport.axes(vertical: 2, horizontal: 0, shiftPressed: true)
+               == SmoothScrollSupport.Axes(vertical: 0, horizontal: 2),
+               "Shift routes a vertical wheel tick sideways keeping its sign")
+        expect(SmoothScrollSupport.axes(vertical: -2, horizontal: 0, shiftPressed: true)
                == SmoothScrollSupport.Axes(vertical: 0, horizontal: -2),
-               "Shift routes a vertical wheel tick with the system's horizontal direction")
+               "the Shift redirect keeps the sign in the other direction too")
         expect(SmoothScrollSupport.axes(vertical: 2, horizontal: 0, shiftPressed: false)
                == SmoothScrollSupport.Axes(vertical: 2, horizontal: 0),
                "a wheel tick without Shift keeps its vertical axis")
         expect(SmoothScrollSupport.axes(vertical: 2, horizontal: -1, shiftPressed: true)
                == SmoothScrollSupport.Axes(vertical: 2, horizontal: -1),
                "Shift preserves a wheel event that already carries horizontal movement")
-        let shiftedNaturalAxes = SmoothScrollSupport.axes(
-            vertical: 2, horizontal: 0, shiftPressed: true)
-        expect(SmoothScrollSupport.postedDelta(
-            shiftedNaturalAxes.horizontal, naturalScrolling: true) == 2,
-               "Shift keeps the standard horizontal direction with natural scrolling")
         expect(SmoothScrollSupport.frameDelta(remaining: 100) == 18,
                "a frame emits its fraction of the remaining distance")
         expect(SmoothScrollSupport.frameDelta(remaining: -100) == -18,
@@ -736,14 +737,91 @@ struct MetricsTests {
                "an unset step falls back to the default")
         expect(SmoothScrollSupport.sanitizedStep(500) == 100,
                "the step clamps to its range")
-        expect(SmoothScrollSupport.postedDelta(18, naturalScrolling: true) == -18,
-               "natural scrolling pre-flips the glide so direction is preserved")
-        expect(SmoothScrollSupport.postedDelta(18, naturalScrolling: false) == 18,
-               "classic scrolling posts the glide as is")
         expect(Defaults.registeredDefaults[DefaultsKey.smoothScrollEnabled] as? Bool == false,
                "smooth scrolling ships off by default")
         expect(Defaults.registeredDefaults[DefaultsKey.smoothScrollStep] as? Int == 40,
                "smooth scrolling step registers its default")
+
+        // A wheel that reports continuously already measures in points, and
+        // that field is the one to trust; the line field only fills in for a
+        // movement too small to register as a whole point.
+        expect(ScrollWheelSupport.pointsPerLine == 10,
+               "one scroll line spans ten points")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 4.0, pointDelta: 40, step: 40) == 40,
+               "the default step travels the same distance the event asked for")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 4.0, pointDelta: 12, step: 40) == 12,
+               "the point field wins, so no assumption about points per line is made")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 4.0, pointDelta: 40, step: 20) == 20,
+               "a shorter step halves the distance of a continuous wheel")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 4.0, pointDelta: 40, step: 100) == 100,
+               "a longer step stretches the distance of a continuous wheel")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: -0.5, pointDelta: -5, step: 40) == -5,
+               "direction survives the conversion")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 0.35, pointDelta: 0, step: 40) == 3.5,
+               "a movement below one whole point still glides")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 0, pointDelta: 12, step: 40) == 12,
+               "a driver that fills in only whole points still glides")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: 0, pointDelta: 0, step: 40) == 0,
+               "an empty event asks for no distance")
+        expect(SmoothScrollSupport.continuousDistance(
+            fixedPointDelta: .nan, pointDelta: 0, step: 40) == 0,
+               "a nonsense delta asks for no distance")
+
+        // The continuous path scales by the step itself and then hands the
+        // budget a step of one. Scaling in both places would square the
+        // setting, so pin that the budget equals the distance.
+        for continuousStep in [20.0, 40.0, 100.0] {
+            let distance = SmoothScrollSupport.continuousDistance(
+                fixedPointDelta: 4.0, pointDelta: 40, step: continuousStep)
+            expect(SmoothScrollSupport.remaining(afterTicks: distance, step: 1, current: 0) == distance,
+                   "the step scales a continuous wheel exactly once")
+        }
+
+        // Fractions are carried instead of rounded away, so the glide
+        // delivers the whole distance it was given.
+        var carriedTotal: Double = 0
+        var carry: Double = 0
+        for _ in 0..<10 {
+            let frame = SmoothScrollSupport.wholePixels(0.6, carry: carry)
+            carriedTotal += frame.pixels
+            carry = frame.carry
+        }
+        expect(abs(carriedTotal + carry - 6) < 0.000001,
+               "ten six-tenths of a pixel are all still there, posted or waiting")
+        expect(carriedTotal >= 5,
+               "never more than one pixel is left waiting")
+        expect(SmoothScrollSupport.wholePixels(0.4, carry: 0).pixels == 0,
+               "a fraction alone posts nothing yet")
+        expect(SmoothScrollSupport.wholePixels(0.4, carry: 0).carry == 0.4,
+               "the fraction is kept for the next frame")
+        expect(SmoothScrollSupport.wholePixels(-1.5, carry: 0).pixels == -1,
+               "negative frames keep their whole pixels")
+        expect(SmoothScrollSupport.wholePixels(-1.5, carry: 0).carry == -0.5,
+               "negative frames carry their fraction")
+        expect(SmoothScrollSupport.wholePixels(.infinity, carry: 0).pixels == 0,
+               "an impossible frame posts nothing")
+        expect(SmoothScrollSupport.finalPixels(0.4, carry: 0.3) == 1,
+               "the landing frame spends the leftover instead of dropping it")
+        expect(SmoothScrollSupport.finalPixels(-0.4, carry: -0.3) == -1,
+               "the landing frame spends it in either direction")
+        expect(SmoothScrollSupport.finalPixels(0.2, carry: 0) == 0,
+               "a landing frame with almost nothing left posts nothing")
+        expect(SmoothScrollSupport.finalPixels(.infinity, carry: 0) == 0,
+               "an impossible landing frame posts nothing")
+        expect(SmoothScrollSupport.carry(0.6, continuing: 5) == 0.6,
+               "leftovers survive while the direction holds")
+        expect(SmoothScrollSupport.carry(0.6, continuing: -5) == 0,
+               "reversing direction drops the leftovers")
+        expect(SmoothScrollSupport.carry(0.6, continuing: 0) == 0.6,
+               "an empty event leaves the leftovers alone")
 
         // MARK: Watts & percent
 

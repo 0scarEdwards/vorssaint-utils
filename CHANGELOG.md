@@ -7,11 +7,16 @@ All notable changes to this project are documented here. The format follows
 ## [3.1.15]
 
 ### Summary
-Vorssaint 3.1.15 fixes a start that left the app with no menu bar icon, and
-keeps the menu bar panel under its icon when the menu bar is set to hide
-itself.
+Vorssaint 3.1.15 repairs smooth scrolling, fixes a start that left the app
+with no menu bar icon, and keeps the menu bar panel under its icon when the
+menu bar is set to hide itself.
 
 ### Fixed
+- Smooth scrolling moves the right distance on mice that report the wheel
+  continuously, and the speed setting now works on them.
+- Smooth scrolling no longer reverses the scroll direction on its own.
+  Inverting the direction works alongside it, and so does Shift to scroll
+  sideways.
 - The app could start with no menu bar icon and quit a few seconds later.
   It now starts reliably, including on a Mac whose display was still waking
   up.
