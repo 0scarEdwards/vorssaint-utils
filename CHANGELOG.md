@@ -31,6 +31,9 @@ is set to hide itself.
   up.
 - The app could quit at startup right after an update, while the tour of the
   new features was opening. The tour now keeps the same size on every page.
+- An external display could go dark while its brightness was adjusted and
+  stay dark until it was unplugged. It recovers now, and a screen switched
+  off here comes back at the next start.
 - Choosing a screenshot area no longer quits the app when the drag ends with
   more than one finger leaving the trackpad. Cancelling with Escape is safe
   too. Thanks to @lei1024.

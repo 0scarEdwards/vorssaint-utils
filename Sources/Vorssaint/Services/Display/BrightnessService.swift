@@ -93,12 +93,30 @@ final class BrightnessService: ObservableObject {
     /// before the first change so restoring is exact. Touched only on the
     /// work queue.
     private var gammaBaselines: [CGDirectDisplayID: GammaTable] = [:]
+    /// How many untouched curves are worth keeping for displays that are not
+    /// attached right now. A curve is a few kilobytes and keeping it is what
+    /// makes a reconnection safe, so the cap only exists so a long session
+    /// full of different monitors cannot grow without bound.
+    private static let rememberedGammaBaselines = 16
+    /// Displays whose picture is currently scaled by this app. While a display
+    /// is in here its live curve is ours, not its own, so it is never read
+    /// back as a baseline. Touched only on the work queue.
+    private var dimmedDisplays = Set<CGDirectDisplayID>()
 
     private struct GammaTable {
         var red: [CGGammaValue]
         var green: [CGGammaValue]
         var blue: [CGGammaValue]
         var count: UInt32
+        /// Which monitor the curve was read from. Display numbers are handed
+        /// out again after a reconnection, so this is what stops one
+        /// monitor's curve from ever being written to another.
+        var fingerprint: String
+    }
+
+    /// Identifies the physical monitor behind a display number.
+    private static func displayFingerprint(_ id: CGDirectDisplayID) -> String {
+        "\(CGDisplayVendorNumber(id)):\(CGDisplayModelNumber(id)):\(CGDisplaySerialNumber(id))"
     }
     private var knownTopology = Set<CGDirectDisplayID>()
     private var knownActiveTopology = Set<CGDirectDisplayID>()
@@ -169,11 +187,8 @@ final class BrightnessService: ObservableObject {
             for id in displaysToRestore {
                 _ = Self.configureDisplay(id, enabled: true)
             }
-            for (id, baseline) in self.gammaBaselines {
-                CGSetDisplayTransferByTable(id, baseline.count, baseline.red,
-                                            baseline.green, baseline.blue)
-            }
-            self.gammaBaselines = [:]
+            Self.forgetDisplaysSwitchedOff()
+            self.restoreAllGamma()
         }
     }
 
@@ -286,8 +301,10 @@ final class BrightnessService: ObservableObject {
                 self.managedDisabledIDs.remove(display.id)
                 self.managedDisabledDisplays.removeValue(forKey: display.id)
                 self.knownActiveTopology.insert(display.id)
+                Self.forgetDisplaySwitchedOff(display.id)
             } else {
                 self.managedDisabledIDs.insert(display.id)
+                Self.rememberDisplaySwitchedOff(display.id)
                 var disabled = display
                 disabled.method = nil
                 disabled.isActive = false
@@ -338,6 +355,10 @@ final class BrightnessService: ObservableObject {
     /// process disabled before the process exits.
     func restoreDisplaysBeforeTermination() {
         workQueue.sync {
+            // Put every dimmed picture back before anything else: leaving one
+            // behind is the difference between quitting the app and a screen
+            // that stays dark with nothing left running to explain it.
+            restoreAllGamma()
             stateLock.lock()
             let ids = managedDisabledIDs
             managedDisabledIDs = []
@@ -345,6 +366,61 @@ final class BrightnessService: ObservableObject {
             stateLock.unlock()
             for id in ids {
                 _ = Self.configureDisplay(id, enabled: true)
+            }
+            Self.forgetDisplaysSwitchedOff()
+        }
+    }
+
+    /// Writes every remembered curve back, skipping any display number that
+    /// now belongs to a different monitor. Runs on the work queue.
+    private func restoreAllGamma() {
+        for (id, baseline) in gammaBaselines
+        where Self.displayFingerprint(id) == baseline.fingerprint {
+            CGSetDisplayTransferByTable(id, baseline.count, baseline.red,
+                                        baseline.green, baseline.blue)
+        }
+        gammaBaselines = [:]
+        dimmedDisplays = []
+    }
+
+    // MARK: - Displays switched off by this app
+
+    /// A display switched off here disappears from the system entirely, and
+    /// the row offering to switch it back on lived only in memory. If the app
+    /// went away without putting it back, whether by a crash or by being
+    /// forced to quit, the only way left was to unplug the screen. The
+    /// intention is written down instead, and honoured on the next start.
+    private static func rememberDisplaySwitchedOff(_ id: CGDirectDisplayID) {
+        var stored = UserDefaults.standard.array(forKey: DefaultsKey.displaysSwitchedOff) as? [Int] ?? []
+        guard !stored.contains(Int(id)) else { return }
+        stored.append(Int(id))
+        UserDefaults.standard.set(stored, forKey: DefaultsKey.displaysSwitchedOff)
+    }
+
+    private static func forgetDisplaySwitchedOff(_ id: CGDirectDisplayID) {
+        let stored = UserDefaults.standard.array(forKey: DefaultsKey.displaysSwitchedOff) as? [Int] ?? []
+        let remaining = stored.filter { $0 != Int(id) }
+        if remaining.isEmpty {
+            UserDefaults.standard.removeObject(forKey: DefaultsKey.displaysSwitchedOff)
+        } else {
+            UserDefaults.standard.set(remaining, forKey: DefaultsKey.displaysSwitchedOff)
+        }
+    }
+
+    private static func forgetDisplaysSwitchedOff() {
+        UserDefaults.standard.removeObject(forKey: DefaultsKey.displaysSwitchedOff)
+    }
+
+    /// Switches back on anything a previous run left off. Called at startup,
+    /// before any display work, so a screen is never stranded between runs.
+    func restoreDisplaysLeftOff() {
+        let stored = UserDefaults.standard.array(forKey: DefaultsKey.displaysSwitchedOff) as? [Int] ?? []
+        guard !stored.isEmpty else { return }
+        Self.forgetDisplaysSwitchedOff()
+        guard DisplayConfigurationBridge.configureEnabled != nil else { return }
+        workQueue.async {
+            for id in stored {
+                _ = Self.configureDisplay(CGDirectDisplayID(id), enabled: true)
             }
         }
     }
@@ -649,13 +725,21 @@ final class BrightnessService: ObservableObject {
         // Software route for everything left over: capture the display's
         // clean gamma curve, restore this session's dim level and reapply it
         // (reconfigurations and wake reset gamma behind our back).
-        gammaBaselines = gammaBaselines.filter { seenTopology.contains($0.key) }
+        // A display that drops off for a moment, which is what a hub
+        // renegotiating or a cable settling looks like, comes back needing
+        // the same untouched curve it had before. Forgetting it here is what
+        // would force a fresh reading from a screen that is still dimmed, so
+        // curves are kept across the gap and only trimmed once far more have
+        // piled up than any desk has monitors.
+        if gammaBaselines.count > Self.rememberedGammaBaselines {
+            gammaBaselines = gammaBaselines.filter { seenTopology.contains($0.key) }
+        }
         for index in softwareIndices.sorted() {
             let id = built[index].id
             stateLock.lock()
             let value = lastApplied[id] ?? 1.0
             stateLock.unlock()
-            captureGammaBaselineIfNeeded(id, currentValue: value)
+            captureGammaBaselineIfNeeded(id)
             guard gammaBaselines[id] != nil else { continue }
             built[index] = BrightnessDisplay(
                 id: id, name: built[index].name, isBuiltIn: false,
@@ -772,11 +856,18 @@ final class BrightnessService: ObservableObject {
 
     // MARK: - Software dimming (work queue)
 
-    /// Remembers the display's untouched curve. While our own dim is applied
-    /// the live table is a scaled copy, so it must never be recaptured as a
-    /// baseline; a clean display refreshes it to follow system curve changes.
-    private func captureGammaBaselineIfNeeded(_ id: CGDirectDisplayID, currentValue: Double) {
-        if gammaBaselines[id] != nil, currentValue < 0.999 { return }
+    /// Remembers the display's untouched curve, once. While a dim is applied
+    /// the live table is a scaled copy of it, and after a reconnection there
+    /// is no way to tell a scaled copy from the real thing.
+    private func captureGammaBaselineIfNeeded(_ id: CGDirectDisplayID) {
+        let fingerprint = Self.displayFingerprint(id)
+        // A curve is only read while the screen is still showing its own. Once
+        // a dim is applied the live curve is a scaled copy, and reading that
+        // back would take the dim as the new normal and darken the screen
+        // again on every reconnection until it is black. A display this app is
+        // not dimming is read again, so a colour profile the user changes, or
+        // a warm evening tint, becomes what everything else scales from.
+        if gammaBaselines[id]?.fingerprint == fingerprint, dimmedDisplays.contains(id) { return }
         let capacity = 256
         var red = [CGGammaValue](repeating: 0, count: capacity)
         var green = [CGGammaValue](repeating: 0, count: capacity)
@@ -789,21 +880,27 @@ final class BrightnessService: ObservableObject {
         gammaBaselines[id] = GammaTable(red: Array(red.prefix(count)),
                                         green: Array(green.prefix(count)),
                                         blue: Array(blue.prefix(count)),
-                                        count: UInt32(count))
+                                        count: UInt32(count),
+                                        fingerprint: fingerprint)
     }
 
     @discardableResult
     private func applySoftwareDim(_ id: CGDirectDisplayID, value: Double) -> Bool {
-        guard let baseline = gammaBaselines[id] else { return false }
+        guard let baseline = gammaBaselines[id],
+              baseline.fingerprint == Self.displayFingerprint(id) else { return false }
         if value >= 0.999 {
-            return CGSetDisplayTransferByTable(id, baseline.count, baseline.red,
-                                               baseline.green, baseline.blue) == .success
+            let restored = CGSetDisplayTransferByTable(id, baseline.count, baseline.red,
+                                                       baseline.green, baseline.blue) == .success
+            if restored { dimmedDisplays.remove(id) }
+            return restored
         }
         let factor = BrightnessSupport.softwareDimFactor(for: value)
         let red = BrightnessSupport.scaledGammaTable(baseline.red, factor: factor)
         let green = BrightnessSupport.scaledGammaTable(baseline.green, factor: factor)
         let blue = BrightnessSupport.scaledGammaTable(baseline.blue, factor: factor)
-        return CGSetDisplayTransferByTable(id, baseline.count, red, green, blue) == .success
+        let applied = CGSetDisplayTransferByTable(id, baseline.count, red, green, blue) == .success
+        if applied { dimmedDisplays.insert(id) }
+        return applied
     }
 
     // MARK: - DDC transactions (work queue)

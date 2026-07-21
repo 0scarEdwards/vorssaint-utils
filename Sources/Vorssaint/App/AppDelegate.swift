@@ -44,6 +44,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         // never turns the item off.
         LaunchAtLogin.repairAtStartup()
 
+        // Switch back on any display a previous run left off. A run that ends
+        // without putting one back leaves a screen dark with no app around to
+        // offer it back, so the repair happens before anything else can care
+        // about which displays are attached.
+        BrightnessService.shared.restoreDisplaysLeftOff()
+
         // An accessory (LSUIElement) app gets no default main menu, so the standard
         // keyboard shortcuts (Cmd+H/M/W/Q and the Edit shortcuts Cmd+C/V/X/A) have
         // no menu items to fire and do nothing in the Settings window. Install one.

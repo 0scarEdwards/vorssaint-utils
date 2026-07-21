@@ -6415,8 +6415,11 @@ struct MetricsTests {
                 && !backupKeys.contains(DefaultsKey.sleepDisabledFlag)
                 && !backupKeys.contains(DefaultsKey.micMuteActive)
                 && !backupKeys.contains(DefaultsKey.cleanerLastAutoRun)
-                && !backupKeys.contains(DefaultsKey.statusItemPlacementGeneration),
+                && !backupKeys.contains(DefaultsKey.statusItemPlacementGeneration)
+                && !backupKeys.contains(DefaultsKey.displaysSwitchedOff),
                "backup never carries private content, live state or machine markers")
+        expect(Defaults.registeredDefaults[DefaultsKey.displaysSwitchedOff] == nil,
+               "a display switched off is a repair note for this machine, not a setting")
         expect(backupKeys.contains(DefaultsKey.hasOnboarded)
                 && backupKeys.contains(DefaultsKey.dockPreviewIntroVersion)
                 && backupKeys.contains(DefaultsKey.featuresOnboardingVersion)
