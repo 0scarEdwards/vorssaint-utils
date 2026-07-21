@@ -242,6 +242,33 @@ enum SwitcherSupport {
         return transparent >= 2
     }
 
+    /// How far the two axes of a capture may disagree before it counts as a
+    /// slice of a window instead of the whole window.
+    static let captureCoverageTolerance = 0.08
+
+    /// Whether a capture holds the whole window or only the part of it that
+    /// was inside a display. The window server clips a window capture to the
+    /// visible region, so a window hanging over a screen edge comes back as a
+    /// thin band of real content while still reporting its full size. Measured
+    /// with a 620 by 452 point window: fully visible it captures 2.00 by 2.00
+    /// pixels per point, hanging over the bottom edge 2.00 by 0.32, hanging
+    /// past the side edge 0.19 by 2.00. Comparing the two axes catches that
+    /// without caring about the display scale, so a plain screen and a Retina
+    /// screen both score the same. A window with nothing to measure passes,
+    /// because there is no evidence either way.
+    static func captureCoversWindow(imageWidth: Int,
+                                    imageHeight: Int,
+                                    windowSize: CGSize,
+                                    tolerance: Double = captureCoverageTolerance) -> Bool {
+        guard windowSize.width.isFinite, windowSize.height.isFinite,
+              windowSize.width > 1, windowSize.height > 1
+        else { return true }
+        let horizontal = Double(imageWidth) / Double(windowSize.width)
+        let vertical = Double(imageHeight) / Double(windowSize.height)
+        guard horizontal > 0, vertical > 0 else { return true }
+        return max(horizontal, vertical) / min(horizontal, vertical) <= 1 + tolerance
+    }
+
     /// Corners of the opaque quadrilateral in a capture, in top-left-origin
     /// pixel coordinates. Stage Manager's strip artwork is the real window
     /// content under a mild perspective transform; these corners feed the

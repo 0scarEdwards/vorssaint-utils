@@ -3757,6 +3757,31 @@ struct MetricsTests {
         expect(!SwitcherSupport.captureLooksTransformed(alphaGrid: [], gridSize: 8),
                "switcher capture classifier tolerates a malformed alpha grid")
 
+        // Pixel counts measured on a 620 by 452 point window: whole on screen,
+        // hanging over the bottom edge, and hanging past the side edge.
+        let probeWindow = CGSize(width: 620, height: 452)
+        expect(SwitcherSupport.captureCoversWindow(imageWidth: 1240, imageHeight: 904,
+                                                   windowSize: probeWindow),
+               "switcher keeps a capture that covers the whole window")
+        expect(!SwitcherSupport.captureCoversWindow(imageWidth: 1240, imageHeight: 144,
+                                                    windowSize: probeWindow),
+               "switcher rejects the band captured for a window hanging over the bottom edge")
+        expect(!SwitcherSupport.captureCoversWindow(imageWidth: 120, imageHeight: 904,
+                                                    windowSize: probeWindow),
+               "switcher rejects the band captured for a window hanging past the side edge")
+        expect(SwitcherSupport.captureCoversWindow(imageWidth: 620, imageHeight: 452,
+                                                   windowSize: probeWindow),
+               "switcher coverage check ignores the display scale, so a plain screen passes")
+        expect(SwitcherSupport.captureCoversWindow(imageWidth: 2200, imageHeight: 424,
+                                                   windowSize: CGSize(width: 1100, height: 212)),
+               "switcher keeps the capture of a window that really is that wide")
+        expect(SwitcherSupport.captureCoversWindow(imageWidth: 1240, imageHeight: 144,
+                                                   windowSize: .zero),
+               "switcher coverage check passes when the window size says nothing")
+        expect(SwitcherSupport.captureCoversWindow(imageWidth: 0, imageHeight: 904,
+                                                   windowSize: probeWindow),
+               "switcher coverage check passes when a capture reports no pixels")
+
         expect(SwitcherSupport.staleCacheVictims(ids: [1, 2, 3], active: [], lastTouched: [:], limit: 3).isEmpty,
                "switcher preview cache keeps everything under the limit")
         expect(SwitcherSupport.staleCacheVictims(ids: [1, 2, 3, 4],
