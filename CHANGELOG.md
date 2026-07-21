@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [3.1.15]
+## [3.1.15] - 2026-07-21
 
 ### Summary
 Vorssaint 3.1.15 fixes starts that could leave the app with no menu bar icon
@@ -52,7 +52,6 @@ press.
   device and the volume it changed.
 - The panel stays under its icon when the menu bar is set to hide itself.
   Switching tabs no longer moves it to the edge of the screen.
-
 - Recording a shortcut captures it instead of running it. Delete clears the
   shortcut, more keys can be recorded, and the field no longer overlaps the
   text beside it while it listens.
