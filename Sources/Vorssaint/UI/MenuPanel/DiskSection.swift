@@ -297,7 +297,7 @@ struct DiskSection: View {
             VStack(alignment: .leading, spacing: 8) {
                 blockHeader(l10n.s.monitorItemDiskSMART, editing: editing, visible: $diskSMART)
                 VStack(alignment: .leading, spacing: 5) {
-                    diskTitleRow(disk)
+                    diskTitleRow(disk, showsTags: !diskUsage)
                     if let smart = disk.smart {
                         smartRows(smart)
                     } else {
@@ -441,7 +441,7 @@ struct DiskSection: View {
         }
     }
 
-    private func diskTitleRow(_ disk: DiskDeviceReading) -> some View {
+    private func diskTitleRow(_ disk: DiskDeviceReading, showsTags: Bool = true) -> some View {
         HStack(spacing: 6) {
             Image(systemName: disk.isInternal ? "internaldrive" : "externaldrive")
                 .font(.system(size: 10, weight: .semibold))
@@ -451,10 +451,12 @@ struct DiskSection: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer(minLength: 0)
-            if let fileSystem = disk.fileSystem {
-                titleTag(fileSystem)
+            if showsTags {
+                if let fileSystem = disk.fileSystem {
+                    titleTag(fileSystem)
+                }
+                titleTag(disk.isInternal ? l10n.s.diskInternal : l10n.s.diskExternal)
             }
-            titleTag(disk.isInternal ? l10n.s.diskInternal : l10n.s.diskExternal)
         }
     }
 

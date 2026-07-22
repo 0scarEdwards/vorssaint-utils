@@ -47,6 +47,8 @@ windows moved without taking their new size.
 - An app with its volume adjusted in the mixer could lose its sound entirely
   after the Mac woke from sleep, until Vorssaint was quit. The mixer now
   notices when the wake broke its audio path and repairs it on its own.
+- The Drives tab showed a drive's format and location twice, next to its name
+  and again in the SMART area. The little tags now appear only once.
 
 ## [3.1.15] - 2026-07-21
 
