@@ -8,9 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Summary
 Vorssaint 3.2.0 lets the extra buttons on a mouse press keyboard shortcuts
-you choose. It also cleans up the sound of boosted apps and repairs
-maximizing and window layout in browsers where windows moved without taking
-their new size.
+you choose. It also cleans up the sound of boosted apps, brings back per app
+volume levels that 3.1.15 stopped saving for some games and tools, and
+repairs maximizing and window layout in browsers where windows moved without
+taking their new size.
 
 ### Added
 - Mouse button shortcuts. Give any extra mouse button a key combination and
@@ -34,6 +35,9 @@ their new size.
 - Window layout shortcuts, the panel buttons and the drag gesture now resize
   those same browsers correctly instead of moving the window and leaving its
   size behind.
+- The volume level chosen for some games and tools stopped being saved in
+  3.1.15 and came back at full on the next launch. It is saved again, and
+  levels saved before 3.1.15 come back on their own.
 
 ## [3.1.15] - 2026-07-21
 

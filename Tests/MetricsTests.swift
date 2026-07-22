@@ -3059,18 +3059,30 @@ struct MetricsTests {
                "a clock that jumps backwards falls back to a full window")
 
         let identifiedRow = MixerRoutingSupport.rowIdentity(bundleIdentifier: "com.example.Player",
-                                                           ownerPid: 501)
+                                                           ownerPid: 501,
+                                                           displayName: "Player")
         expect(identifiedRow.rowID == "com.example.Player"
                && identifiedRow.persistenceID == "com.example.Player",
                "an app with a bundle id keeps it as both row and storage identity")
-        let unidentifiedRow = MixerRoutingSupport.rowIdentity(bundleIdentifier: nil, ownerPid: 501)
-        let otherUnidentifiedRow = MixerRoutingSupport.rowIdentity(bundleIdentifier: nil, ownerPid: 502)
-        expect(!unidentifiedRow.rowID.isEmpty && unidentifiedRow.persistenceID == nil,
-               "an app without a bundle id is still listable but has nothing to store a volume under")
-        expect(unidentifiedRow.rowID != otherUnidentifiedRow.rowID,
-               "two processes without a bundle id are separate rows, so neither inherits the other's volume")
-        expect(MixerRoutingSupport.rowIdentity(bundleIdentifier: "   ", ownerPid: 501).persistenceID == nil,
-               "a blank bundle id is not an identity")
+        let namedRow = MixerRoutingSupport.rowIdentity(bundleIdentifier: nil,
+                                                       ownerPid: 501,
+                                                       displayName: "Retro Game")
+        let otherNamedRow = MixerRoutingSupport.rowIdentity(bundleIdentifier: nil,
+                                                            ownerPid: 502,
+                                                            displayName: "Retro Game")
+        expect(namedRow.persistenceID == "Retro Game",
+               "an app without a bundle id saves its volume under its display name, the same key older versions used")
+        expect(!namedRow.rowID.isEmpty && namedRow.rowID != otherNamedRow.rowID,
+               "two same-named processes without a bundle id stay separate rows")
+        let namelessRow = MixerRoutingSupport.rowIdentity(bundleIdentifier: nil,
+                                                          ownerPid: 501,
+                                                          displayName: nil)
+        expect(!namelessRow.rowID.isEmpty && namelessRow.persistenceID == nil,
+               "a process with neither bundle id nor name is still listable but stores nothing")
+        expect(MixerRoutingSupport.rowIdentity(bundleIdentifier: "   ",
+                                               ownerPid: 501,
+                                               displayName: "  ").persistenceID == nil,
+               "blank identifiers are not identities")
 
         expect(MixerRoutingSupport.restorableInputDeviceUID(originalUID: "BuiltInMicrophoneDevice",
                                                             appliedUID: "USBMicrophone",
