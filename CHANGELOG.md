@@ -4,12 +4,23 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [3.1.16]
+## [3.2.0]
 
 ### Summary
-Vorssaint 3.1.16 cleans up the sound of boosted apps and repairs maximizing
-and window layout in browsers where windows moved without taking their new
-size.
+Vorssaint 3.2.0 lets the extra buttons on a mouse press keyboard shortcuts
+you choose. It also cleans up the sound of boosted apps and repairs
+maximizing and window layout in browsers where windows moved without taking
+their new size.
+
+### Added
+- Mouse button shortcuts. Give any extra mouse button a key combination and
+  it presses those keys for you. Set it up in Settings under Mouse, with a
+  quick toggle in the menu panel.
+
+### Changed
+- Recording a shortcut now keeps the keys to itself. A combination that used
+  to trigger the app or the system while you typed it lands in the field
+  instead.
 
 ### Fixed
 - Boosting an app's volume above 100% no longer adds a crackling noise while
