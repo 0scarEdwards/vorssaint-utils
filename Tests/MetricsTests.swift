@@ -6280,10 +6280,34 @@ struct MetricsTests {
         expect(TextSnippetSupport.expand("plain", date: fixedDate, clipboard: nil) == "plain",
                "text without variables passes through untouched")
 
-        let storedSnippets = [email, dateSnippet]
+        // Per-snippet capitalization option (issue #304)
+        let caseless = TextSnippet(name: "Caseless", trigger: ";email", replacement: "me@x.com",
+                                   expansion: .afterDelimiter, enabled: true, ignoresCase: true)
+        expect(TextSnippetSupport.match(buffer: "x ;EMAIL", expansion: .afterDelimiter,
+                                        snippets: [caseless]) == caseless
+                && TextSnippetSupport.match(buffer: "x ;EmAiL", expansion: .afterDelimiter,
+                                            snippets: [caseless]) == caseless,
+               "a snippet that ignores capitalization fires on any casing")
+        expect(TextSnippetSupport.match(buffer: "x ;EMAIL", expansion: .afterDelimiter,
+                                        snippets: [email]) == nil,
+               "exact snippets still require the configured casing")
+        expect(TextSnippetSupport.match(buffer: ";EMAI", expansion: .afterDelimiter,
+                                        snippets: [caseless]) == nil,
+               "a half-typed trigger stays quiet regardless of casing")
+        expect(!TextSnippetSupport.completes(";e", trigger: ";email", ignoresCase: true),
+               "a buffer shorter than the trigger never completes it")
+
+        let storedSnippets = [email, dateSnippet, caseless]
         expect(TextSnippetSupport.decode(TextSnippetSupport.encode(storedSnippets)) == storedSnippets,
                "snippets round-trip through persistence")
         expect(TextSnippetSupport.decode(nil).isEmpty, "no stored data means no snippets")
+        let legacySnippetJSON = """
+        [{"id":"1B6E2F0A-1111-4222-8333-444455556666","name":"Old","trigger":";old",\
+        "replacement":"x","expansion":"afterDelimiter","enabled":true}]
+        """
+        let legacySnippets = TextSnippetSupport.decode(legacySnippetJSON.data(using: .utf8))
+        expect(legacySnippets.count == 1 && legacySnippets.first?.ignoresCase == false,
+               "snippets saved before the capitalization option decode and keep matching exactly")
 
         // MARK: Radial menu (issue #220)
 

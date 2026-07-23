@@ -15,7 +15,8 @@ apps in the volume mixer from waking up from sleep with no
 sound, brings back per app volume levels that 3.1.15 stopped saving for some
 games and tools, repairs maximizing and window layout in browsers where
 windows moved without taking their new size, and stops external monitors
-from going black while their brightness is adjusted.
+from going black while their brightness is adjusted. Snippet triggers can
+now fire with any capitalization when you want them to.
 
 ### Added
 - Mouse button shortcuts. Give any extra mouse button a key combination and
@@ -27,6 +28,8 @@ from going black while their brightness is adjusted.
 - Eject one drive at a time. Every removable drive in the Drives tab now
   carries its own eject button, so you no longer need to eject all of them
   together or reach for the Finder.
+- Snippet triggers that ignore capitalization. Turn it on for a snippet in
+  its editor and the trigger fires however it is capitalized.
 
 ### Changed
 - Recording a shortcut now keeps the keys to itself. A combination that used
