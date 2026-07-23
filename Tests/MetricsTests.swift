@@ -6041,6 +6041,29 @@ struct MetricsTests {
         expect(!BrightnessSupport.canDisableDisplay(activeDisplayIDs: [1, 3], target: 8),
                "an inactive display cannot enter the disable path")
 
+        expect(BrightnessSupport.ddcCommandDelay(nowMicroseconds: 1_000_000,
+                                                 lastCommandEndMicroseconds: nil) == 0,
+               "the first DDC command to a display waits nothing")
+        expect(BrightnessSupport.ddcCommandDelay(nowMicroseconds: 1_010_000,
+                                                 lastCommandEndMicroseconds: 1_000_000) == 40_000,
+               "a command chasing another waits out the standard's interval")
+        expect(BrightnessSupport.ddcCommandDelay(nowMicroseconds: 1_050_000,
+                                                 lastCommandEndMicroseconds: 1_000_000) == 0
+                && BrightnessSupport.ddcCommandDelay(nowMicroseconds: 2_000_000,
+                                                     lastCommandEndMicroseconds: 1_000_000) == 0,
+               "an elapsed interval clears the wait entirely")
+        expect(BrightnessSupport.ddcCommandDelay(nowMicroseconds: 1_000_000,
+                                                 lastCommandEndMicroseconds: 2_000_000) == 0,
+               "a clock that moved backwards never blocks the bus")
+
+        expect(BrightnessSupport.reconnectedDimLevel(0.0) == BrightnessSupport.reconnectionDimFloor
+                && BrightnessSupport.reconnectedDimLevel(0.1) == BrightnessSupport.reconnectionDimFloor,
+               "a near-black dim returns from a connection gap at the visible floor")
+        expect(BrightnessSupport.reconnectedDimLevel(0.7) == 0.7
+                && BrightnessSupport.reconnectedDimLevel(1.0) == 1.0
+                && BrightnessSupport.reconnectedDimLevel(1.4) == 1.0,
+               "visible dim levels return from a gap untouched, clamped to the range")
+
         expect(BrightnessSupport.softwareDimFactor(for: 1.0) == 1.0
                 && BrightnessSupport.softwareDimFactor(for: 0.0) == 0.0,
                "software dimming spans the whole range and zero really is black")

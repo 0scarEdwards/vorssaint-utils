@@ -13,8 +13,9 @@ on other desktops and take you to them. It also cleans up the sound of
 boosted
 apps, keeps apps in the volume mixer from waking up from sleep with no
 sound, brings back per app volume levels that 3.1.15 stopped saving for some
-games and tools, and repairs maximizing and window layout in browsers where
-windows moved without taking their new size.
+games and tools, repairs maximizing and window layout in browsers where
+windows moved without taking their new size, and stops external monitors
+from going black while their brightness is adjusted.
 
 ### Added
 - Mouse button shortcuts. Give any extra mouse button a key combination and
@@ -49,6 +50,10 @@ windows moved without taking their new size.
   notices when the wake broke its audio path and repairs it on its own.
 - The Drives tab showed a drive's format and location twice, next to its name
   and again in the SMART area. The little tags now appear only once.
+- Some external monitors could go black while their brightness was adjusted,
+  until their cable was plugged in again. Brightness commands now keep the
+  spacing monitors expect, and a screen that reconnects always comes back
+  visible.
 
 ## [3.1.15] - 2026-07-21
 
